@@ -1,0 +1,828 @@
+{
+  "configuracao_infraestrutura": {
+    "descricao": "Configuracoes de acesso aos nos de Escrita (Legado) e Leitura (Moderno)",
+    "intervalo_verificacao_segundos": 10,
+    "origem_command": {
+      "host": "192.168.56.100",
+      "usuario": "sa",
+      "senha": "semsenha159",
+      "porta": 1433,
+      "driver": "pdo_dblib"
+    },
+    "destino_query": {
+      "host": "mssql-novo",
+      "usuario": "sa",
+      "senha": "SuaSenhaForte123!",
+      "porta": 1433,
+      "driver": "pdo_dblib"
+    }
+  },
+  
+  "bancos_gerenciados": [
+    {
+      "banco_legado": "Dados_hp",
+      "banco_moderno": "CQRS_Dados_hp",
+      "tabelas": [
+        {
+          "tabela_legada": "Posgraduacoes",
+          "tabela_moderna": "Posgraduacoes",
+          "estrategia": "completa",
+          "frequencia_sincronizacao_minutos": 10,
+          "coluna_last_updated": null,
+          "comentario": "Tabela que agtar os cursos de Pós Graduação da Unidade.",
+          "camada_anticorrupcao": {
+            "sanitizacao": {
+              "remover_espacos_excesso": true,
+              "forcar_utf8": true
+            },
+            "mapeamento_colunas": {
+                "Id": {
+                    "nome_destino": "Id",
+                    "tipo": "int",
+                    "pk": true
+                },
+                "Nome": {
+                    "nome_destino": "Nome",
+                    "tipo": "varchar(80)"
+                },
+                "Sigla": {
+                    "nome_destino": "Sigla",
+                    "tipo": "char(5)"
+                },
+                "Departamento": {
+                    "nome_destino": "Departamento",
+                    "tipo": "int"
+                },
+                "Categoria": {
+                    "nome_destino": "Categoria",
+                    "tipo": "char(9)"
+                },
+                "DuracaoMinima": {
+                    "nome_destino": "DuracaoMinima",
+                    "tipo": "tinyint"
+                },
+                "DuracaoMaxima": {
+                    "nome_destino": "DuracaoMaxima",
+                    "tipo": "tinyint"
+                },
+                "ConceitoCapes": {
+                    "nome_destino": "ConceitoCapes",
+                    "tipo": "tinyint"
+                },
+                "Creditos": {
+                    "nome_destino": "Creditos",
+                    "tipo": "tinyint"
+                },
+                "NormasGerais": {
+                    "nome_destino": "NormasGerais",
+                    "tipo": "varchar(4000)"
+                },
+                "InscricaoInicio": {
+                    "nome_destino": "InscricaoInicio",
+                    "tipo": "smalldatetime"
+                },
+                "NomInscricaoTerminoe": {
+                    "nome_destino": "InscricaoTermino",
+                    "tipo": "smalldatetime"
+                },
+                "SelecaoInicio": {
+                    "nome_destino": "SelecaoInicio",
+                    "tipo": "smalldatetime"
+                },
+                "SelecaoTermino": {
+                    "nome_destino": "SelecaoTermino",
+                    "tipo": "smalldatetime"
+                },
+                "MatriculaRegularInicio": {
+                    "nome_destino": "MatriculaRegularInicio",
+                    "tipo": "smalldatetime"
+                },
+                "MatriculaRegularTermino": {
+                    "nome_destino": "MatriculaRegularTermino",
+                    "tipo": "smalldatetime"
+                },
+                "MatriculaIngressanteInicio": {
+                    "nome_destino": "MatriculaIngressanteInicio",
+                    "tipo": "smalldatetime"
+                },
+                "MatriculaIngressanteTermino": {
+                    "nome_destino": "MatriculaIngressanteTermino",
+                    "tipo": "smalldatetime"
+                },
+                "MatriculaEspecialInicio": {
+                    "nome_destino": "MatriculaEspecialInicio",
+                    "tipo": "smalldatetime"
+                },
+                "MatriculaEspecialTermino": {
+                    "nome_destino": "MatriculaEspecialTermino",
+                    "tipo": "smalldatetime"
+                },
+                "Documentacao": {
+                    "nome_destino": "Documentacao",
+                    "tipo": "varchar(4000)"
+                },
+                "Vagas": {
+                    "nome_destino": "Vagas",
+                    "tipo": "tinyint"
+                },
+                "Coordenador": {
+                    "nome_destino": "Coordenador",
+                    "tipo": "int"
+                },
+                "Vicecoordenador": {
+                    "nome_destino": "Vicecoordenador",
+                    "tipo": "int"
+                },
+                "Mapa": {
+                    "nome_destino": "Mapa",
+                    "tipo": "int"
+                },
+                "Link": {
+                    "nome_destino": "Link",
+                    "tipo": "varchar(255)"
+                },
+                "CoordenadorInicio": {
+                    "nome_destino": "CoordenadorInicio",
+                    "tipo": "smalldatetime"
+                },
+                "CoordenadorTermino": {
+                    "nome_destino": "CoordenadorTermino",
+                    "tipo": "smalldatetime"
+                },
+                "ViceInicio": {
+                    "nome_destino": "ViceInicio",
+                    "tipo": "smalldatetime"
+                },
+                "ViceTermino": {
+                    "nome_destino": "ViceTermino",
+                    "tipo": "smalldatetime"
+                },
+                "Email": {
+                    "nome_destino": "Email",
+                    "tipo": "char(50)"
+                },
+                "Telefone": {
+                    "nome_destino": "Telefone",
+                    "tipo": "char(15)"
+                },
+                "Secretaria": {
+                    "nome_destino": "Secretaria",
+                    "tipo": "int"
+                },
+                "Inscricao": {
+                    "nome_destino": "Inscricao",
+                    "tipo": "varchar(max)"
+                },
+                "MatriculaIngressante": {
+                    "nome_destino": "MatriculaIngressante",
+                    "tipo": "varchar(max)"
+                },
+                "MatriculaRegular": {
+                    "nome_destino": "MatriculaRegular",
+                    "tipo": "varchar(max)"
+                },
+                "MatriculaEspecial": {
+                    "nome_destino": "MatriculaEspecial",
+                    "tipo": "varchar(max)"
+                },
+                "Selecao": {
+                    "nome_destino": "Selecao",
+                    "tipo": "varchar(max)"
+                },
+                "arguicao": {
+                    "nome_destino": "arguicao",
+                    "tipo": "varchar(max)"
+                },
+                "data_arguicao": {
+                    "nome_destino": "data_arguicao",
+                    "tipo": "smalldatetime"
+                },
+                "data_exame": {
+                    "nome_destino": "data_exame",
+                    "tipo": "smalldatetime"
+                },
+                "proficiencia": {
+                    "nome_destino": "proficiencia",
+                    "tipo": "varchar(max)"
+                },
+                "data_proficiencia": {
+                    "nome_destino": "data_proficiencia",
+                    "tipo": "smalldatetime"
+                }
+            }
+          }
+        },
+        {
+          "tabela_legada": "PosGraduacoesBibliografias",
+          "tabela_moderna": "PosGraduacoesBibliografias",
+          "estrategia": "completa",
+          "frequencia_sincronizacao_minutos": 1,
+          "coluna_last_updated": null,
+          "comentario": "Tabela que Contem infos das bibliografias para as provas mostradas no site.",
+          "camada_anticorrupcao": {
+            "sanitizacao": {
+              "remover_espacos_excesso": true,
+              "forcar_utf8": true
+            },
+            "mapeamento_colunas": {
+                "Id": {
+                    "nome_destino": "Id",
+                    "tipo": "int",
+                    "pk": true
+                },
+                "PosGraduacao": {
+                    "nome_destino": "PosGraduacao",
+                    "tipo": "int"
+                },
+                "Texto": {
+                    "nome_destino": "Texto",
+                    "tipo": "text"
+                }
+            }
+          }
+        },
+        {
+          "tabela_legada": "PosgraduacoesAlunosesp",
+          "tabela_moderna": "PosgraduacoesAlunosesp",
+          "estrategia": "completa",
+          "frequencia_sincronizacao_minutos": 1,
+          "coluna_last_updated": null,
+          "comentario": "Tabela que Contem infos sobre ingresso para aluno especial.",
+          "camada_anticorrupcao": {
+            "sanitizacao": {
+              "remover_espacos_excesso": true,
+              "forcar_utf8": true
+            },
+            "mapeamento_colunas": {
+                "Id": {
+                    "nome_destino": "Id",
+                    "tipo": "int",
+                    "pk": true
+                },
+                "PosGraduacao": {
+                    "nome_destino": "PosGraduacao",
+                    "tipo": "int"
+                },
+                "Texto": {
+                    "nome_destino": "Texto",
+                    "tipo": "text"
+                }
+            }
+          }
+        },
+        {
+          "tabela_legada": "PosGraduacoesDocumentacao",
+          "tabela_moderna": "PosGraduacoesDocumentacao",
+          "estrategia": "completa",
+          "frequencia_sincronizacao_minutos": 1,
+          "coluna_last_updated": null,
+          "comentario": "Tabela que Contem infos sobre documentação mostrada no site.",
+          "camada_anticorrupcao": {
+            "sanitizacao": {
+              "remover_espacos_excesso": true,
+              "forcar_utf8": true
+            },
+            "mapeamento_colunas": {
+                "Id": {
+                    "nome_destino": "Id",
+                    "tipo": "int",
+                    "pk": true
+                },
+                "PosGraduacao": {
+                    "nome_destino": "PosGraduacao",
+                    "tipo": "int"
+                },
+                "Texto": {
+                    "nome_destino": "Texto",
+                    "tipo": "text"
+                }
+            }
+          }
+        },
+        {
+          "tabela_legada": "PosGraduacoesNormasGerais",
+          "tabela_moderna": "PosGraduacoesNormasGerais",
+          "estrategia": "completa",
+          "frequencia_sincronizacao_minutos": 1,
+          "coluna_last_updated": null,
+          "comentario": "Tabela que Contem infos sobre documentação mostrada no site.",
+          "camada_anticorrupcao": {
+            "sanitizacao": {
+              "remover_espacos_excesso": true,
+              "forcar_utf8": true
+            },
+            "mapeamento_colunas": {
+                "Id": {
+                    "nome_destino": "Id",
+                    "tipo": "int",
+                    "pk": true
+                },
+                "PosGraduacao": {
+                    "nome_destino": "PosGraduacao",
+                    "tipo": "int"
+                },
+                "Texto": {
+                    "nome_destino": "Texto",
+                    "tipo": "text"
+                }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "banco_legado": "Dados_pg",
+      "banco_moderno": "CQRS_Dados_pg",
+      "tabelas": [
+        {
+          "tabela_legada": "orientadores",
+          "tabela_moderna": "orientadores",
+          "estrategia": "completa",
+          "frequencia_sincronizacao_minutos": 10,
+          "coluna_last_updated": null,
+          "comentario": "Orientadores credenciados.",
+          "camada_anticorrupcao": {
+            "sanitizacao": {
+              "remover_espacos_excesso": true,
+              "forcar_utf8": true
+            },
+            "mapeamento_colunas": {
+                "area": {
+                    "nome_destino": "area",
+                    "tipo": "int",
+                    "pk": true
+                },
+                "codusp": {
+                    "nome_destino": "codusp",
+                    "tipo": "bigint",
+                    "pk": true
+                },
+                "data_inicio": {
+                    "nome_destino": "data_inicio",
+                    "tipo": "smalldatetime"
+                },
+                "data_fim": {
+                    "nome_destino": "data_fim",
+                    "tipo": "smalldatetime"
+                },
+                "so_mestrado": {
+                    "nome_destino": "so_mestrado",
+                    "tipo": "bit",
+                    "not_null": true
+                },
+                "pontual": {
+                    "nome_destino": "pontual",
+                    "tipo": "bit",
+                    "not_null": true
+                },
+                "id_usuario": {
+                    "nome_destino": "id_usuario",
+                    "tipo": "int",
+                    "not_null": true
+                },
+                "data": {
+                    "nome_destino": "data",
+                    "tipo": "smalldatetime"
+                },
+                "ativo": {
+                    "nome_destino": "ativo",
+                    "tipo": "bit",
+                    "not_null": true
+                }
+            }
+          }
+        },
+        {
+          "tabela_legada": "orientadores_linhaspesq",
+          "tabela_moderna": "orientadores_linhaspesq",
+          "estrategia": "completa",
+          "frequencia_sincronizacao_minutos": 10,
+          "coluna_last_updated": null,
+          "comentario": "Vinculo n-x-n entre Orientadores e linhas de pesquisa.",
+          "camada_anticorrupcao": {
+            "sanitizacao": {
+              "remover_espacos_excesso": false,
+              "forcar_utf8": false
+            },
+            "mapeamento_colunas": {
+                "area": {
+                    "nome_destino": "area",
+                    "tipo": "int",
+                    "pk": true
+                },
+                "codusp": {
+                    "nome_destino": "codusp",
+                    "tipo": "bigint",
+                    "pk": true
+                },
+                "linhapesquisa_id": {
+                    "nome_destino": "linhapesquisa_id",
+                    "tipo": "int",
+                    "pk": true
+                }
+            }
+          }
+        },
+        {
+          "tabela_legada": "linhapesq",
+          "tabela_moderna": "linhapesq",
+          "estrategia": "completa",
+          "frequencia_sincronizacao_minutos": 1,
+          "coluna_last_updated": null,
+          "comentario": "Linhas de pesquisa.",
+          "camada_anticorrupcao": {
+            "sanitizacao": {
+              "remover_espacos_excesso": false,
+              "forcar_utf8": false
+            },
+            "mapeamento_colunas": {
+                "id": {
+                    "nome_destino": "id",
+                    "tipo": "int",
+                    "pk": true
+                },
+                "nome": {
+                    "nome_destino": "nome",
+                    "tipo": "varchar(max)",
+                    "not_null": true
+                },
+                "nomeen": {
+                    "nome_destino": "nomeen",
+                    "tipo": "varchar(max)"
+                },
+                "id_usuario": {
+                    "nome_destino": "id_usuario",
+                    "tipo": "int",
+                    "not_null": true
+                },
+                "data": {
+                    "nome_destino": "data",
+                    "tipo": "smalldatetime",
+                    "not_null": true
+                },
+                "ativo": {
+                    "nome_destino": "ativo",
+                    "tipo": "bit",
+                    "not_null": true
+                }
+            }
+          }
+        },
+        {
+          "tabela_legada": "secretarias",
+          "tabela_moderna": "secretarias",
+          "estrategia": "completa",
+          "frequencia_sincronizacao_minutos": 1,
+          "coluna_last_updated": null,
+          "comentario": "Secretarias(os) dos programas de Pós.",
+          "camada_anticorrupcao": {
+            "sanitizacao": {
+              "remover_espacos_excesso": false,
+              "forcar_utf8": false
+            },
+            "mapeamento_colunas": {
+                "id": {
+                    "nome_destino": "id",
+                    "tipo": "int",
+                    "pk": true
+                },
+                "area": {
+                    "nome_destino": "area",
+                    "tipo": "int",
+                    "not_null": true
+                },
+                "codcur": {
+                    "nome_destino": "codcur",
+                    "tipo": "int",
+                    "not_null": true
+                },
+                "codpes": {
+                    "nome_destino": "codpes",
+                    "tipo": "int",
+                    "not_null": true
+                },
+                "email": {
+                    "nome_destino": "email",
+                    "tipo": "varchar(50)",
+                    "not_null": true
+                },
+                "telefone": {
+                    "nome_destino": "telefone",
+                    "tipo": "varchar(50)",
+                    "not_null": true
+                },
+                "funcao": {
+                    "nome_destino": "funcao",
+                    "tipo": "varchar(250)",
+                    "not_null": true
+                },
+                "local": {
+                    "nome_destino": "local",
+                    "tipo": "varchar(250)"
+                },
+                "lat": {
+                    "nome_destino": "lat",
+                    "tipo": "float"
+                },
+                "long": {
+                    "nome_destino": "long",
+                    "tipo": "float"
+                }
+            }
+          }
+        },
+        {
+          "tabela_legada": "uploads",
+          "tabela_moderna": "uploads",
+          "estrategia": "completa",
+          "frequencia_sincronizacao_minutos": 10,
+          "coluna_last_updated": null,
+          "comentario": "Upload de arquivos.",
+          "camada_anticorrupcao": {
+            "sanitizacao": {
+              "remover_espacos_excesso": false,
+              "forcar_utf8": false
+            },
+            "mapeamento_colunas": {
+                "id": {
+                    "nome_destino": "id",
+                    "tipo": "int",
+                    "pk": true
+                },
+                "menu_id": {
+                    "nome_destino": "menu_id",
+                    "tipo": "int",
+                    "not_null": true
+                },
+                "menu_cat_id": {
+                    "nome_destino": "menu_cat_id",
+                    "tipo": "int",
+                    "not_null": true
+                },
+                "usuario_id": {
+                    "nome_destino": "usuario_id",
+                    "tipo": "int",
+                    "not_null": true
+                },
+                "descricao": {
+                    "nome_destino": "descricao",
+                    "tipo": "varchar(255)",
+                    "not_null": true
+                },
+                "arquivo": {
+                    "nome_destino": "arquivo",
+                    "tipo": "varchar(255)",
+                    "not_null": true
+                },
+                "arquivo_nome": {
+                    "nome_destino": "arquivo_nome",
+                    "tipo": "varchar(255)",
+                    "not_null": true
+                },
+                "data": {
+                    "nome_destino": "data",
+                    "tipo": "smalldatetime",
+                    "not_null": true
+                },
+                "usuario_alterou_id": {
+                    "nome_destino": "usuario_alterou_id",
+                    "tipo": "int"
+                }
+            }
+          }
+        },
+        {
+          "tabela_legada": "exameSelecaoPosGraduacao",
+          "tabela_moderna": "exameSelecaoPosGraduacao",
+          "estrategia": "completa",
+          "frequencia_sincronizacao_minutos": 1,
+          "coluna_last_updated": null,
+          "comentario": "Informações do exame de seleção.",
+          "camada_anticorrupcao": {
+            "sanitizacao": {
+              "remover_espacos_excesso": false,
+              "forcar_utf8": false
+            },
+            "mapeamento_colunas": {
+                "codPPG": {
+                    "nome_destino": "codPPG",
+                    "tipo": "int",
+                    "pk": true
+                },
+                "nga": {
+                    "nome_destino": "nga",
+                    "tipo": "varchar(2)",
+                    "pk": true
+                },
+                "codIdi": {
+                    "nome_destino": "codIdi",
+                    "tipo": "varchar(5)",
+                    "pk": true
+                },
+                "texto": {
+                    "nome_destino": "texto",
+                    "tipo": "text",
+                    "not_null": true
+                }
+            }
+          }
+        },
+        {
+          "tabela_legada": "areas",
+          "tabela_moderna": "areas",
+          "estrategia": "completa",
+          "frequencia_sincronizacao_minutos": 10,
+          "coluna_last_updated": null,
+          "comentario": "Informações das áreas de pesquisa.",
+          "camada_anticorrupcao": {
+            "sanitizacao": {
+              "remover_espacos_excesso": false,
+              "forcar_utf8": false
+            },
+            "mapeamento_colunas": {
+                "codare": {
+                    "nome_destino": "codare",
+                    "tipo": "int",
+                    "pk": true
+                },
+                "codcur": {
+                    "nome_destino": "codcur",
+                    "tipo": "int",
+                    "not_null": true
+                },
+                "nome": {
+                    "nome_destino": "nome",
+                    "tipo": "varchar(250)"
+                },
+                "nomeen": {
+                    "nome_destino": "nomeen",
+                    "tipo": "varchar(250)"
+                },
+                "descricao": {
+                    "nome_destino": "descricao",
+                    "tipo": "varchar(2000)"
+                },
+                "descricaoen": {
+                    "nome_destino": "descricaoen",
+                    "tipo": "varchar(2000)"
+                },
+                "id_usuario": {
+                    "nome_destino": "id_usuario",
+                    "tipo": "int",
+                    "not_null": true
+                },
+                "data": {
+                    "nome_destino": "data",
+                    "tipo": "smalldatetime",
+                    "not_null": true
+                },
+                "ativo": {
+                    "nome_destino": "ativo",
+                    "tipo": "bit",
+                    "not_null": true
+                }
+            }
+          }
+        },
+        {
+          "tabela_legada": "programas",
+          "tabela_moderna": "programas",
+          "estrategia": "completa",
+          "frequencia_sincronizacao_minutos": 10,
+          "coluna_last_updated": null,
+          "comentario": "Informações dos programas de pesquisa.",
+          "camada_anticorrupcao": {
+            "sanitizacao": {
+              "remover_espacos_excesso": false,
+              "forcar_utf8": false
+            },
+            "mapeamento_colunas": {
+                "codcur": {
+                    "nome_destino": "codcur",
+                    "tipo": "int",
+                    "pk": true
+                },
+                "depto": {
+                    "nome_destino": "depto",
+                    "tipo": "int",
+                    "not_null": true
+                },
+                "nome": {
+                    "nome_destino": "nome",
+                    "tipo": "varchar(250)",
+                    "not_null": true
+                },
+                "host": {
+                    "nome_destino": "host",
+                    "tipo": "varchar(50)",
+                    "not_null": true
+                },
+                "abr": {
+                    "nome_destino": "abr",
+                    "tipo": "varchar(4)",
+                    "not_null": true
+                },
+                "titulo": {
+                    "nome_destino": "titulo",
+                    "tipo": "varchar(250)",
+                    "not_null": true
+                },
+                "endereco": {
+                    "nome_destino": "endereco",
+                    "tipo": "varchar(250)",
+                    "not_null": true
+                },
+                "numero": {
+                    "nome_destino": "numero",
+                    "tipo": "int",
+                    "not_null": true
+                },
+                "complemento": {
+                    "nome_destino": "complemento",
+                    "tipo": "varchar(50)"
+                },
+                "bairro": {
+                    "nome_destino": "bairro",
+                    "tipo": "varchar(50)",
+                    "not_null": true
+                },
+                "cidade": {
+                    "nome_destino": "cidade",
+                    "tipo": "varchar(70)",
+                    "not_null": true
+                },
+                "estado": {
+                    "nome_destino": "estado",
+                    "tipo": "varchar(2)",
+                    "not_null": true
+                },
+                "pais": {
+                    "nome_destino": "pais",
+                    "tipo": "varchar(50)",
+                    "not_null": true
+                },
+                "cep": {
+                    "nome_destino": "cep",
+                    "tipo": "varchar(50)",
+                    "not_null": true
+                },
+                "fone": {
+                    "nome_destino": "fone",
+                    "tipo": "varchar(50)",
+                    "not_null": true
+                },
+                "fone2": {
+                    "nome_destino": "fone2",
+                    "tipo": "varchar(50)"
+                },
+                "fax": {
+                    "nome_destino": "fax",
+                    "tipo": "varchar(50)",
+                    "not_null": true
+                },
+                "email": {
+                    "nome_destino": "email",
+                    "tipo": "varchar(50)",
+                    "not_null": true
+                },
+                "conceitocapes": {
+                    "nome_destino": "conceitocapes",
+                    "tipo": "smallint",
+                    "not_null": true
+                },
+                "hp_me": {
+                    "nome_destino": "hp_me",
+                    "tipo": "smallint",
+                    "not_null": true
+                },
+                "hp_do": {
+                    "nome_destino": "hp_do",
+                    "tipo": "smallint",
+                    "not_null": true
+                },
+                "depto_id_area": {
+                    "nome_destino": "depto_id_area",
+                    "tipo": "smallint",
+                    "not_null": true
+                },
+                "num_banners": {
+                    "nome_destino": "num_banners",
+                    "tipo": "smallint",
+                    "not_null": true
+                },
+                "url": {
+                    "nome_destino": "url",
+                    "tipo": "varchar(255)"
+                },
+                "ativo": {
+                    "nome_destino": "ativo",
+                    "tipo": "bit",
+                    "not_null": true
+                }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

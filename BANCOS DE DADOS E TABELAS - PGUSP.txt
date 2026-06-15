@@ -1,0 +1,77 @@
+BANCOS DE DADOS E TABELAS - PGUSP
+
+Dados_hp
+    Posgraduacoes               ok
+    PosgraduacoesAlunosesp      ok
+    PosGraduacoesBibliografias  ok
+    PosGraduacoesDocumentacao   ok
+    PosgraduacoesNormasGerais   ok
+
+
+Dados_pg
+    orientadores                ok
+    orientadores_linhaspesq     ok
+    linhapesq                   ok
+    secretarias                 ok
+    uploads                     ok
+    exameSelecaoPosGraduacao    ok
+    areas                       ok
+    programas                   ok
+
+
+FFCLRP
+R25CRECREDOC
+PESSOA
+AREA
+NOMECURSO
+NOMEAREA
+DISCIPLINA
+OFERECIMENTO
+ESPACOTURMA
+R32TURMINDOC
+R27DISMINCRE
+R39PGMORIDOC
+R10DOCCOOCUR
+QUALIFICACAO
+VINCULOPESSOAUSP
+R48PGMTRBDOC
+AGPROGRAMA
+CREDAREA
+EMAILPESSOA
+CURSO
+AGPROGRAMA
+
+Libra
+indexadorPortalProducoesCientificas
+idiomas
+titulospaginas
+CVLATTES
+FormsOnline
+idiomaOferecimentoDisciplina
+exameSelecaoPosGraduacao
+
+Wffclrp
+noticias
+noticias_categorias
+defesas
+defesas_defendidas
+blocos_old
+salas_old
+editais
+editais_categorias
+formularios
+
+
+
+Dados_pg
+orientadores
+orientadores_linhaspesq
+linhapesq
+secretarias
+uploads
+exameSelecaoPosGraduacao
+areas
+programas
+
+
+

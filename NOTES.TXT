@@ -1,0 +1,13 @@
+Apagr BD:
+USE master;
+GO
+
+-- Altera o banco para modo usuário único, derrubando as conexões existentes na hora
+ALTER DATABASE [Dados_pg] 
+SET SINGLE_USER 
+WITH ROLLBACK IMMEDIATE;
+GO
+
+-- Agora o banco está livre para ser excluído
+DROP DATABASE [Dados_pg];
+GO
