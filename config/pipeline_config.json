@@ -1485,7 +1485,7 @@
                 "estrategia": "completa",
                 "frequencia_sincronizacao_minutos": 1,
                 "coluna_last_updated": null,
-                "comentario": "Descrição da tabela.",
+                "comentario": "Indexadores científicos.",
                 "camada_anticorrupcao": {
                     "sanitizacao": {
                         "remover_espacos_excesso": true,
@@ -1526,7 +1526,7 @@
                 "estrategia": "completa",
                 "frequencia_sincronizacao_minutos": 1,
                 "coluna_last_updated": null,
-                "comentario": "Descrição da tabela.",
+                "comentario": "Idiomas.",
                 "camada_anticorrupcao": {
                     "sanitizacao": {
                         "remover_espacos_excesso": true,
@@ -1566,7 +1566,7 @@
                 "estrategia": "completa",
                 "frequencia_sincronizacao_minutos": 1,
                 "coluna_last_updated": null,
-                "comentario": "Descrição da tabela.",
+                "comentario": "Códigos dos Lattes dos orientadores e alunos.",
                 "camada_anticorrupcao": {
                     "sanitizacao": {
                         "remover_espacos_excesso": true,
@@ -1601,7 +1601,7 @@
                 "estrategia": "completa",
                 "frequencia_sincronizacao_minutos": 1,
                 "coluna_last_updated": null,
-                "comentario": "Descrição da tabela.",
+                "comentario": "Formulários Online.",
                 "camada_anticorrupcao": {
                     "sanitizacao": {
                         "remover_espacos_excesso": true,
@@ -1627,7 +1627,7 @@
                 "estrategia": "completa",
                 "frequencia_sincronizacao_minutos": 1,
                 "coluna_last_updated": null,
-                "comentario": "Descrição da tabela.",
+                "comentario": "Idiomas em que as disciplinas são oferecidas.",
                 "camada_anticorrupcao": {
                     "sanitizacao": {
                         "remover_espacos_excesso": true,
@@ -3402,7 +3402,7 @@
             "estrategia": "completa",
             "frequencia_sincronizacao_minutos": 1,
             "coluna_last_updated": null,
-            "comentario": "Descrição da tabela.",
+            "comentario": "Esta tabela, apesar do nome AGPROGRAMA, passou a conter os CURSOS DE PÓS-GRADUAÇÃO(Mestrado ou Doutorado), ao qual o aluno está vinculado, pertencente a uma área de concentração, de um determinado programa de pós-graduação.",
             "camada_anticorrupcao": {
                 "sanitizacao": {
                     "remover_espacos_excesso": true,
