@@ -2449,7 +2449,7 @@
             }
         },        
         {
-            "tabela_legada": "codare",
+            "tabela_legada": "R27DISMINCRE",
             "tabela_moderna": "R27DISMINCRE",
             "codare": "completa",
             "frequencia_sincronizacao_minutos": 1,
@@ -2633,8 +2633,7 @@
                     },
                     "dtafimfnc": {
                         "nome_destino": "dtafimfnc",
-                        "tipo": "smalldatetime",
-                        "not_null": true
+                        "tipo": "smalldatetime"
                     },
                     "fncpescur": {
                         "nome_destino": "fncpescur",
@@ -2760,8 +2759,7 @@
                     },
                     "dtafimvin": {
                         "nome_destino": "dtafimvin",
-                        "tipo": "smalldatetime",
-                        "not_null": true
+                        "tipo": "smalldatetime"
                     },
                     "sitatl": {
                         "nome_destino": "sitatl",

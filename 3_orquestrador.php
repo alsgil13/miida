@@ -81,9 +81,16 @@ while (true) {
                     
                     echo "\n [" . date('H:i:s') . "] Alocando pipeline incremental para: [{$chaveCronometro}]\n";
                     
+                    // 1. Marca o tempo de início em milissegundos (float)
+                    $inicioMili = microtime(true);
+
                     // Executa o isolamento, extração, higienização (ACL) e a carga idempotente (Upsert)
                     $processor->sincronizarTabela($banco, $tabela);
+                    // 2. Marca o tempo de término e calcula a diferença
+                    $fimMili = microtime(true);
+                    $tempoGastoMili = round(($fimMili - $inicioMili) * 1000, 2); // Arredonda para 2 casas decimais
                     
+                    echo " [" . date('H:i:s') . "] Concluído: [{$chaveCronometro}] em {$tempoGastoMili} ms\n";
                     // Atualiza o marcador temporal em memória para iniciar o descanso da tabela
                     $cronometroTabelas[$chaveCronometro] = time();
                 }

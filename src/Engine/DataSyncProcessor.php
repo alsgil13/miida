@@ -40,6 +40,7 @@ class DataSyncProcessor
         echo "  ├── Sincronizando: [{$bancoLegado}].[{$tabelaLegada}] -> [{$bancoModerno}].[{$tabelaModerna}]\n";
 
         try {
+            $inicioMiliAllSinc = microtime(true);
             $this->connLegado->exec("USE [{$bancoLegado}]");
             $this->connModerno->exec("USE [{$bancoModerno}]");
 
@@ -115,14 +116,15 @@ class DataSyncProcessor
             }
 
             $this->controlRepo->atualizarEstadoSincronizacao($bancoModerno, $tabelaModerna, 'SUCESSO', $inseridosOuAtualizados, $timestampCiclo);
-            
+            $fimMiliAllSinc = microtime(true);
+            $tempoGastoMili = round(($fimMiliAllSinc - $inicioMiliAllSinc) * 1000, 2); // Arredonda para 2 casas decimais
             // LOG DE SUCESSO SE HOUVER ALTERAÇÕES
             if ($inseridosOuAtualizados > 0) {
                 $componenteNome = "DataSyncProcessor -> {$tabelaModerna}";
-                $this->logger->success($componenteNome, "Sincronização executada.", "Registros processados: {$inseridosOuAtualizados} de um lote de {$totalRegistros}");
+                $this->logger->success($componenteNome, "Sincronização executada.", "Registros processados: {$inseridosOuAtualizados} de um lote de {$totalRegistros} em {$tempoGastoMili}ms");
             }
 
-            echo "  │    └── [✔] Ciclo concluído. Registros modificados/inseridos no destino: {$inseridosOuAtualizados}\n";
+            echo "  │    └── [✔] Ciclo concluído. Registros modificados/inseridos no destino: {$inseridosOuAtualizados} em {$tempoGastoMili}ms\n";
 
         } catch (Exception $e) {
             $bancoModerno  = $configBanco['banco_moderno'];
