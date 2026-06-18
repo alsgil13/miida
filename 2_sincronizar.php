@@ -38,7 +38,7 @@ try {
     
     echo "[*] Conectando ao Nó de Leitura Moderno (SQL 2022)...\n";
     $connModerno = ConnectionFactory::getModernoConnection($infra, 'master');
-    echo "[✔] Conexões estabelecidas com sucesso.\n\n";
+    echo "[OK] Conexões estabelecidas com sucesso.\n\n";
 
     // Instancia componentes de suporte
     $controlRepo = new ControlRepository($connModerno);

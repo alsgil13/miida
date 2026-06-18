@@ -939,8 +939,7 @@
                 },
                  "data_inicio": {
                     "nome_destino": "data_inicio",
-                    "tipo": "smalldatetime",
-                    "not_null": true
+                    "tipo": "smalldatetime"
 
                 },
                  "data_fim": {
@@ -1562,7 +1561,7 @@
             },        
             {
                 "tabela_legada": "CVLATTES",
-                "tabela_moderna": "CVLATTESTABELA_NOVO2",
+                "tabela_moderna": "CVLATTES",
                 "estrategia": "completa",
                 "frequencia_sincronizacao_minutos": 1,
                 "coluna_last_updated": null,
@@ -2248,76 +2247,105 @@
                     "forcar_utf8": true
                 },
                 "mapeamento_colunas": {
-                    "codofeatvceu": {
-                        "nome_destino": "codofeatvceu",
-                        "tipo": "int",
+                    "sgldis": {
+                        "nome_destino": "sgldis",
+                        "tipo": "char(7)",
                         "pk": true
                     },
-                    "codund": {
-                        "nome_destino": "codund",
+                    "numseqdis": {
+                        "nome_destino": "numseqdis",
                         "tipo": "tinyint",
-                        "not_null": true
+                        "pk": true
                     },
-                    "codcurceu": {
-                        "nome_destino": "codcurceu",
-                        "tipo": "int",
-                        "not_null": true
-                    },
-                    "codpgmceu": {
-                        "nome_destino": "codpgmceu",
-                        "tipo": "int",
-                        "not_null": true
-                    },
-                    "codatvceu": {
-                        "nome_destino": "codatvceu",
-                        "tipo": "int",
-                        "not_null": true
-                    },
-                    "codedicurceu": {
-                        "nome_destino": "codedicurceu",
+                    "numofe": {
+                        "nome_destino": "numofe",
                         "tipo": "smallint",
+                        "pk": true
+                    },
+                    "numvagofe": {
+                        "nome_destino": "numvagofe",
+                        "tipo": "tinyint"
+                    },
+                    "numvagespofe": {
+                        "nome_destino": "numvagespofe",
+                        "tipo": "tinyint"
+                    },
+                    "numminins": {
+                        "nome_destino": "numminins",
+                        "tipo": "tinyint"
+                    },
+                    "dtainiofe": {
+                        "nome_destino": "dtainiofe",
+                        "tipo": "smalldatetime",
                         "not_null": true
                     },
-                    "qtdvagofe": {
-                        "nome_destino": "qtdvagofe",
-                        "tipo": "int",
+                    "dtafimofe": {
+                        "nome_destino": "dtafimofe",
+                        "tipo": "smalldatetime",
                         "not_null": true
                     },
-                    "idfusuinc": {
-                        "nome_destino": "idfusuinc",
-                        "tipo": "varchar(20)",
+                    "dtalimcan": {
+                        "nome_destino": "dtalimcan",
+                        "tipo": "smalldatetime",
                         "not_null": true
                     },
-                    "dtainc": {
-                        "nome_destino": "dtainc",
-                        "tipo": "datetime",
-                        "not_null": true
+                    "stacslofe": {
+                        "nome_destino": "stacslofe",
+                        "tipo": "char(1)"
                     },
-                    "idfusualt": {
-                        "nome_destino": "idfusualt",
-                        "tipo": "varchar(20)",
-                        "not_null": true
+                    "criselofe": {
+                        "nome_destino": "criselofe",
+                        "tipo": "varchar(255)"
                     },
-                    "dtaalt": {
-                        "nome_destino": "dtaalt",
-                        "tipo": "datetime",
-                        "not_null": true
-                    },
-                    "dtainiofeatv": {
-                        "nome_destino": "dtainiofeatv",
-                        "tipo": "smalldatetime"
-                    },
-                    "dtafimofeatv": {
-                        "nome_destino": "dtafimofeatv",
-                        "tipo": "smalldatetime"
+                    "stacslcct": {
+                        "nome_destino": "stacslcct",
+                        "tipo": "char(1)"
                     },
                     "timestamp": {
                         "nome_destino": "timestamp",
                         "tipo": "timestamp"
                     },
-                    "numseqofeedi": {
-                        "nome_destino": "numseqofeedi",
+                    "numvagofetot": {
+                        "nome_destino": "numvagofetot",
+                        "tipo": "tinyint",
+                        "not_null": true
+                    },
+                    "codare": {
+                        "nome_destino": "codare",
+                        "tipo": "int"
+                    },
+                    "codcvn": {
+                        "nome_destino": "codcvn",
+                        "tipo": "int"
+                    },
+                    "tipmotcantur": {
+                        "nome_destino": "tipmotcantur",
                         "tipo": "tinyint"
+                    },
+                    "dtacantur": {
+                        "nome_destino": "dtacantur",
+                        "tipo": "smalldatetime"
+                    },
+                    "stacslatm": {
+                        "nome_destino": "stacslatm",
+                        "tipo": "char(1)"
+                    },
+                    "nivcvn": {
+                        "nome_destino": "nivcvn",
+                        "tipo": "char(2)"
+                    },
+                    "codpesalt": {
+                        "nome_destino": "codpesalt",
+                        "tipo": "int"
+                    },
+                    "codlinofe": {
+                        "nome_destino": "codlinofe",
+                        "tipo": "char(3)"
+                    },
+                    "fmtofe": {
+                        "nome_destino": "fmtofe",
+                        "tipo": "char(1)",
+                        "not_null": true
                     }
                 }
             }

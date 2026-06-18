@@ -53,14 +53,7 @@ class DataSyncProcessor
 
             $stmtExtracao = $this->connLegado->prepare($sqlExtracao);
             $stmtExtracao->execute($colunaUpdate !== null ? [':dataCorte' => $dataCorte] : []);
-            $registrosLegados = $stmtExtracao->fetchAll(PDO::FETCH_ASSOC);
-            $totalRegistros = count($registrosLegados);
-
-            if ($totalRegistros === 0) {
-                $this->controlRepo->atualizarEstadoSincronizacao($bancoModerno, $tabelaModerna, 'SUCESSO', 0, $timestampCiclo);
-                return;
-            }
-
+            
             $chavesPrimarias = [];
             $mapeamento = $configTabela['camada_anticorrupcao']['mapeamento_colunas'];
             foreach ($mapeamento as $colunaOriginal => $detalhes) {
@@ -73,89 +66,156 @@ class DataSyncProcessor
                 throw new Exception("A tabela {$tabelaModerna} não possui nenhuma Chave Primária ('pk') mapeada no JSON.");
             }
 
+            // Identifica os campos timestamp
+            $camposTimestamp = [];
+            foreach ($mapeamento as $colunaOriginal => $detalhes) {
+                if (isset($detalhes['tipo']) && $detalhes['tipo'] === 'timestamp') {
+                    $camposTimestamp[] = $detalhes['nome_destino'] ?? $colunaOriginal;
+                }
+            }
+
+            // Processa registros em lotes para economizar memória
+            $tamanhoBatch = 1000;
+            $registrosBatch = [];
+            $totalRegistros = 0;
             $inseridosOuAtualizados = 0;
 
-            foreach ($registrosLegados as $linhaBruta) {
-                $linhaHigienizada = $this->acl->processarLinha($linhaBruta, $configTabela);
+            while ($linhaBruta = $stmtExtracao->fetch(PDO::FETCH_ASSOC)) {
+                $registrosBatch[] = $linhaBruta;
+                $totalRegistros++;
                 
-                $clausulasCheck = [];
-                $paramsCheck = [];
-                foreach ($chavesPrimarias as $pk) {
-                    $clausulasCheck[] = "[{$pk}] = :pk_{$pk}";
-                    $paramsCheck[":pk_{$pk}"] = $linhaHigienizada[$pk];
+                if (count($registrosBatch) >= $tamanhoBatch) {
+                    $inseridosOuAtualizados += $this->processarBatch(
+                        $registrosBatch,
+                        $configBanco,
+                        $configTabela,
+                        $timestampCiclo,
+                        $chavesPrimarias,
+                        $camposTimestamp
+                    );
+                    $registrosBatch = []; // Libera memória
                 }
-                $stringClausulasCheck = implode(" AND ", $clausulasCheck);
+            }
 
-                $sqlCheckHash = "SELECT hash_versao FROM [{$tabelaModerna}] WHERE {$stringClausulasCheck}";
-                $stmtCheck = $this->connModerno->prepare($sqlCheckHash);
-                $stmtCheck->execute($paramsCheck);
-                $registroDestino = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+            // Processa último lote
+            if (!empty($registrosBatch)) {
+                $inseridosOuAtualizados += $this->processarBatch(
+                    $registrosBatch,
+                    $configBanco,
+                    $configTabela,
+                    $timestampCiclo,
+                    $chavesPrimarias,
+                    $camposTimestamp
+                );
+            }
 
-                if ($registroDestino && $registroDestino['hash_versao'] === $linhaHigienizada['hash_versao']) {
-                    continue; 
-                }
-
-                $colunasLista = array_keys($linhaHigienizada);
-                if ($colunaUpdate === null && !in_array('middleware_last_updated', $colunasLista)) {
-                    $linhaHigienizada['middleware_last_updated'] = $timestampCiclo;
-                    $colunasLista[] = 'middleware_last_updated';
-                }
-
-                $camposMergeSource = [];
-                $camposUpdate = [];
-                $camposInsertColunas = [];
-                $camposInsertValores = [];
-
-                foreach ($colunasLista as $coluna) {
-                    $camposMergeSource[] = ":{$coluna} AS [{$coluna}]";
-                    $camposInsertColunas[] = "[{$coluna}]";
-                    $camposInsertValores[] = "s.[{$coluna}]";
-                    
-                    if (!in_array($coluna, $chavesPrimarias)) {
-                        $camposUpdate[] = "t.[{$coluna}] = s.[{$coluna}]";
-                    }
-                }
-
-                $stringJoinMerge = implode(" AND ", $clausulasJoinMerge = array_map(fn($pk) => "t.[{$pk}] = s.[{$pk}]", $chavesPrimarias));
-                $stringMergeSource = implode(", ", $camposMergeSource);
-                $stringUpdate = !empty($camposUpdate) ? "UPDATE SET " . implode(", ", $camposUpdate) : "UPDATE SET t.[hash_versao] = s.[hash_versao]";
-                $stringInsertColunas = implode(", ", $camposInsertColunas);
-                $stringInsertValores = implode(", ", $camposInsertValores);
-
-                $sqlUpsert = "
-                    MERGE [{$tabelaModerna}] AS t
-                    USING (SELECT {$stringMergeSource}) AS s
-                    ON ({$stringJoinMerge})
-                    WHEN MATCHED THEN {$stringUpdate}
-                    WHEN NOT MATCHED THEN INSERT ({$stringInsertColunas}) VALUES ({$stringInsertValores});
-                ";
-
-                $stmtUpsert = $this->connModerno->prepare($sqlUpsert);
-                $params = [];
-                foreach ($linhaHigienizada as $key => $value) {
-                    $params[":{$key}"] = $value;
-                }
-                $stmtUpsert->execute($params);
-                $inseridosOuAtualizados++;
+            if ($totalRegistros === 0) {
+                $this->controlRepo->atualizarEstadoSincronizacao($bancoModerno, $tabelaModerna, 'SUCESSO', 0, $timestampCiclo);
+                return;
             }
 
             $this->controlRepo->atualizarEstadoSincronizacao($bancoModerno, $tabelaModerna, 'SUCESSO', $inseridosOuAtualizados, $timestampCiclo);
             
             // LOG DE SUCESSO SE HOUVER ALTERAÇÕES
             if ($inseridosOuAtualizados > 0) {
+                $componenteNome = "DataSyncProcessor -> {$tabelaModerna}";
                 $this->logger->success($componenteNome, "Sincronização executada.", "Registros processados: {$inseridosOuAtualizados} de um lote de {$totalRegistros}");
             }
 
             echo "  │    └── [✔] Ciclo concluído. Registros modificados/inseridos no destino: {$inseridosOuAtualizados}\n";
 
         } catch (Exception $e) {
+            $bancoModerno  = $configBanco['banco_moderno'];
+            $tabelaModerna = $configTabela['tabela_moderna'];
             $this->controlRepo->atualizarEstadoSincronizacao($bancoModerno, $tabelaModerna, 'ERRO', 0, $timestampCiclo);
             
             // LOG DE ERRO OPERACIONAL
+            $componenteNome = "DataSyncProcessor -> {$tabelaModerna}";
             $this->logger->error($componenteNome, "Falha crítica durante a sincronização incremental.", $e->getMessage());
             
             echo "  │    └── [❌] ERRO NO CICLO: " . $e->getMessage() . "\n";
             throw $e;
         }
+    }
+
+    private function processarBatch(array $registrosBatch, array $configBanco, array $configTabela, string $timestampCiclo, array $chavesPrimarias, array $camposTimestamp): int
+    {
+        $bancoModerno  = $configBanco['banco_moderno'];
+        $tabelaModerna = $configTabela['tabela_moderna'];
+        $colunaUpdate  = $configTabela['coluna_last_updated'];
+        $registrosBatchProcessados = 0;
+
+        foreach ($registrosBatch as $linhaBruta) {
+            $linhaHigienizada = $this->acl->processarLinha($linhaBruta, $configTabela);
+            
+            $clausulasCheck = [];
+            $paramsCheck = [];
+            foreach ($chavesPrimarias as $pk) {
+                $clausulasCheck[] = "[{$pk}] = :pk_{$pk}";
+                $paramsCheck[":pk_{$pk}"] = $linhaHigienizada[$pk];
+            }
+            $stringClausulasCheck = implode(" AND ", $clausulasCheck);
+
+            $sqlCheckHash = "SELECT hash_versao FROM [{$tabelaModerna}] WHERE {$stringClausulasCheck}";
+            $stmtCheck = $this->connModerno->prepare($sqlCheckHash);
+            $stmtCheck->execute($paramsCheck);
+            $registroDestino = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+
+            if ($registroDestino && $registroDestino['hash_versao'] === $linhaHigienizada['hash_versao']) {
+                continue; 
+            }
+
+            $colunasLista = array_keys($linhaHigienizada);
+            if ($colunaUpdate === null && !in_array('middleware_last_updated', $colunasLista)) {
+                $linhaHigienizada['middleware_last_updated'] = $timestampCiclo;
+                $colunasLista[] = 'middleware_last_updated';
+            }
+
+            $camposMergeSource = [];
+            $camposUpdate = [];
+            $camposInsertColunas = [];
+            $camposInsertValores = [];
+
+            foreach ($colunasLista as $coluna) {
+                // Pula campos timestamp
+                if (in_array($coluna, $camposTimestamp)) {
+                    continue;
+                }
+                $camposMergeSource[] = ":{$coluna} AS [{$coluna}]";
+                $camposInsertColunas[] = "[{$coluna}]";
+                $camposInsertValores[] = "s.[{$coluna}]";
+                
+                if (!in_array($coluna, $chavesPrimarias)) {
+                    $camposUpdate[] = "t.[{$coluna}] = s.[{$coluna}]";
+                }
+            }
+
+            $stringJoinMerge = implode(" AND ", array_map(fn($pk) => "t.[{$pk}] = s.[{$pk}]", $chavesPrimarias));
+            $stringMergeSource = implode(", ", $camposMergeSource);
+            $stringUpdate = !empty($camposUpdate) ? "UPDATE SET " . implode(", ", $camposUpdate) : "UPDATE SET t.[hash_versao] = s.[hash_versao]";
+            $stringInsertColunas = implode(", ", $camposInsertColunas);
+            $stringInsertValores = implode(", ", $camposInsertValores);
+
+            $sqlUpsert = "
+                MERGE [{$tabelaModerna}] AS t
+                USING (SELECT {$stringMergeSource}) AS s
+                ON ({$stringJoinMerge})
+                WHEN MATCHED THEN {$stringUpdate}
+                WHEN NOT MATCHED THEN INSERT ({$stringInsertColunas}) VALUES ({$stringInsertValores});
+            ";
+
+            $stmtUpsert = $this->connModerno->prepare($sqlUpsert);
+            $params = [];
+            foreach ($linhaHigienizada as $key => $value) {
+                // Pule campos timestamp também nos parâmetros
+                if (!in_array($key, $camposTimestamp)) {
+                    $params[":{$key}"] = $value;
+                }
+            }
+            $stmtUpsert->execute($params);
+            $registrosBatchProcessados++;
+        }
+        
+        return $registrosBatchProcessados;
     }
 }
