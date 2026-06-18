@@ -37,7 +37,7 @@ class SchemaCloner
 
             foreach ($banco['tabelas'] as $tabela) {
                 $tabelaDestino = $tabela['tabela_moderna'];
-                echo "  ├── 📋 Construindo DDL para a tabela: [{$tabelaDestino}]... ";
+                echo "  ├── Construindo DDL para a tabela: [{$tabelaDestino}]... ";
                 
                 $this->construirETestarTabela($tabela);
             }
@@ -62,7 +62,7 @@ class SchemaCloner
 
         // Se o DB_ID retornar nulo, significa que o banco de dados não existe
         if ($resultado['banco_id'] === null) {
-            echo "📦 Banco de dados [{$nomeBanco}] não encontrado. Iniciando criação...\n";
+            echo "Banco de dados [{$nomeBanco}] não encontrado. Iniciando criação...\n";
             try {
                 $this->connModerno->exec("CREATE DATABASE [{$nomeBanco}]");
                 echo " -> Banco de dados [{$nomeBanco}] criado com sucesso.\n";
@@ -71,7 +71,7 @@ class SchemaCloner
             }
         } else {
             // Se já existir, apenas emite o aviso e passa para a próxima etapa
-            echo "📦 Banco de dados [{$nomeBanco}] já existente. Ignorando criação estrutural.\n";
+            echo "Banco de dados [{$nomeBanco}] já existente. Ignorando criação estrutural.\n";
         }
     }
 

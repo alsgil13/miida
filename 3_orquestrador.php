@@ -30,8 +30,8 @@ if (!file_exists($jsonPath)) {
 echo "=========================================================\n";
 echo "           MIIDA - MOTOR DAEMON ORQUESTRADOR             \n";
 echo "=========================================================\n";
-echo "[*] Iniciando Worker em segundo plano (Loop Contínuo)...\n";
-echo "[*] Monitorando alterações cadastrais e de infraestrutura...\n\n";
+echo "[...] Iniciando Worker em segundo plano (Loop Contínuo)...\n";
+echo "[...] Monitorando alterações cadastrais e de infraestrutura...\n\n";
 
 // Array de estado volátil em memória para controle de janelas de backoff por tabela
 $cronometroTabelas = [];
@@ -100,7 +100,7 @@ while (true) {
     } catch (Exception $e) {
         // Falhas operacionais ou de rede sofrem interceptação para auto-recuperação contínua
         echo "ERRO NO ORQUESTRADOR: " . $e->getMessage() . "\n";
-        echo "[*] Liberando canais de comunicação e preparando auto-recuperação...\n";
+        echo "[...] Liberando canais de comunicação e preparando auto-recuperação...\n";
     } finally {
         // Libera conexões de sockets ao final de cada avaliação para mitigar conexões persistentes ociosas
         ConnectionFactory::killConnections();

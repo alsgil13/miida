@@ -124,7 +124,7 @@ class DataSyncProcessor
                 $this->logger->success($componenteNome, "Sincronização executada.", "Registros processados: {$inseridosOuAtualizados} de um lote de {$totalRegistros} em {$tempoGastoMili}ms");
             }
 
-            echo "  │    └── [✔] Ciclo concluído. Registros modificados/inseridos no destino: {$inseridosOuAtualizados} em {$tempoGastoMili}ms\n";
+            echo "  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: {$inseridosOuAtualizados} em {$tempoGastoMili}ms\n";
 
         } catch (Exception $e) {
             $bancoModerno  = $configBanco['banco_moderno'];
@@ -135,7 +135,7 @@ class DataSyncProcessor
             $componenteNome = "DataSyncProcessor -> {$tabelaModerna}";
             $this->logger->error($componenteNome, "Falha crítica durante a sincronização incremental.", $e->getMessage());
             
-            echo "  │    └── [❌] ERRO NO CICLO: " . $e->getMessage() . "\n";
+            echo "  │    └── [ X ] ERRO NO CICLO: " . $e->getMessage() . "\n";
             throw $e;
         }
     }

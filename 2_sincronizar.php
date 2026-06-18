@@ -33,10 +33,10 @@ echo "=========================================================\n";
 
 try {
     // Inicializa Conexões através da ConnectionFactory
-    echo "[*] Conectando ao Nó de Escrita Legado (SQL 2005)...\n";
+    echo "[...] Conectando ao Nó de Escrita Legado (SQL 2005)...\n";
     $connLegado = ConnectionFactory::getLegadoConnection($infra, 'master');
     
-    echo "[*] Conectando ao Nó de Leitura Moderno (SQL 2022)...\n";
+    echo "[...] Conectando ao Nó de Leitura Moderno (SQL 2022)...\n";
     $connModerno = ConnectionFactory::getModernoConnection($infra, 'master');
     echo "[OK] Conexões estabelecidas com sucesso.\n\n";
 
@@ -69,5 +69,5 @@ try {
 } finally {
     // Encerra os canais de comunicação com segurança
     ConnectionFactory::killConnections();
-    echo "[*] Conexões encerradas de forma segura.\n";
+    echo "[...] Conexões encerradas de forma segura.\n";
 }
