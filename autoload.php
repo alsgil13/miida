@@ -1,5 +1,23 @@
 <?php
 
+
+// --- CARREGAMENTO DO ARQUIVO .env NA INICIALIZAÇÃO ---
+$envPath = __DIR__ . '/.env'; // Ajuste o caminho se o .env estiver em outra pasta
+if (file_exists($envPath)) {
+    $linhas = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($linhas as $linha) {
+        // Ignora comentários no arquivo .env
+        if (strpos(trim($linha), '#') === 0) continue; 
+        
+        // Divide a linha apenas no primeiro sinal de '='
+        if (strpos($linha, '=') !== false) {
+            list($nome, $valor) = explode('=', $linha, 2);
+            putenv(trim($nome) . '=' . trim($valor));
+        }
+    }
+}
+
+
 /**
  * MIIDA - Autoloader Nativo Padrão PSR-4
  * Mapeia o Namespace 'Miida\\' para a pasta 'src/' de forma dinâmica

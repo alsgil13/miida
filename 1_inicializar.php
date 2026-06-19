@@ -5,8 +5,6 @@
  * Script CLI de Inicialização, Provisionamento e Auditoria de Infraestrutura
  */
 
-// require_once __DIR__ . '/src/Database/ConnectionFactory.php';
-// require_once __DIR__ . '/src/Engine/SchemaCloner.php';
 require_once __DIR__ . '/autoload.php';
 
 use Miida\Database\ConnectionFactory;
@@ -30,14 +28,22 @@ if (json_last_error() !== JSON_ERROR_NONE) {
 
 $infra = $config['configuracao_infraestrutura'];
 
+// --- PROCESSAMENTO DAS VARIÁVEIS DE AMBIENTE (.ENV) ---
+foreach (['origem_command', 'destino_query'] as $no) {
+    foreach ($infra[$no] as $chave => $valor) {
+        if (strpos((string)$valor, 'env:') === 0) {
+            $envVarName = substr($valor, 4);
+            $infra[$no][$chave] = getenv($envVarName) ?: '';
+        }
+    }
+}
+
 try {
     echo "[*] Estabelecendo conexão inicial com o nó moderno (SQL 2022)...\n";
     $connModerno = ConnectionFactory::getModernoConnection($infra, 'master');
     echo " -> Conexão ativa via driver: " . ($infra['destino_query']['driver'] ?? 'padrão') . "\n\n";
 
-    // =========================================================================
     // FASE 1: AUTO-PROVISIONAMENTO DA TABELA DE CONTROLE OPERACIONAL (MIIDA)
-    // =========================================================================
     echo "[1/2] Verificando repositório de controle operacional...\n";
     
     $sqlTabelaControle = "
@@ -57,14 +63,14 @@ try {
     $connModerno->exec($sqlTabelaControle);
     echo " -> Tabela [master].[dbo].[miida_controle_sincronizacao] checada/criada com sucesso.\n\n";
 
-    // NOVA: Tabela de Log Histórico de Eventos
+    // Tabela de Log Histórico de Eventos
     $sqlTabelaLogs = "
         IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'miida_log_eventos')
         BEGIN
             CREATE TABLE miida_log_eventos (
                 id INT IDENTITY(1,1) PRIMARY KEY,
                 data_evento DATETIME NOT NULL DEFAULT GETDATE(),
-                nivel VARCHAR(16) NOT NULL, -- INFO, SUCCESS, WARNING, ERROR
+                nivel VARCHAR(16) NOT NULL,
                 componente VARCHAR(64) NOT NULL,
                 mensagem VARCHAR(MAX) NOT NULL,
                 detalhes_tecnicos VARCHAR(MAX) NULL
@@ -75,9 +81,7 @@ try {
     
     echo " -> Tabelas de controle e logs checadas/criadas com sucesso no banco master.\n\n";
 
-    // =========================================================================
     // FASE 2: CLONAGEM E ENGENHARIA REVERSA DOS BANCOS DE NEGÓCIO
-    // =========================================================================
     echo "[2/2] Iniciando clonagem declarativa dos esquemas de negócio...\n";
     $cloner = new SchemaCloner($connModerno);
     $cloner->clonar($config['bancos_gerenciados']);
