@@ -37,15 +37,10 @@ echo "          MIIDA - INICIANDO PIPELINE DE DADOS            \n";
 echo "=========================================================\n";
 
 try {
-<<<<<<< HEAD
     echo "[*] Conectando ao Nó de Escrita Legado (SQL 2005)...\n";
-=======
-    // Inicializa Conexões através da ConnectionFactory
-    echo "[...] Conectando ao Nó de Escrita Legado (SQL 2005)...\n";
->>>>>>> 8ce4f97fa9824e1b54e365f8c3e9ad84581da60a
     $connLegado = ConnectionFactory::getLegadoConnection($infra, 'master');
     
-    echo "[...] Conectando ao Nó de Leitura Moderno (SQL 2022)...\n";
+    echo "[*] Conectando ao Nó de Leitura Moderno (SQL 2022)...\n";
     $connModerno = ConnectionFactory::getModernoConnection($infra, 'master');
     echo "[OK] Conexões estabelecidas com sucesso.\n\n";
 
@@ -74,5 +69,5 @@ try {
     echo "=========================================================\n";
 } finally {
     ConnectionFactory::killConnections();
-    echo "[...] Conexões encerradas de forma segura.\n";
+    echo "[*] Conexões encerradas de forma segura.\n";
 }
