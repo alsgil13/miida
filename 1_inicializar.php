@@ -39,7 +39,7 @@ foreach (['origem_command', 'destino_query'] as $no) {
 }
 
 try {
-    echo "[*] Estabelecendo conexão inicial com o nó moderno (SQL 2022)...\n";
+    echo "[...] Estabelecendo conexão inicial com o nó moderno (SQL 2022)...\n";
     $connModerno = ConnectionFactory::getModernoConnection($infra, 'master');
     echo " -> Conexão ativa via driver: " . ($infra['destino_query']['driver'] ?? 'padrão') . "\n\n";
 
@@ -86,14 +86,14 @@ try {
     $cloner = new SchemaCloner($connModerno);
     $cloner->clonar($config['bancos_gerenciados']);
 
-    echo "\n[✔] Todo o ecossistema (Controle + Negócio) foi provisionado com sucesso!\n";
+    echo "\n[ OK ] Todo o ecossistema (Controle + Negócio) foi provisionado com sucesso!\n";
     echo "=========================================================\n";
 
 } catch (Exception $e) {
-    echo "\nERRO DURANTE A EXECUÇÃO DO MIDDLEWARE:\n";
+    echo "\n[ X ] ERRO DURANTE A EXECUÇÃO DO MIDDLEWARE:\n";
     echo "Mensagem: " . $e->getMessage() . "\n";
     echo "=========================================================\n";
 } finally {
     ConnectionFactory::killConnections();
-    echo "[*] Conexões finalizadas de forma segura.\n";
+    echo "[...] Conexões finalizadas de forma segura.\n";
 }

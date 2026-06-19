@@ -24,8 +24,8 @@ if (!file_exists($jsonPath)) {
 echo "=========================================================\n";
 echo "           MIIDA - MOTOR DAEMON ORQUESTRADOR             \n";
 echo "=========================================================\n";
-echo "[*] Iniciando Worker em segundo plano (Loop Contínuo)...\n";
-echo "[*] Monitorando alterações cadastrais e de infraestrutura...\n\n";
+echo "[...] Iniciando Worker em segundo plano (Loop Contínuo)...\n";
+echo "[...] Monitorando alterações cadastrais e de infraestrutura...\n\n";
 
 // LÊ O CONFIG APENAS UMA VEZ NA INICIALIZAÇÃO
 $config = json_decode(file_get_contents($jsonPath), true);
@@ -91,7 +91,7 @@ while (true) {
 
     } catch (Exception $e) {
         echo "ERRO NO ORQUESTRADOR: " . $e->getMessage() . "\n";
-        echo "[*] Liberando canais de comunicação e preparando auto-recuperação...\n";
+        echo "[...] Liberando canais de comunicação e preparando auto-recuperação...\n";
     } finally {
         ConnectionFactory::killConnections();
     }
