@@ -1,0 +1,1040 @@
+  ├── Sincronizando: [FFCLRP].[ESPACOTURMA] -> [CQRS_FFCLRP].[ESPACOTURMA]
+ [09:51:30] Concluído: [CQRS_FFCLRP.ESPACOTURMA] em 33.25 ms
+
+ [09:51:30] Alocando pipeline incremental para: [CQRS_FFCLRP.R32TURMINDOC]
+  ├── Sincronizando: [FFCLRP].[R32TURMINDOC] -> [CQRS_FFCLRP].[R32TURMINDOC]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 8969.82ms
+ [09:51:39] Concluído: [CQRS_FFCLRP.R32TURMINDOC] em 8969.9 ms
+
+ [09:51:39] Alocando pipeline incremental para: [CQRS_FFCLRP.R27DISMINCRE]
+  ├── Sincronizando: [FFCLRP].[R27DISMINCRE] -> [CQRS_FFCLRP].[R27DISMINCRE]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 2762ms
+ [09:51:42] Concluído: [CQRS_FFCLRP.R27DISMINCRE] em 2762.21 ms
+
+ [09:51:42] Alocando pipeline incremental para: [CQRS_FFCLRP.R39PGMORIDOC]
+  ├── Sincronizando: [FFCLRP].[R39PGMORIDOC] -> [CQRS_FFCLRP].[R39PGMORIDOC]
+ [09:51:42] Concluído: [CQRS_FFCLRP.R39PGMORIDOC] em 41.93 ms
+
+ [09:51:42] Alocando pipeline incremental para: [CQRS_FFCLRP.R10DOCCOOCUR]
+  ├── Sincronizando: [FFCLRP].[R10DOCCOOCUR] -> [CQRS_FFCLRP].[R10DOCCOOCUR]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 3407.34ms
+ [09:51:45] Concluído: [CQRS_FFCLRP.R10DOCCOOCUR] em 3407.4 ms
+
+ [09:51:45] Alocando pipeline incremental para: [CQRS_FFCLRP.QUALIFICACAO]
+  ├── Sincronizando: [FFCLRP].[QUALIFICACAO] -> [CQRS_FFCLRP].[QUALIFICACAO]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 3531.46ms
+ [09:51:49] Concluído: [CQRS_FFCLRP.QUALIFICACAO] em 3531.68 ms
+
+ [09:51:49] Alocando pipeline incremental para: [CQRS_FFCLRP.VINCULOPESSOAUSP]
+  ├── Sincronizando: [FFCLRP].[VINCULOPESSOAUSP] -> [CQRS_FFCLRP].[VINCULOPESSOAUSP]
+ [09:51:49] Concluído: [CQRS_FFCLRP.VINCULOPESSOAUSP] em 169.47 ms
+
+ [09:51:59] Alocando pipeline incremental para: [CQRS_FFCLRP.R48PGMTRBDOC]
+  ├── Sincronizando: [FFCLRP].[R48PGMTRBDOC] -> [CQRS_FFCLRP].[R48PGMTRBDOC]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 24378.42ms
+ [09:52:23] Concluído: [CQRS_FFCLRP.R48PGMTRBDOC] em 24378.63 ms
+
+ [09:52:23] Alocando pipeline incremental para: [CQRS_FFCLRP.AGPROGRAMA]
+  ├── Sincronizando: [FFCLRP].[AGPROGRAMA] -> [CQRS_FFCLRP].[AGPROGRAMA]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 10276.51ms
+ [09:52:34] Concluído: [CQRS_FFCLRP.AGPROGRAMA] em 10276.76 ms
+
+ [09:52:34] Alocando pipeline incremental para: [CQRS_FFCLRP.CREDAREA]
+  ├── Sincronizando: [FFCLRP].[CREDAREA] -> [CQRS_FFCLRP].[CREDAREA]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 949.55ms
+ [09:52:35] Concluído: [CQRS_FFCLRP.CREDAREA] em 949.77 ms
+
+ [09:52:35] Alocando pipeline incremental para: [CQRS_FFCLRP.EMAILPESSOA]
+  ├── Sincronizando: [FFCLRP].[EMAILPESSOA] -> [CQRS_FFCLRP].[EMAILPESSOA]
+ [09:52:35] Concluído: [CQRS_FFCLRP.EMAILPESSOA] em 68.59 ms
+
+ [09:52:35] Alocando pipeline incremental para: [CQRS_FFCLRP.CURSO]
+  ├── Sincronizando: [FFCLRP].[CURSO] -> [CQRS_FFCLRP].[CURSO]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 603.03ms
+ [09:52:35] Concluído: [CQRS_FFCLRP.CURSO] em 603.25 ms
+
+
+ [⚠️ 09:52:35] ALERTA DE CRON: Disparando ciclo global de limpeza de registros órfãos...
+
+ [09:52:35] Iniciando auditoria de órfãos em: [CQRS_Dados_hp.Posgraduacoes] via PKs [Id]
+ [09:52:35] Concluído: [CQRS_Dados_hp.Posgraduacoes] -> Nenhum órfão encontrado. Sincronia perfeita em 8.18 ms
+
+ [09:52:35] Iniciando auditoria de órfãos em: [CQRS_Dados_hp.PosGraduacoesBibliografias] via PKs [Id]
+ [09:52:35] Concluído: [CQRS_Dados_hp.PosGraduacoesBibliografias] -> Nenhum órfão encontrado. Sincronia perfeita em 14.53 ms
+
+ [09:52:35] Iniciando auditoria de órfãos em: [CQRS_Dados_hp.PosgraduacoesAlunosesp] via PKs [Id]
+ [09:52:35] Concluído: [CQRS_Dados_hp.PosgraduacoesAlunosesp] -> Nenhum órfão encontrado. Sincronia perfeita em 8.71 ms
+
+ [09:52:35] Iniciando auditoria de órfãos em: [CQRS_Dados_hp.PosGraduacoesDocumentacao] via PKs [Id]
+ [09:52:35] Concluído: [CQRS_Dados_hp.PosGraduacoesDocumentacao] -> Nenhum órfão encontrado. Sincronia perfeita em 13.98 ms
+
+ [09:52:35] Iniciando auditoria de órfãos em: [CQRS_Dados_hp.PosGraduacoesNormasGerais] via PKs [Id]
+ [09:52:35] Concluído: [CQRS_Dados_hp.PosGraduacoesNormasGerais] -> Nenhum órfão encontrado. Sincronia perfeita em 10.38 ms
+
+ [09:52:35] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.orientadores] via PKs [area + codusp]
+ [09:52:35] Concluído: [CQRS_Dados_pg.orientadores] -> Nenhum órfão encontrado. Sincronia perfeita em 14.05 ms
+
+ [09:52:35] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.orientadores_linhaspesq] via PKs [area + codusp + linhapesquisa_id]
+ [09:52:35] Concluído: [CQRS_Dados_pg.orientadores_linhaspesq] -> Nenhum órfão encontrado. Sincronia perfeita em 13.35 ms
+
+ [09:52:36] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.linhapesq] via PKs [id]
+ [09:52:36] Concluído: [CQRS_Dados_pg.linhapesq] -> Nenhum órfão encontrado. Sincronia perfeita em 7.03 ms
+
+ [09:52:36] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.secretarias] via PKs [id]
+ [09:52:36] Concluído: [CQRS_Dados_pg.secretarias] -> Nenhum órfão encontrado. Sincronia perfeita em 5.27 ms
+
+ [09:52:36] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.uploads] via PKs [id]
+ [09:52:36] Concluído: [CQRS_Dados_pg.uploads] -> Nenhum órfão encontrado. Sincronia perfeita em 7.09 ms
+
+ [09:52:36] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.exameSelecaoPosGraduacao] via PKs [codPPG + nga + codIdi]
+ [09:52:36] Concluído: [CQRS_Dados_pg.exameSelecaoPosGraduacao] -> Nenhum órfão encontrado. Sincronia perfeita em 8.37 ms
+
+ [09:52:36] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.areas] via PKs [codare]
+ [09:52:36] Concluído: [CQRS_Dados_pg.areas] -> Nenhum órfão encontrado. Sincronia perfeita em 15.35 ms
+
+ [09:52:36] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.programas] via PKs [codcur]
+ [09:52:36] Concluído: [CQRS_Dados_pg.programas] -> Nenhum órfão encontrado. Sincronia perfeita em 7.85 ms
+
+ [09:52:36] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.noticias] via PKs [id]
+ [09:52:36] Concluído: [CQRS_Wffclrp.noticias] -> Nenhum órfão encontrado. Sincronia perfeita em 11.8 ms
+
+ [09:52:36] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.noticias_categorias] via PKs [id]
+ [09:52:36] Concluído: [CQRS_Wffclrp.noticias_categorias] -> Nenhum órfão encontrado. Sincronia perfeita em 7.65 ms
+
+ [09:52:36] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.defesas] via PKs [id]
+ [09:52:36] Concluído: [CQRS_Wffclrp.defesas] -> Nenhum órfão encontrado. Sincronia perfeita em 6.63 ms
+
+ [09:52:36] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.defesas_defendidas] via PKs [id]
+ [09:52:36] Concluído: [CQRS_Wffclrp.defesas_defendidas] -> Nenhum órfão encontrado. Sincronia perfeita em 33.89 ms
+
+ [09:52:36] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.blocos_old] via PKs [id]
+ [09:52:36] Concluído: [CQRS_Wffclrp.blocos_old] -> Nenhum órfão encontrado. Sincronia perfeita em 7.99 ms
+
+ [09:52:36] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.salas_old] via PKs [id]
+ [09:52:36] Concluído: [CQRS_Wffclrp.salas_old] -> Nenhum órfão encontrado. Sincronia perfeita em 9.33 ms
+
+ [09:52:36] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.editais] via PKs [id]
+ [09:52:36] Concluído: [CQRS_Wffclrp.editais] -> Nenhum órfão encontrado. Sincronia perfeita em 19.45 ms
+
+ [09:52:36] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.editais_categorias] via PKs [id]
+ [09:52:36] Concluído: [CQRS_Wffclrp.editais_categorias] -> Nenhum órfão encontrado. Sincronia perfeita em 11.1 ms
+
+ [09:52:36] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.formularios] via PKs [id]
+ [09:52:36] Concluído: [CQRS_Wffclrp.formularios] -> Nenhum órfão encontrado. Sincronia perfeita em 13.54 ms
+
+ [09:52:36] Iniciando auditoria de órfãos em: [CQRS_Libra.indexadorPortalProducoesCientificas] via PKs [nUSP]
+ [09:52:36] Concluído: [CQRS_Libra.indexadorPortalProducoesCientificas] -> Nenhum órfão encontrado. Sincronia perfeita em 10.98 ms
+
+ [09:52:36] Iniciando auditoria de órfãos em: [CQRS_Libra.idioma] via PKs [codIdi]
+ [09:52:36] Concluído: [CQRS_Libra.idioma] -> Nenhum órfão encontrado. Sincronia perfeita em 6.97 ms
+
+ [09:52:36] Iniciando auditoria de órfãos em: [CQRS_Libra.CVLATTES] via PKs [codpes]
+ [09:52:36] Concluído: [CQRS_Libra.CVLATTES] -> Nenhum órfão encontrado. Sincronia perfeita em 208.18 ms
+
+ [09:52:36] Iniciando auditoria de órfãos em: [CQRS_Libra.FormsOnline] via PKs [codform]
+ [09:52:36] Concluído: [CQRS_Libra.FormsOnline] -> Nenhum órfão encontrado. Sincronia perfeita em 8.67 ms
+
+ [09:52:36] Iniciando auditoria de órfãos em: [CQRS_Libra.idiomaOferecimentoDisciplina] via PKs [codIdi + codOfe + codDisc + codSeqDisc + codUnddUnvsdd]
+ [09:52:36] Concluído: [CQRS_Libra.idiomaOferecimentoDisciplina] -> Nenhum órfão encontrado. Sincronia perfeita em 8.55 ms
+
+ [09:52:36] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.R25CRECREDOC] via PKs [codare + nivare + codpes + dtavalini + tiport]
+ [09:52:37] Concluído: [CQRS_FFCLRP.R25CRECREDOC] -> Nenhum órfão encontrado. Sincronia perfeita em 102.72 ms
+
+ [09:52:37] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.PESSOA] via PKs [codpes]
+ [09:52:38] Concluído: [CQRS_FFCLRP.PESSOA] -> Nenhum órfão encontrado. Sincronia perfeita em 1076.49 ms
+
+ [09:52:38] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.AREA] via PKs [codare]
+ [09:52:38] Concluído: [CQRS_FFCLRP.AREA] -> Nenhum órfão encontrado. Sincronia perfeita em 9.57 ms
+
+ [09:52:38] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.NOMECURSO] via PKs [codcur + dtainicur]
+ [09:52:38] Concluído: [CQRS_FFCLRP.NOMECURSO] -> Nenhum órfão encontrado. Sincronia perfeita em 7.52 ms
+
+ [09:52:38] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.NOMEAREA] via PKs [codare + dtainiare]
+ [09:52:38] Concluído: [CQRS_FFCLRP.NOMEAREA] -> Nenhum órfão encontrado. Sincronia perfeita em 96.99 ms
+
+ [09:52:38] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.DISCIPLINA] via PKs [sgldis + numseqdis]
+ [09:52:38] Concluído: [CQRS_FFCLRP.DISCIPLINA] -> Nenhum órfão encontrado. Sincronia perfeita em 13.03 ms
+
+ [09:52:38] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.OFERECIMENTO] via PKs [sgldis + numseqdis + numofe]
+ [09:52:38] Concluído: [CQRS_FFCLRP.OFERECIMENTO] -> Nenhum órfão encontrado. Sincronia perfeita em 348.43 ms
+
+ [09:52:38] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.ESPACOTURMA] via PKs [sgldis + numseqdis + numofe + diasmnofe + horiniofe]
+ [09:52:38] Concluído: [CQRS_FFCLRP.ESPACOTURMA] -> Nenhum órfão encontrado. Sincronia perfeita em 4.88 ms
+
+ [09:52:38] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.R32TURMINDOC] via PKs [codpes + sgldis + numseqdis + numofe]
+ [09:52:39] Concluído: [CQRS_FFCLRP.R32TURMINDOC] -> Nenhum órfão encontrado. Sincronia perfeita em 333.56 ms
+
+ [09:52:39] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.R27DISMINCRE] via PKs [codare + nivare + sgldis + numseqdis + dtaatvdis]
+ [09:52:39] Concluído: [CQRS_FFCLRP.R27DISMINCRE] -> Nenhum órfão encontrado. Sincronia perfeita em 457.74 ms
+
+ [09:52:39] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.R39PGMORIDOC] via PKs [codpes + codare + codpespgm + numseqpgm + dtainiort]
+ [09:52:40] Concluído: [CQRS_FFCLRP.R39PGMORIDOC] -> Nenhum órfão encontrado. Sincronia perfeita em 526.73 ms
+
+ [09:52:40] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.R10DOCCOOCUR] via PKs [codcur + codpes + dtainifnc]
+ [09:52:40] Concluído: [CQRS_FFCLRP.R10DOCCOOCUR] -> Nenhum órfão encontrado. Sincronia perfeita em 255.87 ms
+
+ [09:52:40] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.QUALIFICACAO] via PKs [codare + codpes + numseqpgm + nivpgm + numseqqua]
+ [09:52:40] Concluído: [CQRS_FFCLRP.QUALIFICACAO] -> Nenhum órfão encontrado. Sincronia perfeita em 135.74 ms
+
+ [09:52:40] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.VINCULOPESSOAUSP] via PKs [codpes + numseqpes + tipvin]
+ [09:52:41] Concluído: [CQRS_FFCLRP.VINCULOPESSOAUSP] -> Nenhum órfão encontrado. Sincronia perfeita em 1252.43 ms
+
+ [09:52:41] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.R48PGMTRBDOC] via PKs [codpesdct + codare + codpes + numseqpgm + numseqptpban]
+ [09:52:43] Concluído: [CQRS_FFCLRP.R48PGMTRBDOC] -> Nenhum órfão encontrado. Sincronia perfeita em 1215 ms
+
+ [09:52:43] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.AGPROGRAMA] via PKs [codare + codpes + numseqpgm]
+ [09:52:43] Concluído: [CQRS_FFCLRP.AGPROGRAMA] -> Nenhum órfão encontrado. Sincronia perfeita em 289.23 ms
+
+ [09:52:43] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.CREDAREA] via PKs [codare + nivare]
+ [09:52:43] Concluído: [CQRS_FFCLRP.CREDAREA] -> Nenhum órfão encontrado. Sincronia perfeita em 28.7 ms
+
+ [09:52:43] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.EMAILPESSOA] via PKs [codpes + numseqema]
+ [09:52:45] Concluído: [CQRS_FFCLRP.EMAILPESSOA] -> Nenhum órfão encontrado. Sincronia perfeita em 1864.83 ms
+
+ [09:52:45] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.CURSO] via PKs [codcur]
+ [09:52:45] Concluído: [CQRS_FFCLRP.CURSO] -> Nenhum órfão encontrado. Sincronia perfeita em 16.86 ms
+
+ [09:52:45] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.AGPROGRAMA] via PKs [codare + codpes + numseqpgm]
+ [09:52:45] Concluído: [CQRS_FFCLRP.AGPROGRAMA] -> Nenhum órfão encontrado. Sincronia perfeita em 392.02 ms
+ [✔ 09:52:45] Ciclo de limpeza finalizado em 10164.75 ms.
+
+
+ [09:52:55] Alocando pipeline incremental para: [CQRS_Dados_hp.Posgraduacoes]
+  ├── Sincronizando: [Dados_hp].[Posgraduacoes] -> [CQRS_Dados_hp].[Posgraduacoes]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 66.44ms
+ [09:52:55] Concluído: [CQRS_Dados_hp.Posgraduacoes] em 66.51 ms
+
+ [09:52:55] Alocando pipeline incremental para: [CQRS_Dados_hp.PosGraduacoesBibliografias]
+  ├── Sincronizando: [Dados_hp].[PosGraduacoesBibliografias] -> [CQRS_Dados_hp].[PosGraduacoesBibliografias]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 173.16ms
+ [09:52:56] Concluído: [CQRS_Dados_hp.PosGraduacoesBibliografias] em 173.22 ms
+
+ [09:52:56] Alocando pipeline incremental para: [CQRS_Dados_hp.PosgraduacoesAlunosesp]
+  ├── Sincronizando: [Dados_hp].[PosgraduacoesAlunosesp] -> [CQRS_Dados_hp].[PosgraduacoesAlunosesp]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 224.11ms
+ [09:52:56] Concluído: [CQRS_Dados_hp.PosgraduacoesAlunosesp] em 224.26 ms
+
+ [09:52:56] Alocando pipeline incremental para: [CQRS_Dados_hp.PosGraduacoesDocumentacao]
+  ├── Sincronizando: [Dados_hp].[PosGraduacoesDocumentacao] -> [CQRS_Dados_hp].[PosGraduacoesDocumentacao]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 327.58ms
+ [09:52:56] Concluído: [CQRS_Dados_hp.PosGraduacoesDocumentacao] em 327.75 ms
+
+ [09:52:56] Alocando pipeline incremental para: [CQRS_Dados_hp.PosGraduacoesNormasGerais]
+  ├── Sincronizando: [Dados_hp].[PosGraduacoesNormasGerais] -> [CQRS_Dados_hp].[PosGraduacoesNormasGerais]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 134.62ms
+ [09:52:56] Concluído: [CQRS_Dados_hp.PosGraduacoesNormasGerais] em 134.71 ms
+
+ [09:52:56] Alocando pipeline incremental para: [CQRS_Dados_pg.linhapesq]
+  ├── Sincronizando: [Dados_pg].[linhapesq] -> [CQRS_Dados_pg].[linhapesq]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 136.57ms
+ [09:52:56] Concluído: [CQRS_Dados_pg.linhapesq] em 136.66 ms
+
+ [09:52:56] Alocando pipeline incremental para: [CQRS_Dados_pg.secretarias]
+  ├── Sincronizando: [Dados_pg].[secretarias] -> [CQRS_Dados_pg].[secretarias]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 45.89ms
+ [09:52:57] Concluído: [CQRS_Dados_pg.secretarias] em 45.97 ms
+
+ [09:52:57] Alocando pipeline incremental para: [CQRS_Dados_pg.exameSelecaoPosGraduacao]
+  ├── Sincronizando: [Dados_pg].[exameSelecaoPosGraduacao] -> [CQRS_Dados_pg].[exameSelecaoPosGraduacao]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 68.64ms
+ [09:52:57] Concluído: [CQRS_Dados_pg.exameSelecaoPosGraduacao] em 68.73 ms
+
+ [09:52:57] Alocando pipeline incremental para: [CQRS_Wffclrp.noticias]
+  ├── Sincronizando: [Wffclrp].[noticias] -> [CQRS_Wffclrp].[noticias]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 527.26ms
+ [09:52:57] Concluído: [CQRS_Wffclrp.noticias] em 527.49 ms
+
+ [09:52:57] Alocando pipeline incremental para: [CQRS_Wffclrp.noticias_categorias]
+  ├── Sincronizando: [Wffclrp].[noticias_categorias] -> [CQRS_Wffclrp].[noticias_categorias]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 57ms
+ [09:52:57] Concluído: [CQRS_Wffclrp.noticias_categorias] em 57.08 ms
+
+ [09:52:57] Alocando pipeline incremental para: [CQRS_Wffclrp.defesas]
+  ├── Sincronizando: [Wffclrp].[defesas] -> [CQRS_Wffclrp].[defesas]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 66.16ms
+ [09:52:57] Concluído: [CQRS_Wffclrp.defesas] em 66.28 ms
+
+ [09:52:57] Alocando pipeline incremental para: [CQRS_Wffclrp.defesas_defendidas]
+  ├── Sincronizando: [Wffclrp].[defesas_defendidas] -> [CQRS_Wffclrp].[defesas_defendidas]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 2080.29ms
+ [09:52:59] Concluído: [CQRS_Wffclrp.defesas_defendidas] em 2080.58 ms
+
+ [09:52:59] Alocando pipeline incremental para: [CQRS_Wffclrp.blocos_old]
+  ├── Sincronizando: [Wffclrp].[blocos_old] -> [CQRS_Wffclrp].[blocos_old]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 98.75ms
+ [09:52:59] Concluído: [CQRS_Wffclrp.blocos_old] em 98.85 ms
+
+ [09:52:59] Alocando pipeline incremental para: [CQRS_Wffclrp.salas_old]
+  ├── Sincronizando: [Wffclrp].[salas_old] -> [CQRS_Wffclrp].[salas_old]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 98.13ms
+ [09:53:00] Concluído: [CQRS_Wffclrp.salas_old] em 98.23 ms
+
+ [09:53:00] Alocando pipeline incremental para: [CQRS_Wffclrp.editais]
+  ├── Sincronizando: [Wffclrp].[editais] -> [CQRS_Wffclrp].[editais]
+ [09:53:00] Concluído: [CQRS_Wffclrp.editais] em 35.94 ms
+
+ [09:53:00] Alocando pipeline incremental para: [CQRS_Wffclrp.editais_categorias]
+  ├── Sincronizando: [Wffclrp].[editais_categorias] -> [CQRS_Wffclrp].[editais_categorias]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 43.98ms
+ [09:53:00] Concluído: [CQRS_Wffclrp.editais_categorias] em 44.12 ms
+
+ [09:53:00] Alocando pipeline incremental para: [CQRS_Wffclrp.formularios]
+  ├── Sincronizando: [Wffclrp].[formularios] -> [CQRS_Wffclrp].[formularios]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 397.79ms
+ [09:53:00] Concluído: [CQRS_Wffclrp.formularios] em 397.93 ms
+
+ [09:53:00] Alocando pipeline incremental para: [CQRS_Libra.indexadorPortalProducoesCientificas]
+  ├── Sincronizando: [Libra].[indexadorPortalProducoesCientificas] -> [CQRS_Libra].[indexadorPortalProducoesCientificas]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 205.74ms
+ [09:53:00] Concluído: [CQRS_Libra.indexadorPortalProducoesCientificas] em 205.81 ms
+
+ [09:53:00] Alocando pipeline incremental para: [CQRS_Libra.idioma]
+  ├── Sincronizando: [Libra].[idioma] -> [CQRS_Libra].[idioma]
+ [09:53:00] Concluído: [CQRS_Libra.idioma] em 22.07 ms
+
+ [09:53:00] Alocando pipeline incremental para: [CQRS_Libra.CVLATTES]
+  ├── Sincronizando: [Libra].[CVLATTES] -> [CQRS_Libra].[CVLATTES]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 8605.24ms
+ [09:53:09] Concluído: [CQRS_Libra.CVLATTES] em 8605.36 ms
+
+ [09:53:09] Alocando pipeline incremental para: [CQRS_Libra.FormsOnline]
+  ├── Sincronizando: [Libra].[FormsOnline] -> [CQRS_Libra].[FormsOnline]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 3 em 106.83ms
+ [09:53:09] Concluído: [CQRS_Libra.FormsOnline] em 119.62 ms
+
+ [09:53:09] Alocando pipeline incremental para: [CQRS_Libra.idiomaOferecimentoDisciplina]
+  ├── Sincronizando: [Libra].[idiomaOferecimentoDisciplina] -> [CQRS_Libra].[idiomaOferecimentoDisciplina]
+ [09:53:09] Concluído: [CQRS_Libra.idiomaOferecimentoDisciplina] em 44.87 ms
+
+ [09:53:09] Alocando pipeline incremental para: [CQRS_FFCLRP.R25CRECREDOC]
+  ├── Sincronizando: [FFCLRP].[R25CRECREDOC] -> [CQRS_FFCLRP].[R25CRECREDOC]
+ [09:53:09] Concluído: [CQRS_FFCLRP.R25CRECREDOC] em 43.07 ms
+
+ [09:53:09] Alocando pipeline incremental para: [CQRS_FFCLRP.PESSOA]
+  ├── Sincronizando: [FFCLRP].[PESSOA] -> [CQRS_FFCLRP].[PESSOA]
+ [09:53:09] Concluído: [CQRS_FFCLRP.PESSOA] em 66.06 ms
+
+ [09:53:09] Alocando pipeline incremental para: [CQRS_FFCLRP.AREA]
+  ├── Sincronizando: [FFCLRP].[AREA] -> [CQRS_FFCLRP].[AREA]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 802.68ms
+ [09:53:10] Concluído: [CQRS_FFCLRP.AREA] em 802.9 ms
+
+ [09:53:10] Alocando pipeline incremental para: [CQRS_FFCLRP.NOMECURSO]
+  ├── Sincronizando: [FFCLRP].[NOMECURSO] -> [CQRS_FFCLRP].[NOMECURSO]
+ [09:53:10] Concluído: [CQRS_FFCLRP.NOMECURSO] em 79.93 ms
+
+ [09:53:10] Alocando pipeline incremental para: [CQRS_FFCLRP.NOMEAREA]
+  ├── Sincronizando: [FFCLRP].[NOMEAREA] -> [CQRS_FFCLRP].[NOMEAREA]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 1211.67ms
+ [09:53:11] Concluído: [CQRS_FFCLRP.NOMEAREA] em 1211.77 ms
+
+ [09:53:11] Alocando pipeline incremental para: [CQRS_FFCLRP.DISCIPLINA]
+  ├── Sincronizando: [FFCLRP].[DISCIPLINA] -> [CQRS_FFCLRP].[DISCIPLINA]
+ [09:53:11] Concluído: [CQRS_FFCLRP.DISCIPLINA] em 46.49 ms
+
+ [09:53:11] Alocando pipeline incremental para: [CQRS_FFCLRP.OFERECIMENTO]
+  ├── Sincronizando: [FFCLRP].[OFERECIMENTO] -> [CQRS_FFCLRP].[OFERECIMENTO]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 7946.17ms
+ [09:53:19] Concluído: [CQRS_FFCLRP.OFERECIMENTO] em 7946.31 ms
+
+ [09:53:19] Alocando pipeline incremental para: [CQRS_FFCLRP.ESPACOTURMA]
+  ├── Sincronizando: [FFCLRP].[ESPACOTURMA] -> [CQRS_FFCLRP].[ESPACOTURMA]
+ [09:53:19] Concluído: [CQRS_FFCLRP.ESPACOTURMA] em 42.6 ms
+
+ [09:53:19] Alocando pipeline incremental para: [CQRS_FFCLRP.R32TURMINDOC]
+  ├── Sincronizando: [FFCLRP].[R32TURMINDOC] -> [CQRS_FFCLRP].[R32TURMINDOC]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 10848.28ms
+ [09:53:30] Concluído: [CQRS_FFCLRP.R32TURMINDOC] em 10848.35 ms
+
+ [09:53:30] Alocando pipeline incremental para: [CQRS_FFCLRP.R27DISMINCRE]
+  ├── Sincronizando: [FFCLRP].[R27DISMINCRE] -> [CQRS_FFCLRP].[R27DISMINCRE]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 2779.19ms
+ [09:53:33] Concluído: [CQRS_FFCLRP.R27DISMINCRE] em 2779.48 ms
+
+ [09:53:33] Alocando pipeline incremental para: [CQRS_FFCLRP.R39PGMORIDOC]
+  ├── Sincronizando: [FFCLRP].[R39PGMORIDOC] -> [CQRS_FFCLRP].[R39PGMORIDOC]
+ [09:53:33] Concluído: [CQRS_FFCLRP.R39PGMORIDOC] em 46.44 ms
+
+ [09:53:33] Alocando pipeline incremental para: [CQRS_FFCLRP.R10DOCCOOCUR]
+  ├── Sincronizando: [FFCLRP].[R10DOCCOOCUR] -> [CQRS_FFCLRP].[R10DOCCOOCUR]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 4048.84ms
+ [09:53:37] Concluído: [CQRS_FFCLRP.R10DOCCOOCUR] em 4048.9 ms
+
+ [09:53:37] Alocando pipeline incremental para: [CQRS_FFCLRP.QUALIFICACAO]
+  ├── Sincronizando: [FFCLRP].[QUALIFICACAO] -> [CQRS_FFCLRP].[QUALIFICACAO]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 3260.14ms
+ [09:53:40] Concluído: [CQRS_FFCLRP.QUALIFICACAO] em 3260.31 ms
+
+ [09:53:40] Alocando pipeline incremental para: [CQRS_FFCLRP.VINCULOPESSOAUSP]
+  ├── Sincronizando: [FFCLRP].[VINCULOPESSOAUSP] -> [CQRS_FFCLRP].[VINCULOPESSOAUSP]
+ [09:53:40] Concluído: [CQRS_FFCLRP.VINCULOPESSOAUSP] em 56.73 ms
+
+ [09:53:50] Alocando pipeline incremental para: [CQRS_Dados_pg.orientadores]
+  ├── Sincronizando: [Dados_pg].[orientadores] -> [CQRS_Dados_pg].[orientadores]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 425.43ms
+ [09:53:51] Concluído: [CQRS_Dados_pg.orientadores] em 425.57 ms
+
+ [09:53:51] Alocando pipeline incremental para: [CQRS_Dados_pg.orientadores_linhaspesq]
+  ├── Sincronizando: [Dados_pg].[orientadores_linhaspesq] -> [CQRS_Dados_pg].[orientadores_linhaspesq]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 300.95ms
+ [09:53:51] Concluído: [CQRS_Dados_pg.orientadores_linhaspesq] em 301.04 ms
+
+ [09:53:51] Alocando pipeline incremental para: [CQRS_Dados_pg.uploads]
+  ├── Sincronizando: [Dados_pg].[uploads] -> [CQRS_Dados_pg].[uploads]
+ [09:53:51] Concluído: [CQRS_Dados_pg.uploads] em 32.27 ms
+
+ [09:53:51] Alocando pipeline incremental para: [CQRS_Dados_pg.areas]
+  ├── Sincronizando: [Dados_pg].[areas] -> [CQRS_Dados_pg].[areas]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 63.27ms
+ [09:53:51] Concluído: [CQRS_Dados_pg.areas] em 63.35 ms
+
+ [09:53:51] Alocando pipeline incremental para: [CQRS_Dados_pg.programas]
+  ├── Sincronizando: [Dados_pg].[programas] -> [CQRS_Dados_pg].[programas]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 54.23ms
+ [09:53:51] Concluído: [CQRS_Dados_pg.programas] em 54.33 ms
+
+ [09:53:51] Alocando pipeline incremental para: [CQRS_FFCLRP.R48PGMTRBDOC]
+  ├── Sincronizando: [FFCLRP].[R48PGMTRBDOC] -> [CQRS_FFCLRP].[R48PGMTRBDOC]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 30785.3ms
+ [09:54:22] Concluído: [CQRS_FFCLRP.R48PGMTRBDOC] em 30785.49 ms
+
+ [09:54:22] Alocando pipeline incremental para: [CQRS_FFCLRP.AGPROGRAMA]
+  ├── Sincronizando: [FFCLRP].[AGPROGRAMA] -> [CQRS_FFCLRP].[AGPROGRAMA]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 13671.85ms
+ [09:54:36] Concluído: [CQRS_FFCLRP.AGPROGRAMA] em 13672.23 ms
+
+ [09:54:36] Alocando pipeline incremental para: [CQRS_FFCLRP.CREDAREA]
+  ├── Sincronizando: [FFCLRP].[CREDAREA] -> [CQRS_FFCLRP].[CREDAREA]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 1140.96ms
+ [09:54:37] Concluído: [CQRS_FFCLRP.CREDAREA] em 1141.16 ms
+
+ [09:54:37] Alocando pipeline incremental para: [CQRS_FFCLRP.EMAILPESSOA]
+  ├── Sincronizando: [FFCLRP].[EMAILPESSOA] -> [CQRS_FFCLRP].[EMAILPESSOA]
+ [09:54:37] Concluído: [CQRS_FFCLRP.EMAILPESSOA] em 52.13 ms
+
+ [09:54:37] Alocando pipeline incremental para: [CQRS_FFCLRP.CURSO]
+  ├── Sincronizando: [FFCLRP].[CURSO] -> [CQRS_FFCLRP].[CURSO]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 639.5ms
+ [09:54:37] Concluído: [CQRS_FFCLRP.CURSO] em 639.77 ms
+
+
+ [⚠️ 09:54:37] ALERTA DE CRON: Disparando ciclo global de limpeza de registros órfãos...
+
+ [09:54:37] Iniciando auditoria de órfãos em: [CQRS_Dados_hp.Posgraduacoes] via PKs [Id]
+ [09:54:37] Concluído: [CQRS_Dados_hp.Posgraduacoes] -> Nenhum órfão encontrado. Sincronia perfeita em 7.93 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Dados_hp.PosGraduacoesBibliografias] via PKs [Id]
+ [09:54:38] Concluído: [CQRS_Dados_hp.PosGraduacoesBibliografias] -> Nenhum órfão encontrado. Sincronia perfeita em 8.47 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Dados_hp.PosgraduacoesAlunosesp] via PKs [Id]
+ [09:54:38] Concluído: [CQRS_Dados_hp.PosgraduacoesAlunosesp] -> Nenhum órfão encontrado. Sincronia perfeita em 9.06 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Dados_hp.PosGraduacoesDocumentacao] via PKs [Id]
+ [09:54:38] Concluído: [CQRS_Dados_hp.PosGraduacoesDocumentacao] -> Nenhum órfão encontrado. Sincronia perfeita em 11.03 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Dados_hp.PosGraduacoesNormasGerais] via PKs [Id]
+ [09:54:38] Concluído: [CQRS_Dados_hp.PosGraduacoesNormasGerais] -> Nenhum órfão encontrado. Sincronia perfeita em 10.52 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.orientadores] via PKs [area + codusp]
+ [09:54:38] Concluído: [CQRS_Dados_pg.orientadores] -> Nenhum órfão encontrado. Sincronia perfeita em 18.8 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.orientadores_linhaspesq] via PKs [area + codusp + linhapesquisa_id]
+ [09:54:38] Concluído: [CQRS_Dados_pg.orientadores_linhaspesq] -> Nenhum órfão encontrado. Sincronia perfeita em 11.85 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.linhapesq] via PKs [id]
+ [09:54:38] Concluído: [CQRS_Dados_pg.linhapesq] -> Nenhum órfão encontrado. Sincronia perfeita em 10.81 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.secretarias] via PKs [id]
+ [09:54:38] Concluído: [CQRS_Dados_pg.secretarias] -> Nenhum órfão encontrado. Sincronia perfeita em 8.18 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.uploads] via PKs [id]
+ [09:54:38] Concluído: [CQRS_Dados_pg.uploads] -> Nenhum órfão encontrado. Sincronia perfeita em 14.85 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.exameSelecaoPosGraduacao] via PKs [codPPG + nga + codIdi]
+ [09:54:38] Concluído: [CQRS_Dados_pg.exameSelecaoPosGraduacao] -> Nenhum órfão encontrado. Sincronia perfeita em 8.96 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.areas] via PKs [codare]
+ [09:54:38] Concluído: [CQRS_Dados_pg.areas] -> Nenhum órfão encontrado. Sincronia perfeita em 9.24 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.programas] via PKs [codcur]
+ [09:54:38] Concluído: [CQRS_Dados_pg.programas] -> Nenhum órfão encontrado. Sincronia perfeita em 6.99 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.noticias] via PKs [id]
+ [09:54:38] Concluído: [CQRS_Wffclrp.noticias] -> Nenhum órfão encontrado. Sincronia perfeita em 15.13 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.noticias_categorias] via PKs [id]
+ [09:54:38] Concluído: [CQRS_Wffclrp.noticias_categorias] -> Nenhum órfão encontrado. Sincronia perfeita em 10.32 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.defesas] via PKs [id]
+ [09:54:38] Concluído: [CQRS_Wffclrp.defesas] -> Nenhum órfão encontrado. Sincronia perfeita em 6.98 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.defesas_defendidas] via PKs [id]
+ [09:54:38] Concluído: [CQRS_Wffclrp.defesas_defendidas] -> Nenhum órfão encontrado. Sincronia perfeita em 30.89 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.blocos_old] via PKs [id]
+ [09:54:38] Concluído: [CQRS_Wffclrp.blocos_old] -> Nenhum órfão encontrado. Sincronia perfeita em 8.07 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.salas_old] via PKs [id]
+ [09:54:38] Concluído: [CQRS_Wffclrp.salas_old] -> Nenhum órfão encontrado. Sincronia perfeita em 7.99 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.editais] via PKs [id]
+ [09:54:38] Concluído: [CQRS_Wffclrp.editais] -> Nenhum órfão encontrado. Sincronia perfeita em 9.6 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.editais_categorias] via PKs [id]
+ [09:54:38] Concluído: [CQRS_Wffclrp.editais_categorias] -> Nenhum órfão encontrado. Sincronia perfeita em 10.43 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.formularios] via PKs [id]
+ [09:54:38] Concluído: [CQRS_Wffclrp.formularios] -> Nenhum órfão encontrado. Sincronia perfeita em 12.58 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Libra.indexadorPortalProducoesCientificas] via PKs [nUSP]
+ [09:54:38] Concluído: [CQRS_Libra.indexadorPortalProducoesCientificas] -> Nenhum órfão encontrado. Sincronia perfeita em 13.46 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Libra.idioma] via PKs [codIdi]
+ [09:54:38] Concluído: [CQRS_Libra.idioma] -> Nenhum órfão encontrado. Sincronia perfeita em 9.83 ms
+
+ [09:54:38] Iniciando auditoria de órfãos em: [CQRS_Libra.CVLATTES] via PKs [codpes]
+ [09:54:39] Concluído: [CQRS_Libra.CVLATTES] -> Nenhum órfão encontrado. Sincronia perfeita em 231.99 ms
+
+ [09:54:39] Iniciando auditoria de órfãos em: [CQRS_Libra.FormsOnline] via PKs [codform]
+ [09:54:39] Concluído: [CQRS_Libra.FormsOnline] -> Nenhum órfão encontrado. Sincronia perfeita em 9.69 ms
+
+ [09:54:39] Iniciando auditoria de órfãos em: [CQRS_Libra.idiomaOferecimentoDisciplina] via PKs [codIdi + codOfe + codDisc + codSeqDisc + codUnddUnvsdd]
+ [09:54:39] Concluído: [CQRS_Libra.idiomaOferecimentoDisciplina] -> Nenhum órfão encontrado. Sincronia perfeita em 7.84 ms
+
+ [09:54:39] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.R25CRECREDOC] via PKs [codare + nivare + codpes + dtavalini + tiport]
+ [09:54:39] Concluído: [CQRS_FFCLRP.R25CRECREDOC] -> Nenhum órfão encontrado. Sincronia perfeita em 66.48 ms
+
+ [09:54:39] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.PESSOA] via PKs [codpes]
+ [09:54:39] Concluído: [CQRS_FFCLRP.PESSOA] -> Nenhum órfão encontrado. Sincronia perfeita em 379.29 ms
+
+ [09:54:39] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.AREA] via PKs [codare]
+ [09:54:39] Concluído: [CQRS_FFCLRP.AREA] -> Nenhum órfão encontrado. Sincronia perfeita em 9.68 ms
+
+ [09:54:39] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.NOMECURSO] via PKs [codcur + dtainicur]
+ [09:54:39] Concluído: [CQRS_FFCLRP.NOMECURSO] -> Nenhum órfão encontrado. Sincronia perfeita em 9 ms
+
+ [09:54:39] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.NOMEAREA] via PKs [codare + dtainiare]
+ [09:54:39] Concluído: [CQRS_FFCLRP.NOMEAREA] -> Nenhum órfão encontrado. Sincronia perfeita em 22.13 ms
+
+ [09:54:39] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.DISCIPLINA] via PKs [sgldis + numseqdis]
+ [09:54:39] Concluído: [CQRS_FFCLRP.DISCIPLINA] -> Nenhum órfão encontrado. Sincronia perfeita em 10.82 ms
+
+ [09:54:39] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.OFERECIMENTO] via PKs [sgldis + numseqdis + numofe]
+ [09:54:39] Concluído: [CQRS_FFCLRP.OFERECIMENTO] -> Nenhum órfão encontrado. Sincronia perfeita em 169.7 ms
+
+ [09:54:39] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.ESPACOTURMA] via PKs [sgldis + numseqdis + numofe + diasmnofe + horiniofe]
+ [09:54:39] Concluído: [CQRS_FFCLRP.ESPACOTURMA] -> Nenhum órfão encontrado. Sincronia perfeita em 9.42 ms
+
+ [09:54:39] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.R32TURMINDOC] via PKs [codpes + sgldis + numseqdis + numofe]
+ [09:54:40] Concluído: [CQRS_FFCLRP.R32TURMINDOC] -> Nenhum órfão encontrado. Sincronia perfeita em 161.77 ms
+
+ [09:54:40] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.R27DISMINCRE] via PKs [codare + nivare + sgldis + numseqdis + dtaatvdis]
+ [09:54:40] Concluído: [CQRS_FFCLRP.R27DISMINCRE] -> Nenhum órfão encontrado. Sincronia perfeita em 89.19 ms
+
+ [09:54:40] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.R39PGMORIDOC] via PKs [codpes + codare + codpespgm + numseqpgm + dtainiort]
+ [09:54:40] Concluído: [CQRS_FFCLRP.R39PGMORIDOC] -> Nenhum órfão encontrado. Sincronia perfeita em 158.89 ms
+
+ [09:54:40] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.R10DOCCOOCUR] via PKs [codcur + codpes + dtainifnc]
+ [09:54:40] Concluído: [CQRS_FFCLRP.R10DOCCOOCUR] -> Nenhum órfão encontrado. Sincronia perfeita em 95.94 ms
+
+ [09:54:40] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.QUALIFICACAO] via PKs [codare + codpes + numseqpgm + nivpgm + numseqqua]
+ [09:54:40] Concluído: [CQRS_FFCLRP.QUALIFICACAO] -> Nenhum órfão encontrado. Sincronia perfeita em 62.75 ms
+
+ [09:54:40] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.VINCULOPESSOAUSP] via PKs [codpes + numseqpes + tipvin]
+ [09:54:40] Concluído: [CQRS_FFCLRP.VINCULOPESSOAUSP] -> Nenhum órfão encontrado. Sincronia perfeita em 270.28 ms
+
+ [09:54:40] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.R48PGMTRBDOC] via PKs [codpesdct + codare + codpes + numseqpgm + numseqptpban]
+ [09:54:41] Concluído: [CQRS_FFCLRP.R48PGMTRBDOC] -> Nenhum órfão encontrado. Sincronia perfeita em 520.99 ms
+
+ [09:54:41] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.AGPROGRAMA] via PKs [codare + codpes + numseqpgm]
+ [09:54:41] Concluído: [CQRS_FFCLRP.AGPROGRAMA] -> Nenhum órfão encontrado. Sincronia perfeita em 174.34 ms
+
+ [09:54:41] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.CREDAREA] via PKs [codare + nivare]
+ [09:54:41] Concluído: [CQRS_FFCLRP.CREDAREA] -> Nenhum órfão encontrado. Sincronia perfeita em 12.72 ms
+
+ [09:54:41] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.EMAILPESSOA] via PKs [codpes + numseqema]
+ [09:54:42] Concluído: [CQRS_FFCLRP.EMAILPESSOA] -> Nenhum órfão encontrado. Sincronia perfeita em 884.41 ms
+
+ [09:54:42] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.CURSO] via PKs [codcur]
+ [09:54:42] Concluído: [CQRS_FFCLRP.CURSO] -> Nenhum órfão encontrado. Sincronia perfeita em 13.33 ms
+
+ [09:54:42] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.AGPROGRAMA] via PKs [codare + codpes + numseqpgm]
+ [09:54:42] Concluído: [CQRS_FFCLRP.AGPROGRAMA] -> Nenhum órfão encontrado. Sincronia perfeita em 181.85 ms
+ [✔ 09:54:42] Ciclo de limpeza finalizado em 4972.92 ms.
+
+
+ [09:54:52] Alocando pipeline incremental para: [CQRS_Dados_hp.Posgraduacoes]
+  ├── Sincronizando: [Dados_hp].[Posgraduacoes] -> [CQRS_Dados_hp].[Posgraduacoes]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 120.21ms
+ [09:54:53] Concluído: [CQRS_Dados_hp.Posgraduacoes] em 120.29 ms
+
+ [09:54:53] Alocando pipeline incremental para: [CQRS_Dados_hp.PosGraduacoesBibliografias]
+  ├── Sincronizando: [Dados_hp].[PosGraduacoesBibliografias] -> [CQRS_Dados_hp].[PosGraduacoesBibliografias]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 66.15ms
+ [09:54:53] Concluído: [CQRS_Dados_hp.PosGraduacoesBibliografias] em 66.23 ms
+
+ [09:54:53] Alocando pipeline incremental para: [CQRS_Dados_hp.PosgraduacoesAlunosesp]
+  ├── Sincronizando: [Dados_hp].[PosgraduacoesAlunosesp] -> [CQRS_Dados_hp].[PosgraduacoesAlunosesp]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 175.53ms
+ [09:54:53] Concluído: [CQRS_Dados_hp.PosgraduacoesAlunosesp] em 175.66 ms
+
+ [09:54:53] Alocando pipeline incremental para: [CQRS_Dados_hp.PosGraduacoesDocumentacao]
+  ├── Sincronizando: [Dados_hp].[PosGraduacoesDocumentacao] -> [CQRS_Dados_hp].[PosGraduacoesDocumentacao]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 338.14ms
+ [09:54:53] Concluído: [CQRS_Dados_hp.PosGraduacoesDocumentacao] em 338.28 ms
+
+ [09:54:53] Alocando pipeline incremental para: [CQRS_Dados_hp.PosGraduacoesNormasGerais]
+  ├── Sincronizando: [Dados_hp].[PosGraduacoesNormasGerais] -> [CQRS_Dados_hp].[PosGraduacoesNormasGerais]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 115.35ms
+ [09:54:53] Concluído: [CQRS_Dados_hp.PosGraduacoesNormasGerais] em 115.48 ms
+
+ [09:54:53] Alocando pipeline incremental para: [CQRS_Dados_pg.linhapesq]
+  ├── Sincronizando: [Dados_pg].[linhapesq] -> [CQRS_Dados_pg].[linhapesq]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 164.32ms
+ [09:54:53] Concluído: [CQRS_Dados_pg.linhapesq] em 164.46 ms
+
+ [09:54:53] Alocando pipeline incremental para: [CQRS_Dados_pg.secretarias]
+  ├── Sincronizando: [Dados_pg].[secretarias] -> [CQRS_Dados_pg].[secretarias]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 41.96ms
+ [09:54:54] Concluído: [CQRS_Dados_pg.secretarias] em 42.04 ms
+
+ [09:54:54] Alocando pipeline incremental para: [CQRS_Dados_pg.exameSelecaoPosGraduacao]
+  ├── Sincronizando: [Dados_pg].[exameSelecaoPosGraduacao] -> [CQRS_Dados_pg].[exameSelecaoPosGraduacao]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 76ms
+ [09:54:54] Concluído: [CQRS_Dados_pg.exameSelecaoPosGraduacao] em 76.06 ms
+
+ [09:54:54] Alocando pipeline incremental para: [CQRS_Wffclrp.noticias]
+  ├── Sincronizando: [Wffclrp].[noticias] -> [CQRS_Wffclrp].[noticias]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 490.85ms
+ [09:54:54] Concluído: [CQRS_Wffclrp.noticias] em 491.11 ms
+
+ [09:54:54] Alocando pipeline incremental para: [CQRS_Wffclrp.noticias_categorias]
+  ├── Sincronizando: [Wffclrp].[noticias_categorias] -> [CQRS_Wffclrp].[noticias_categorias]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 44.98ms
+ [09:54:54] Concluído: [CQRS_Wffclrp.noticias_categorias] em 45.05 ms
+
+ [09:54:54] Alocando pipeline incremental para: [CQRS_Wffclrp.defesas]
+  ├── Sincronizando: [Wffclrp].[defesas] -> [CQRS_Wffclrp].[defesas]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 74.07ms
+ [09:54:54] Concluído: [CQRS_Wffclrp.defesas] em 74.18 ms
+
+ [09:54:54] Alocando pipeline incremental para: [CQRS_Wffclrp.defesas_defendidas]
+  ├── Sincronizando: [Wffclrp].[defesas_defendidas] -> [CQRS_Wffclrp].[defesas_defendidas]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 2646.35ms
+ [09:54:57] Concluído: [CQRS_Wffclrp.defesas_defendidas] em 2646.9 ms
+
+ [09:54:57] Alocando pipeline incremental para: [CQRS_Wffclrp.blocos_old]
+  ├── Sincronizando: [Wffclrp].[blocos_old] -> [CQRS_Wffclrp].[blocos_old]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 123.78ms
+ [09:54:57] Concluído: [CQRS_Wffclrp.blocos_old] em 123.86 ms
+
+ [09:54:57] Alocando pipeline incremental para: [CQRS_Wffclrp.salas_old]
+  ├── Sincronizando: [Wffclrp].[salas_old] -> [CQRS_Wffclrp].[salas_old]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 86.4ms
+ [09:54:57] Concluído: [CQRS_Wffclrp.salas_old] em 86.47 ms
+
+ [09:54:57] Alocando pipeline incremental para: [CQRS_Wffclrp.editais]
+  ├── Sincronizando: [Wffclrp].[editais] -> [CQRS_Wffclrp].[editais]
+ [09:54:57] Concluído: [CQRS_Wffclrp.editais] em 36.14 ms
+
+ [09:54:57] Alocando pipeline incremental para: [CQRS_Wffclrp.editais_categorias]
+  ├── Sincronizando: [Wffclrp].[editais_categorias] -> [CQRS_Wffclrp].[editais_categorias]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 42.31ms
+ [09:54:57] Concluído: [CQRS_Wffclrp.editais_categorias] em 42.37 ms
+
+ [09:54:57] Alocando pipeline incremental para: [CQRS_Wffclrp.formularios]
+  ├── Sincronizando: [Wffclrp].[formularios] -> [CQRS_Wffclrp].[formularios]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 405.35ms
+ [09:54:58] Concluído: [CQRS_Wffclrp.formularios] em 405.48 ms
+
+ [09:54:58] Alocando pipeline incremental para: [CQRS_Libra.indexadorPortalProducoesCientificas]
+  ├── Sincronizando: [Libra].[indexadorPortalProducoesCientificas] -> [CQRS_Libra].[indexadorPortalProducoesCientificas]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 247.54ms
+ [09:54:58] Concluído: [CQRS_Libra.indexadorPortalProducoesCientificas] em 247.66 ms
+
+ [09:54:58] Alocando pipeline incremental para: [CQRS_Libra.idioma]
+  ├── Sincronizando: [Libra].[idioma] -> [CQRS_Libra].[idioma]
+ [09:54:58] Concluído: [CQRS_Libra.idioma] em 39.48 ms
+
+ [09:54:58] Alocando pipeline incremental para: [CQRS_Libra.CVLATTES]
+  ├── Sincronizando: [Libra].[CVLATTES] -> [CQRS_Libra].[CVLATTES]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 7864.03ms
+ [09:55:06] Concluído: [CQRS_Libra.CVLATTES] em 7864.09 ms
+
+ [09:55:06] Alocando pipeline incremental para: [CQRS_Libra.FormsOnline]
+  ├── Sincronizando: [Libra].[FormsOnline] -> [CQRS_Libra].[FormsOnline]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 3 em 73.64ms
+ [09:55:06] Concluído: [CQRS_Libra.FormsOnline] em 88.91 ms
+
+ [09:55:06] Alocando pipeline incremental para: [CQRS_Libra.idiomaOferecimentoDisciplina]
+  ├── Sincronizando: [Libra].[idiomaOferecimentoDisciplina] -> [CQRS_Libra].[idiomaOferecimentoDisciplina]
+ [09:55:06] Concluído: [CQRS_Libra.idiomaOferecimentoDisciplina] em 22.47 ms
+
+ [09:55:06] Alocando pipeline incremental para: [CQRS_FFCLRP.R25CRECREDOC]
+  ├── Sincronizando: [FFCLRP].[R25CRECREDOC] -> [CQRS_FFCLRP].[R25CRECREDOC]
+ [09:55:06] Concluído: [CQRS_FFCLRP.R25CRECREDOC] em 22.59 ms
+
+ [09:55:06] Alocando pipeline incremental para: [CQRS_FFCLRP.PESSOA]
+  ├── Sincronizando: [FFCLRP].[PESSOA] -> [CQRS_FFCLRP].[PESSOA]
+ [09:55:06] Concluído: [CQRS_FFCLRP.PESSOA] em 36.87 ms
+
+ [09:55:06] Alocando pipeline incremental para: [CQRS_FFCLRP.AREA]
+  ├── Sincronizando: [FFCLRP].[AREA] -> [CQRS_FFCLRP].[AREA]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 741.46ms
+ [09:55:07] Concluído: [CQRS_FFCLRP.AREA] em 741.54 ms
+
+ [09:55:07] Alocando pipeline incremental para: [CQRS_FFCLRP.NOMECURSO]
+  ├── Sincronizando: [FFCLRP].[NOMECURSO] -> [CQRS_FFCLRP].[NOMECURSO]
+ [09:55:07] Concluído: [CQRS_FFCLRP.NOMECURSO] em 28.09 ms
+
+ [09:55:07] Alocando pipeline incremental para: [CQRS_FFCLRP.NOMEAREA]
+  ├── Sincronizando: [FFCLRP].[NOMEAREA] -> [CQRS_FFCLRP].[NOMEAREA]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 1045.82ms
+ [09:55:08] Concluído: [CQRS_FFCLRP.NOMEAREA] em 1045.9 ms
+
+ [09:55:08] Alocando pipeline incremental para: [CQRS_FFCLRP.DISCIPLINA]
+  ├── Sincronizando: [FFCLRP].[DISCIPLINA] -> [CQRS_FFCLRP].[DISCIPLINA]
+ [09:55:08] Concluído: [CQRS_FFCLRP.DISCIPLINA] em 36.83 ms
+
+ [09:55:08] Alocando pipeline incremental para: [CQRS_FFCLRP.OFERECIMENTO]
+  ├── Sincronizando: [FFCLRP].[OFERECIMENTO] -> [CQRS_FFCLRP].[OFERECIMENTO]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 8933.04ms
+ [09:55:17] Concluído: [CQRS_FFCLRP.OFERECIMENTO] em 8933.18 ms
+
+ [09:55:17] Alocando pipeline incremental para: [CQRS_FFCLRP.ESPACOTURMA]
+  ├── Sincronizando: [FFCLRP].[ESPACOTURMA] -> [CQRS_FFCLRP].[ESPACOTURMA]
+ [09:55:17] Concluído: [CQRS_FFCLRP.ESPACOTURMA] em 23.87 ms
+
+ [09:55:17] Alocando pipeline incremental para: [CQRS_FFCLRP.R32TURMINDOC]
+  ├── Sincronizando: [FFCLRP].[R32TURMINDOC] -> [CQRS_FFCLRP].[R32TURMINDOC]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 8497.16ms
+ [09:55:25] Concluído: [CQRS_FFCLRP.R32TURMINDOC] em 8497.27 ms
+
+ [09:55:25] Alocando pipeline incremental para: [CQRS_FFCLRP.R27DISMINCRE]
+  ├── Sincronizando: [FFCLRP].[R27DISMINCRE] -> [CQRS_FFCLRP].[R27DISMINCRE]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 3477.76ms
+ [09:55:29] Concluído: [CQRS_FFCLRP.R27DISMINCRE] em 3477.98 ms
+
+ [09:55:29] Alocando pipeline incremental para: [CQRS_FFCLRP.R39PGMORIDOC]
+  ├── Sincronizando: [FFCLRP].[R39PGMORIDOC] -> [CQRS_FFCLRP].[R39PGMORIDOC]
+ [09:55:29] Concluído: [CQRS_FFCLRP.R39PGMORIDOC] em 35.28 ms
+
+ [09:55:29] Alocando pipeline incremental para: [CQRS_FFCLRP.R10DOCCOOCUR]
+  ├── Sincronizando: [FFCLRP].[R10DOCCOOCUR] -> [CQRS_FFCLRP].[R10DOCCOOCUR]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 3301.95ms
+ [09:55:32] Concluído: [CQRS_FFCLRP.R10DOCCOOCUR] em 3302.04 ms
+
+ [09:55:32] Alocando pipeline incremental para: [CQRS_FFCLRP.QUALIFICACAO]
+  ├── Sincronizando: [FFCLRP].[QUALIFICACAO] -> [CQRS_FFCLRP].[QUALIFICACAO]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 4941.3ms
+ [09:55:37] Concluído: [CQRS_FFCLRP.QUALIFICACAO] em 4941.58 ms
+
+ [09:55:37] Alocando pipeline incremental para: [CQRS_FFCLRP.VINCULOPESSOAUSP]
+  ├── Sincronizando: [FFCLRP].[VINCULOPESSOAUSP] -> [CQRS_FFCLRP].[VINCULOPESSOAUSP]
+ [09:55:37] Concluído: [CQRS_FFCLRP.VINCULOPESSOAUSP] em 47.66 ms
+
+ [09:55:47] Alocando pipeline incremental para: [CQRS_FFCLRP.R48PGMTRBDOC]
+  ├── Sincronizando: [FFCLRP].[R48PGMTRBDOC] -> [CQRS_FFCLRP].[R48PGMTRBDOC]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 31119.6ms
+ [09:56:18] Concluído: [CQRS_FFCLRP.R48PGMTRBDOC] em 31119.89 ms
+
+ [09:56:18] Alocando pipeline incremental para: [CQRS_FFCLRP.AGPROGRAMA]
+  ├── Sincronizando: [FFCLRP].[AGPROGRAMA] -> [CQRS_FFCLRP].[AGPROGRAMA]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 13670.1ms
+ [09:56:32] Concluído: [CQRS_FFCLRP.AGPROGRAMA] em 13670.43 ms
+
+ [09:56:32] Alocando pipeline incremental para: [CQRS_FFCLRP.CREDAREA]
+  ├── Sincronizando: [FFCLRP].[CREDAREA] -> [CQRS_FFCLRP].[CREDAREA]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 1022.32ms
+ [09:56:33] Concluído: [CQRS_FFCLRP.CREDAREA] em 1022.44 ms
+
+ [09:56:33] Alocando pipeline incremental para: [CQRS_FFCLRP.EMAILPESSOA]
+  ├── Sincronizando: [FFCLRP].[EMAILPESSOA] -> [CQRS_FFCLRP].[EMAILPESSOA]
+ [09:56:33] Concluído: [CQRS_FFCLRP.EMAILPESSOA] em 58.48 ms
+
+ [09:56:33] Alocando pipeline incremental para: [CQRS_FFCLRP.CURSO]
+  ├── Sincronizando: [FFCLRP].[CURSO] -> [CQRS_FFCLRP].[CURSO]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 441.9ms
+ [09:56:33] Concluído: [CQRS_FFCLRP.CURSO] em 442.07 ms
+
+
+ [⚠️ 09:56:33] ALERTA DE CRON: Disparando ciclo global de limpeza de registros órfãos...
+
+ [09:56:33] Iniciando auditoria de órfãos em: [CQRS_Dados_hp.Posgraduacoes] via PKs [Id]
+ [09:56:33] Concluído: [CQRS_Dados_hp.Posgraduacoes] -> Nenhum órfão encontrado. Sincronia perfeita em 9.79 ms
+
+ [09:56:33] Iniciando auditoria de órfãos em: [CQRS_Dados_hp.PosGraduacoesBibliografias] via PKs [Id]
+ [09:56:33] Concluído: [CQRS_Dados_hp.PosGraduacoesBibliografias] -> Nenhum órfão encontrado. Sincronia perfeita em 8.47 ms
+
+ [09:56:33] Iniciando auditoria de órfãos em: [CQRS_Dados_hp.PosgraduacoesAlunosesp] via PKs [Id]
+ [09:56:33] Concluído: [CQRS_Dados_hp.PosgraduacoesAlunosesp] -> Nenhum órfão encontrado. Sincronia perfeita em 10.09 ms
+
+ [09:56:33] Iniciando auditoria de órfãos em: [CQRS_Dados_hp.PosGraduacoesDocumentacao] via PKs [Id]
+ [09:56:33] Concluído: [CQRS_Dados_hp.PosGraduacoesDocumentacao] -> Nenhum órfão encontrado. Sincronia perfeita em 16.2 ms
+
+ [09:56:33] Iniciando auditoria de órfãos em: [CQRS_Dados_hp.PosGraduacoesNormasGerais] via PKs [Id]
+ [09:56:34] Concluído: [CQRS_Dados_hp.PosGraduacoesNormasGerais] -> Nenhum órfão encontrado. Sincronia perfeita em 14.31 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.orientadores] via PKs [area + codusp]
+ [09:56:34] Concluído: [CQRS_Dados_pg.orientadores] -> Nenhum órfão encontrado. Sincronia perfeita em 10.36 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.orientadores_linhaspesq] via PKs [area + codusp + linhapesquisa_id]
+ [09:56:34] Concluído: [CQRS_Dados_pg.orientadores_linhaspesq] -> Nenhum órfão encontrado. Sincronia perfeita em 12.76 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.linhapesq] via PKs [id]
+ [09:56:34] Concluído: [CQRS_Dados_pg.linhapesq] -> Nenhum órfão encontrado. Sincronia perfeita em 6.89 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.secretarias] via PKs [id]
+ [09:56:34] Concluído: [CQRS_Dados_pg.secretarias] -> Nenhum órfão encontrado. Sincronia perfeita em 8.48 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.uploads] via PKs [id]
+ [09:56:34] Concluído: [CQRS_Dados_pg.uploads] -> Nenhum órfão encontrado. Sincronia perfeita em 14.04 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.exameSelecaoPosGraduacao] via PKs [codPPG + nga + codIdi]
+ [09:56:34] Concluído: [CQRS_Dados_pg.exameSelecaoPosGraduacao] -> Nenhum órfão encontrado. Sincronia perfeita em 12.81 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.areas] via PKs [codare]
+ [09:56:34] Concluído: [CQRS_Dados_pg.areas] -> Nenhum órfão encontrado. Sincronia perfeita em 8.97 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Dados_pg.programas] via PKs [codcur]
+ [09:56:34] Concluído: [CQRS_Dados_pg.programas] -> Nenhum órfão encontrado. Sincronia perfeita em 9.28 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.noticias] via PKs [id]
+ [09:56:34] Concluído: [CQRS_Wffclrp.noticias] -> Nenhum órfão encontrado. Sincronia perfeita em 12.25 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.noticias_categorias] via PKs [id]
+ [09:56:34] Concluído: [CQRS_Wffclrp.noticias_categorias] -> Nenhum órfão encontrado. Sincronia perfeita em 9.58 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.defesas] via PKs [id]
+ [09:56:34] Concluído: [CQRS_Wffclrp.defesas] -> Nenhum órfão encontrado. Sincronia perfeita em 7.77 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.defesas_defendidas] via PKs [id]
+ [09:56:34] Concluído: [CQRS_Wffclrp.defesas_defendidas] -> Nenhum órfão encontrado. Sincronia perfeita em 23.86 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.blocos_old] via PKs [id]
+ [09:56:34] Concluído: [CQRS_Wffclrp.blocos_old] -> Nenhum órfão encontrado. Sincronia perfeita em 8.61 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.salas_old] via PKs [id]
+ [09:56:34] Concluído: [CQRS_Wffclrp.salas_old] -> Nenhum órfão encontrado. Sincronia perfeita em 8.28 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.editais] via PKs [id]
+ [09:56:34] Concluído: [CQRS_Wffclrp.editais] -> Nenhum órfão encontrado. Sincronia perfeita em 7.21 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.editais_categorias] via PKs [id]
+ [09:56:34] Concluído: [CQRS_Wffclrp.editais_categorias] -> Nenhum órfão encontrado. Sincronia perfeita em 6.05 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Wffclrp.formularios] via PKs [id]
+ [09:56:34] Concluído: [CQRS_Wffclrp.formularios] -> Nenhum órfão encontrado. Sincronia perfeita em 9.64 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Libra.indexadorPortalProducoesCientificas] via PKs [nUSP]
+ [09:56:34] Concluído: [CQRS_Libra.indexadorPortalProducoesCientificas] -> Nenhum órfão encontrado. Sincronia perfeita em 8.28 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Libra.idioma] via PKs [codIdi]
+ [09:56:34] Concluído: [CQRS_Libra.idioma] -> Nenhum órfão encontrado. Sincronia perfeita em 9.49 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Libra.CVLATTES] via PKs [codpes]
+ [09:56:34] Concluído: [CQRS_Libra.CVLATTES] -> Nenhum órfão encontrado. Sincronia perfeita em 108.82 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Libra.FormsOnline] via PKs [codform]
+ [09:56:34] Concluído: [CQRS_Libra.FormsOnline] -> Nenhum órfão encontrado. Sincronia perfeita em 9.19 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_Libra.idiomaOferecimentoDisciplina] via PKs [codIdi + codOfe + codDisc + codSeqDisc + codUnddUnvsdd]
+ [09:56:34] Concluído: [CQRS_Libra.idiomaOferecimentoDisciplina] -> Nenhum órfão encontrado. Sincronia perfeita em 9.45 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.R25CRECREDOC] via PKs [codare + nivare + codpes + dtavalini + tiport]
+ [09:56:34] Concluído: [CQRS_FFCLRP.R25CRECREDOC] -> Nenhum órfão encontrado. Sincronia perfeita em 68.11 ms
+
+ [09:56:34] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.PESSOA] via PKs [codpes]
+ [09:56:35] Concluído: [CQRS_FFCLRP.PESSOA] -> Nenhum órfão encontrado. Sincronia perfeita em 408.52 ms
+
+ [09:56:35] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.AREA] via PKs [codare]
+ [09:56:35] Concluído: [CQRS_FFCLRP.AREA] -> Nenhum órfão encontrado. Sincronia perfeita em 7.09 ms
+
+ [09:56:35] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.NOMECURSO] via PKs [codcur + dtainicur]
+ [09:56:35] Concluído: [CQRS_FFCLRP.NOMECURSO] -> Nenhum órfão encontrado. Sincronia perfeita em 5.44 ms
+
+ [09:56:35] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.NOMEAREA] via PKs [codare + dtainiare]
+ [09:56:35] Concluído: [CQRS_FFCLRP.NOMEAREA] -> Nenhum órfão encontrado. Sincronia perfeita em 20.19 ms
+
+ [09:56:35] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.DISCIPLINA] via PKs [sgldis + numseqdis]
+ [09:56:35] Concluído: [CQRS_FFCLRP.DISCIPLINA] -> Nenhum órfão encontrado. Sincronia perfeita em 8.48 ms
+
+ [09:56:35] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.OFERECIMENTO] via PKs [sgldis + numseqdis + numofe]
+ [09:56:35] Concluído: [CQRS_FFCLRP.OFERECIMENTO] -> Nenhum órfão encontrado. Sincronia perfeita em 65.89 ms
+
+ [09:56:35] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.ESPACOTURMA] via PKs [sgldis + numseqdis + numofe + diasmnofe + horiniofe]
+ [09:56:35] Concluído: [CQRS_FFCLRP.ESPACOTURMA] -> Nenhum órfão encontrado. Sincronia perfeita em 11.35 ms
+
+ [09:56:35] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.R32TURMINDOC] via PKs [codpes + sgldis + numseqdis + numofe]
+ [09:56:35] Concluído: [CQRS_FFCLRP.R32TURMINDOC] -> Nenhum órfão encontrado. Sincronia perfeita em 135.19 ms
+
+ [09:56:35] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.R27DISMINCRE] via PKs [codare + nivare + sgldis + numseqdis + dtaatvdis]
+ [09:56:35] Concluído: [CQRS_FFCLRP.R27DISMINCRE] -> Nenhum órfão encontrado. Sincronia perfeita em 72.15 ms
+
+ [09:56:35] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.R39PGMORIDOC] via PKs [codpes + codare + codpespgm + numseqpgm + dtainiort]
+ [09:56:36] Concluído: [CQRS_FFCLRP.R39PGMORIDOC] -> Nenhum órfão encontrado. Sincronia perfeita em 167.16 ms
+
+ [09:56:36] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.R10DOCCOOCUR] via PKs [codcur + codpes + dtainifnc]
+ [09:56:36] Concluído: [CQRS_FFCLRP.R10DOCCOOCUR] -> Nenhum órfão encontrado. Sincronia perfeita em 112.95 ms
+
+ [09:56:36] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.QUALIFICACAO] via PKs [codare + codpes + numseqpgm + nivpgm + numseqqua]
+ [09:56:36] Concluído: [CQRS_FFCLRP.QUALIFICACAO] -> Nenhum órfão encontrado. Sincronia perfeita em 64.88 ms
+
+ [09:56:36] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.VINCULOPESSOAUSP] via PKs [codpes + numseqpes + tipvin]
+ [09:56:36] Concluído: [CQRS_FFCLRP.VINCULOPESSOAUSP] -> Nenhum órfão encontrado. Sincronia perfeita em 232.42 ms
+
+ [09:56:36] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.R48PGMTRBDOC] via PKs [codpesdct + codare + codpes + numseqpgm + numseqptpban]
+ [09:56:37] Concluído: [CQRS_FFCLRP.R48PGMTRBDOC] -> Nenhum órfão encontrado. Sincronia perfeita em 616.35 ms
+
+ [09:56:37] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.AGPROGRAMA] via PKs [codare + codpes + numseqpgm]
+ [09:56:37] Concluído: [CQRS_FFCLRP.AGPROGRAMA] -> Nenhum órfão encontrado. Sincronia perfeita em 171.43 ms
+
+ [09:56:37] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.CREDAREA] via PKs [codare + nivare]
+ [09:56:37] Concluído: [CQRS_FFCLRP.CREDAREA] -> Nenhum órfão encontrado. Sincronia perfeita em 15.99 ms
+
+ [09:56:37] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.EMAILPESSOA] via PKs [codpes + numseqema]
+ [09:56:38] Concluído: [CQRS_FFCLRP.EMAILPESSOA] -> Nenhum órfão encontrado. Sincronia perfeita em 739.16 ms
+
+ [09:56:38] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.CURSO] via PKs [codcur]
+ [09:56:38] Concluído: [CQRS_FFCLRP.CURSO] -> Nenhum órfão encontrado. Sincronia perfeita em 11.85 ms
+
+ [09:56:38] Iniciando auditoria de órfãos em: [CQRS_FFCLRP.AGPROGRAMA] via PKs [codare + codpes + numseqpgm]
+ [09:56:38] Concluído: [CQRS_FFCLRP.AGPROGRAMA] -> Nenhum órfão encontrado. Sincronia perfeita em 186.27 ms
+ [✔ 09:56:38] Ciclo de limpeza finalizado em 4682.55 ms.
+
+
+ [09:56:48] Alocando pipeline incremental para: [CQRS_Dados_hp.Posgraduacoes]
+  ├── Sincronizando: [Dados_hp].[Posgraduacoes] -> [CQRS_Dados_hp].[Posgraduacoes]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 72.19ms
+ [09:56:48] Concluído: [CQRS_Dados_hp.Posgraduacoes] em 72.28 ms
+
+ [09:56:48] Alocando pipeline incremental para: [CQRS_Dados_hp.PosGraduacoesBibliografias]
+  ├── Sincronizando: [Dados_hp].[PosGraduacoesBibliografias] -> [CQRS_Dados_hp].[PosGraduacoesBibliografias]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 154.1ms
+ [09:56:48] Concluído: [CQRS_Dados_hp.PosGraduacoesBibliografias] em 154.15 ms
+
+ [09:56:48] Alocando pipeline incremental para: [CQRS_Dados_hp.PosgraduacoesAlunosesp]
+  ├── Sincronizando: [Dados_hp].[PosgraduacoesAlunosesp] -> [CQRS_Dados_hp].[PosgraduacoesAlunosesp]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 136.61ms
+ [09:56:48] Concluído: [CQRS_Dados_hp.PosgraduacoesAlunosesp] em 136.67 ms
+
+ [09:56:48] Alocando pipeline incremental para: [CQRS_Dados_hp.PosGraduacoesDocumentacao]
+  ├── Sincronizando: [Dados_hp].[PosGraduacoesDocumentacao] -> [CQRS_Dados_hp].[PosGraduacoesDocumentacao]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 233.89ms
+ [09:56:49] Concluído: [CQRS_Dados_hp.PosGraduacoesDocumentacao] em 233.96 ms
+
+ [09:56:49] Alocando pipeline incremental para: [CQRS_Dados_hp.PosGraduacoesNormasGerais]
+  ├── Sincronizando: [Dados_hp].[PosGraduacoesNormasGerais] -> [CQRS_Dados_hp].[PosGraduacoesNormasGerais]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 161.66ms
+ [09:56:49] Concluído: [CQRS_Dados_hp.PosGraduacoesNormasGerais] em 161.82 ms
+
+ [09:56:49] Alocando pipeline incremental para: [CQRS_Dados_pg.linhapesq]
+  ├── Sincronizando: [Dados_pg].[linhapesq] -> [CQRS_Dados_pg].[linhapesq]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 91.6ms
+ [09:56:49] Concluído: [CQRS_Dados_pg.linhapesq] em 91.68 ms
+
+ [09:56:49] Alocando pipeline incremental para: [CQRS_Dados_pg.secretarias]
+  ├── Sincronizando: [Dados_pg].[secretarias] -> [CQRS_Dados_pg].[secretarias]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 34.57ms
+ [09:56:49] Concluído: [CQRS_Dados_pg.secretarias] em 34.64 ms
+
+ [09:56:49] Alocando pipeline incremental para: [CQRS_Dados_pg.exameSelecaoPosGraduacao]
+  ├── Sincronizando: [Dados_pg].[exameSelecaoPosGraduacao] -> [CQRS_Dados_pg].[exameSelecaoPosGraduacao]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 58.56ms
+ [09:56:49] Concluído: [CQRS_Dados_pg.exameSelecaoPosGraduacao] em 58.64 ms
+
+ [09:56:49] Alocando pipeline incremental para: [CQRS_Wffclrp.noticias]
+  ├── Sincronizando: [Wffclrp].[noticias] -> [CQRS_Wffclrp].[noticias]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 419.44ms
+ [09:56:49] Concluído: [CQRS_Wffclrp.noticias] em 419.56 ms
+
+ [09:56:49] Alocando pipeline incremental para: [CQRS_Wffclrp.noticias_categorias]
+  ├── Sincronizando: [Wffclrp].[noticias_categorias] -> [CQRS_Wffclrp].[noticias_categorias]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 47.14ms
+ [09:56:49] Concluído: [CQRS_Wffclrp.noticias_categorias] em 47.18 ms
+
+ [09:56:49] Alocando pipeline incremental para: [CQRS_Wffclrp.defesas]
+  ├── Sincronizando: [Wffclrp].[defesas] -> [CQRS_Wffclrp].[defesas]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 61.86ms
+ [09:56:50] Concluído: [CQRS_Wffclrp.defesas] em 61.93 ms
+
+ [09:56:50] Alocando pipeline incremental para: [CQRS_Wffclrp.defesas_defendidas]
+  ├── Sincronizando: [Wffclrp].[defesas_defendidas] -> [CQRS_Wffclrp].[defesas_defendidas]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 2490.44ms
+ [09:56:52] Concluído: [CQRS_Wffclrp.defesas_defendidas] em 2490.67 ms
+
+ [09:56:52] Alocando pipeline incremental para: [CQRS_Wffclrp.blocos_old]
+  ├── Sincronizando: [Wffclrp].[blocos_old] -> [CQRS_Wffclrp].[blocos_old]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 55.95ms
+ [09:56:52] Concluído: [CQRS_Wffclrp.blocos_old] em 56 ms
+
+ [09:56:52] Alocando pipeline incremental para: [CQRS_Wffclrp.salas_old]
+  ├── Sincronizando: [Wffclrp].[salas_old] -> [CQRS_Wffclrp].[salas_old]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 101.8ms
+ [09:56:52] Concluído: [CQRS_Wffclrp.salas_old] em 101.88 ms
+
+ [09:56:52] Alocando pipeline incremental para: [CQRS_Wffclrp.editais]
+  ├── Sincronizando: [Wffclrp].[editais] -> [CQRS_Wffclrp].[editais]
+ [09:56:52] Concluído: [CQRS_Wffclrp.editais] em 43.3 ms
+
+ [09:56:52] Alocando pipeline incremental para: [CQRS_Wffclrp.editais_categorias]
+  ├── Sincronizando: [Wffclrp].[editais_categorias] -> [CQRS_Wffclrp].[editais_categorias]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 45.22ms
+ [09:56:52] Concluído: [CQRS_Wffclrp.editais_categorias] em 45.32 ms
+
+ [09:56:52] Alocando pipeline incremental para: [CQRS_Wffclrp.formularios]
+  ├── Sincronizando: [Wffclrp].[formularios] -> [CQRS_Wffclrp].[formularios]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 370.47ms
+ [09:56:53] Concluído: [CQRS_Wffclrp.formularios] em 370.57 ms
+
+ [09:56:53] Alocando pipeline incremental para: [CQRS_Libra.indexadorPortalProducoesCientificas]
+  ├── Sincronizando: [Libra].[indexadorPortalProducoesCientificas] -> [CQRS_Libra].[indexadorPortalProducoesCientificas]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 206.73ms
+ [09:56:53] Concluído: [CQRS_Libra.indexadorPortalProducoesCientificas] em 206.83 ms
+
+ [09:56:53] Alocando pipeline incremental para: [CQRS_Libra.idioma]
+  ├── Sincronizando: [Libra].[idioma] -> [CQRS_Libra].[idioma]
+ [09:56:53] Concluído: [CQRS_Libra.idioma] em 44.66 ms
+
+ [09:56:53] Alocando pipeline incremental para: [CQRS_Libra.CVLATTES]
+  ├── Sincronizando: [Libra].[CVLATTES] -> [CQRS_Libra].[CVLATTES]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 8344.34ms
+ [09:57:01] Concluído: [CQRS_Libra.CVLATTES] em 8344.44 ms
+
+ [09:57:01] Alocando pipeline incremental para: [CQRS_Libra.FormsOnline]
+  ├── Sincronizando: [Libra].[FormsOnline] -> [CQRS_Libra].[FormsOnline]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 3 em 108.11ms
+ [09:57:01] Concluído: [CQRS_Libra.FormsOnline] em 124.71 ms
+
+ [09:57:01] Alocando pipeline incremental para: [CQRS_Libra.idiomaOferecimentoDisciplina]
+  ├── Sincronizando: [Libra].[idiomaOferecimentoDisciplina] -> [CQRS_Libra].[idiomaOferecimentoDisciplina]
+ [09:57:01] Concluído: [CQRS_Libra.idiomaOferecimentoDisciplina] em 37.17 ms
+
+ [09:57:01] Alocando pipeline incremental para: [CQRS_FFCLRP.R25CRECREDOC]
+  ├── Sincronizando: [FFCLRP].[R25CRECREDOC] -> [CQRS_FFCLRP].[R25CRECREDOC]
+ [09:57:01] Concluído: [CQRS_FFCLRP.R25CRECREDOC] em 47.16 ms
+
+ [09:57:01] Alocando pipeline incremental para: [CQRS_FFCLRP.PESSOA]
+  ├── Sincronizando: [FFCLRP].[PESSOA] -> [CQRS_FFCLRP].[PESSOA]
+ [09:57:02] Concluído: [CQRS_FFCLRP.PESSOA] em 83.9 ms
+
+ [09:57:02] Alocando pipeline incremental para: [CQRS_FFCLRP.AREA]
+  ├── Sincronizando: [FFCLRP].[AREA] -> [CQRS_FFCLRP].[AREA]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 479.07ms
+ [09:57:02] Concluído: [CQRS_FFCLRP.AREA] em 479.24 ms
+
+ [09:57:02] Alocando pipeline incremental para: [CQRS_FFCLRP.NOMECURSO]
+  ├── Sincronizando: [FFCLRP].[NOMECURSO] -> [CQRS_FFCLRP].[NOMECURSO]
+ [09:57:02] Concluído: [CQRS_FFCLRP.NOMECURSO] em 46.75 ms
+
+ [09:57:02] Alocando pipeline incremental para: [CQRS_FFCLRP.NOMEAREA]
+  ├── Sincronizando: [FFCLRP].[NOMEAREA] -> [CQRS_FFCLRP].[NOMEAREA]
+  │    └── [ OK ] Ciclo concluído. Registros modificados/inseridos no destino: 0 em 816.24ms
+ [09:57:03] Concluído: [CQRS_FFCLRP.NOMEAREA] em 816.31 ms
+
+ [09:57:03] Alocando pipeline incremental para: [CQRS_FFCLRP.DISCIPLINA]
+  ├── Sincronizando: [FFCLRP].[DISCIPLINA] -> [CQRS_FFCLRP].[DISCIPLINA]
+ [09:57:03] Concluído: [CQRS_FFCLRP.DISCIPLINA] em 45.19 ms
+
+ [09:57:03] Alocando pipeline incremental para: [CQRS_FFCLRP.OFERECIMENTO]
+  ├── Sincronizando: [FFCLRP].[OFERECIMENTO] -> [CQRS_FFCLRP].[OFERECIMENTO]
