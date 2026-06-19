@@ -2,6 +2,7 @@
   "configuracao_infraestrutura": {
     "descricao": "Configuracoes de acesso aos nos de Escrita (Legado) e Leitura (Moderno)",
     "intervalo_verificacao_segundos": 10,
+    "intervalo_limpeza_orfaos_minutos": 1,
     "origem_command": {
       "host": "env:DB_ORIGEM_HOST",
       "usuario": "env:DB_ORIGEM_USER",
@@ -26,7 +27,7 @@
           "tabela_legada": "Posgraduacoes",
           "tabela_moderna": "Posgraduacoes",
           "estrategia": "completa",
-          "frequencia_sincronizacao_minutos": 10,
+          "frequencia_sincronizacao_minutos": 1,
           "coluna_last_updated": null,
           "comentario": "Tabela que agtar os cursos de Pós Graduação da Unidade.",
           "camada_anticorrupcao": {
