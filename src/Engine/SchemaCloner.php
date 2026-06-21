@@ -78,9 +78,90 @@ class SchemaCloner
     /**
      * Monta dinamicamente o comando CREATE TABLE com base no JSON (Suporta chaves compostas)
      */
+    // private function construirETestarTabela(array $configTabela): void
+    // {
+    //     $tabelaDestino = $configTabela['tabela_moderna'];
+    //     $schemaDestino = $configTabela['schema'];
+    //     $mapeamento = $configTabela['camada_anticorrupcao']['mapeamento_colunas'];
+
+    //     $colunasDdl = [];
+    //     $chavesPrimarias = [];
+
+    //     // Processa as colunas vindas do mapeamento da ACL
+    //     foreach ($mapeamento as $colunaLegada => $detalhes) {
+    //         $nomeColunaNova = $detalhes['nome_destino'] ?? $colunaLegada;
+    //         $tipoColunaNova = trim($detalhes['tipo']);
+
+    //         $linhaColuna = "[{$nomeColunaNova}] {$tipoColunaNova}";
+
+    //         $isPk = isset($detalhes['pk']) && $detalhes['pk'] === true;
+    //         $isNotNull = isset($detalhes['not_null']) && $detalhes['not_null'] === true;
+
+    //         // Chaves primárias no SQL Server obrigatoriamente precisam ser NOT NULL
+    //         if ($isPk) {
+    //             $linhaColuna .= " NOT NULL";
+    //             $chavesPrimarias[] = "[{$nomeColunaNova}]";
+    //         } elseif ($isNotNull) {
+    //             $linhaColuna .= " NOT NULL";
+    //         } else {
+    //             $linhaColuna .= " NULL";
+    //         }
+
+    //         $colunasDdl[] = $linhaColuna;
+    //     }
+
+    //     // Se houver chaves primárias mapeadas, anexa a restrição composta de forma agrupada
+    //     if (!empty($chavesPrimarias)) {
+    //         $stringPks = implode(", ", $chavesPrimarias);
+    //         $colunasDdl[] = "PRIMARY KEY ({$stringPks})";
+    //     }
+
+    //     // Regra adaptativa temporal: adiciona a coluna de controle se o legado for nulo
+    //     if ($configTabela['coluna_last_updated'] === null) {
+    //         $colunasDdl[] = "[middleware_last_updated] DATETIME DEFAULT GETDATE()";
+    //     }
+
+    //     // Adiciona a coluna obrigatória do MIIDA para cálculo do Hash MD5 de concorrência por linha
+    //     $colunasDdl[] = "[hash_versao] VARCHAR(32) NOT NULL";
+
+    //     $stringColunas = implode(",\n    ", $colunasDdl);
+
+    //     // Criar esquema caso não exista
+    //     $sqlCreateSchema = "IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = '{$schemaDestino}')
+    //                             BEGIN
+    //                                 EXEC('CREATE SCHEMA {$schemaDestino}')
+    //                             END";
+    //     try {
+    //         $this->connModerno->exec($sqlCreateSchema);
+    //         echo "OK (Schema Criado /verificado)\n";
+    //     } catch (Exception $e) {
+    //         echo "FALHA!\n";
+    //         throw new Exception("Erro ao executar DDL do schema {$schemaDestino}: " . $e->getMessage());
+    //     }
+    //     // Cláusula defensiva (Idempotente) para não destruir dados se rodado novamente
+    //     $sqlCreateTable = "IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = '{$tabelaDestino}')
+    //     BEGIN
+    //         CREATE TABLE [{$schemaDestino}.{$tabelaDestino}] (
+    //             {$stringColunas}
+    //         )
+    //     END";
+
+    //     try {
+    //         $this->connModerno->exec($sqlCreateTable);
+    //         echo "OK (Estrutura gerada/verificada)\n";
+    //     } catch (Exception $e) {
+    //         echo "FALHA!\n";
+    //         throw new Exception("Erro ao executar DDL da tabela {$schemaDestino}.{$tabelaDestino}: " . $e->getMessage());
+    //     }
+    // }
+/**
+     * Monta dinamicamente o comando CREATE TABLE com base no JSON (Suporta chaves compostas)
+     */
     private function construirETestarTabela(array $configTabela): void
     {
         $tabelaDestino = $configTabela['tabela_moderna'];
+        // CORREÇÃO: Alinhado com a chave do seu JSON reorganizado
+        $schemaDestino = $configTabela['schema'] ?? 'dbo'; 
         $mapeamento = $configTabela['camada_anticorrupcao']['mapeamento_colunas'];
 
         $colunasDdl = [];
@@ -96,7 +177,6 @@ class SchemaCloner
             $isPk = isset($detalhes['pk']) && $detalhes['pk'] === true;
             $isNotNull = isset($detalhes['not_null']) && $detalhes['not_null'] === true;
 
-            // Chaves primárias no SQL Server obrigatoriamente precisam ser NOT NULL
             if ($isPk) {
                 $linhaColuna .= " NOT NULL";
                 $chavesPrimarias[] = "[{$nomeColunaNova}]";
@@ -109,36 +189,54 @@ class SchemaCloner
             $colunasDdl[] = $linhaColuna;
         }
 
-        // Se houver chaves primárias mapeadas, anexa a restrição composta de forma agrupada
         if (!empty($chavesPrimarias)) {
             $stringPks = implode(", ", $chavesPrimarias);
             $colunasDdl[] = "PRIMARY KEY ({$stringPks})";
         }
 
-        // Regra adaptativa temporal: adiciona a coluna de controle se o legado for nulo
         if ($configTabela['coluna_last_updated'] === null) {
             $colunasDdl[] = "[middleware_last_updated] DATETIME DEFAULT GETDATE()";
         }
 
-        // Adiciona a coluna obrigatória do MIIDA para cálculo do Hash MD5 de concorrência por linha
         $colunasDdl[] = "[hash_versao] VARCHAR(32) NOT NULL";
 
         $stringColunas = implode(",\n    ", $colunasDdl);
 
-        // Cláusula defensiva (Idempotente) para não destruir dados se rodado novamente
-        $sqlCreateTable = "IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = '{$tabelaDestino}')
+        // 1. Criar esquema caso não exista
+        $sqlCreateSchema = "IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = '{$schemaDestino}')
+                            BEGIN
+                                EXEC('CREATE SCHEMA {$schemaDestino}')
+                            END";
+        try {
+            // SOLUÇÃO DO ERRO 20019: Usar prepare/execute e liberar o cursor imediatamente
+            $stmtSchema = $this->connModerno->prepare($sqlCreateSchema);
+            $stmtSchema->execute();
+            $stmtSchema->closeCursor(); // <-- Libera a conexão pdo_dblib para o próximo comando
+            
+            echo "OK (Schema Criado /verificado) -> ";
+        } catch (Exception $e) {
+            echo "FALHA SCHEMA!\n";
+            throw new Exception("Erro ao executar DDL do schema {$schemaDestino}: " . $e->getMessage());
+        }
+
+        // 2. Cláusula defensiva (Idempotente) para criar a tabela
+        // CORREÇÃO: No SQL Server, a sintaxe correta para o IF NOT EXISTS com Schema é verificar na sys.objects ou sys.tables
+        $sqlCreateTable = "IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('[{$schemaDestino}].[{$tabelaDestino}]') AND type = 'U')
         BEGIN
-            CREATE TABLE [{$tabelaDestino}] (
+            CREATE TABLE [{$schemaDestino}].[{$tabelaDestino}] (
                 {$stringColunas}
             )
         END";
 
         try {
-            $this->connModerno->exec($sqlCreateTable);
+            $stmtTable = $this->connModerno->prepare($sqlCreateTable);
+            $stmtTable->execute();
+            $stmtTable->closeCursor(); // <-- Boa prática manter limpo para a próxima tabela do loop
+            
             echo "OK (Estrutura gerada/verificada)\n";
         } catch (Exception $e) {
-            echo "FALHA!\n";
-            throw new Exception("Erro ao executar DDL da tabela {$tabelaDestino}: " . $e->getMessage());
+            echo "FALHA TABELA!\n";
+            throw new Exception("Erro ao executar DDL da tabela {$schemaDestino}.{$tabelaDestino}: " . $e->getMessage());
         }
     }
 }

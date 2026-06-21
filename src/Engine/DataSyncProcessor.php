@@ -32,12 +32,13 @@ class DataSyncProcessor
         $bancoModerno  = $configBanco['banco_moderno'];
         $tabelaLegada  = $configTabela['tabela_legada'];
         $tabelaModerna = $configTabela['tabela_moderna'];
+        $schemaModerno = is_null($configTabela['schema']) ? "dbo" : $configTabela['schema'];
         $colunaUpdate  = $configTabela['coluna_last_updated'];
 
         $timestampCiclo = date('Y-m-d H:i:s');
-        $componenteNome = "DataSyncProcessor -> {$tabelaModerna}";
+        $componenteNome = "DataSyncProcessor -> {$schemaModerno}.{$tabelaModerna}";
         
-        echo "  ├── Sincronizando: [{$bancoLegado}].[{$tabelaLegada}] -> [{$bancoModerno}].[{$tabelaModerna}]\n";
+        echo "  ├── Sincronizando: [{$bancoLegado}].[{$tabelaLegada}] -> [{$bancoModerno}].[{$schemaModerno}].[{$tabelaModerna}]\n";
 
         try {
             $inicioMiliAllSinc = microtime(true);
@@ -62,9 +63,9 @@ class DataSyncProcessor
                     $chavesPrimarias[] = $detalhes['nome_destino'] ?? $colunaOriginal;
                 }
             }
-
+##### Parei aquiiiiiiiiii
             if (empty($chavesPrimarias)) {
-                throw new Exception("A tabela {$tabelaModerna} não possui nenhuma Chave Primária ('pk') mapeada no JSON.");
+                throw new Exception("A tabela {$schemaModerno}.{$tabelaModerna} não possui nenhuma Chave Primária ('pk') mapeada no JSON.");
             }
 
             // Identifica os campos timestamp
@@ -111,16 +112,16 @@ class DataSyncProcessor
             }
 
             if ($totalRegistros === 0) {
-                $this->controlRepo->atualizarEstadoSincronizacao($bancoModerno, $tabelaModerna, 'SUCESSO', 0, $timestampCiclo);
+                $this->controlRepo->atualizarEstadoSincronizacao($bancoModerno, $schemaModerno.".".$tabelaModerna, 'SUCESSO', 0, $timestampCiclo);
                 return;
             }
 
-            $this->controlRepo->atualizarEstadoSincronizacao($bancoModerno, $tabelaModerna, 'SUCESSO', $inseridosOuAtualizados, $timestampCiclo);
+            $this->controlRepo->atualizarEstadoSincronizacao($bancoModerno, $schemaModerno.".".$tabelaModerna, 'SUCESSO', $inseridosOuAtualizados, $timestampCiclo);
             $fimMiliAllSinc = microtime(true);
             $tempoGastoMili = round(($fimMiliAllSinc - $inicioMiliAllSinc) * 1000, 2); // Arredonda para 2 casas decimais
             // LOG DE SUCESSO SE HOUVER ALTERAÇÕES
             if ($inseridosOuAtualizados > 0) {
-                $componenteNome = "DataSyncProcessor -> {$tabelaModerna}";
+                $componenteNome = "DataSyncProcessor -> {$schemaModerno}.{$tabelaModerna}";
                 $this->logger->success($componenteNome, "Sincronização executada.", "Registros processados: {$inseridosOuAtualizados} de um lote de {$totalRegistros} em {$tempoGastoMili}ms");
             }
 
@@ -129,10 +130,11 @@ class DataSyncProcessor
         } catch (Exception $e) {
             $bancoModerno  = $configBanco['banco_moderno'];
             $tabelaModerna = $configTabela['tabela_moderna'];
-            $this->controlRepo->atualizarEstadoSincronizacao($bancoModerno, $tabelaModerna, 'ERRO', 0, $timestampCiclo);
+            $schemaModerno = $configTabela['schema'];
+            $this->controlRepo->atualizarEstadoSincronizacao($bancoModerno, $schemaModerno.".".$tabelaModerna, 'ERRO', 0, $timestampCiclo);
             
             // LOG DE ERRO OPERACIONAL
-            $componenteNome = "DataSyncProcessor -> {$tabelaModerna}";
+            $componenteNome = "DataSyncProcessor -> {$schemaModerno}.{$tabelaModerna}";
             $this->logger->error($componenteNome, "Falha crítica durante a sincronização incremental.", $e->getMessage());
             
             echo "  │    └── [ X ] ERRO NO CICLO: " . $e->getMessage() . "\n";
@@ -144,7 +146,9 @@ class DataSyncProcessor
     {
         $bancoModerno  = $configBanco['banco_moderno'];
         $tabelaModerna = $configTabela['tabela_moderna'];
+        $schemaModerno = $configTabela['schema'] ?? 'dbo'; 
         $colunaUpdate  = $configTabela['coluna_last_updated'];
+        $tabelaModernaFQ = $bancoModerno.".".$schemaModerno.".".$tabelaModerna;
         $registrosBatchProcessados = 0;
 
         foreach ($registrosBatch as $linhaBruta) {
@@ -158,7 +162,7 @@ class DataSyncProcessor
             }
             $stringClausulasCheck = implode(" AND ", $clausulasCheck);
 
-            $sqlCheckHash = "SELECT hash_versao FROM [{$tabelaModerna}] WHERE {$stringClausulasCheck}";
+            $sqlCheckHash = "SELECT hash_versao FROM {$tabelaModernaFQ} WHERE {$stringClausulasCheck}";
             $stmtCheck = $this->connModerno->prepare($sqlCheckHash);
             $stmtCheck->execute($paramsCheck);
             $registroDestino = $stmtCheck->fetch(PDO::FETCH_ASSOC);
@@ -199,7 +203,7 @@ class DataSyncProcessor
             $stringInsertValores = implode(", ", $camposInsertValores);
 
             $sqlUpsert = "
-                MERGE [{$tabelaModerna}] AS t
+                MERGE [{$bancoModerno}].[{$schemaModerno}].[{$tabelaModerna}] AS t
                 USING (SELECT {$stringMergeSource}) AS s
                 ON ({$stringJoinMerge})
                 WHEN MATCHED THEN {$stringUpdate}

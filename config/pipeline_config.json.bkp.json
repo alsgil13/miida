@@ -26,8 +26,7 @@
         {
           "tabela_legada": "Posgraduacoes",
           "tabela_moderna": "Posgraduacoes",
-          "estrategia": "completa", 
-          "schema": null,
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 1,
           "coluna_last_updated": null,
           "comentario": "Tabela que agtar os cursos de Pós Graduação da Unidade.",
@@ -216,8 +215,7 @@
         {
           "tabela_legada": "PosGraduacoesBibliografias",
           "tabela_moderna": "PosGraduacoesBibliografias",
-          "estrategia": "completa", 
-          "schema": null,
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 1,
           "coluna_last_updated": null,
           "comentario": "Tabela que Contem infos das bibliografias para as provas mostradas no site.",
@@ -246,8 +244,7 @@
         {
           "tabela_legada": "PosgraduacoesAlunosesp",
           "tabela_moderna": "PosgraduacoesAlunosesp",
-          "estrategia": "completa", 
-          "schema": null,
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 1,
           "coluna_last_updated": null,
           "comentario": "Tabela que Contem infos sobre ingresso para aluno especial.",
@@ -276,8 +273,7 @@
         {
           "tabela_legada": "PosGraduacoesDocumentacao",
           "tabela_moderna": "PosGraduacoesDocumentacao",
-          "estrategia": "completa", 
-          "schema": null,
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 1,
           "coluna_last_updated": null,
           "comentario": "Tabela que Contem infos sobre documentação mostrada no site.",
@@ -306,8 +302,7 @@
         {
           "tabela_legada": "PosGraduacoesNormasGerais",
           "tabela_moderna": "PosGraduacoesNormasGerais",
-          "estrategia": "completa", 
-          "schema": null,
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 1,
           "coluna_last_updated": null,
           "comentario": "Tabela que Contem infos sobre documentação mostrada no site.",
@@ -336,13 +331,12 @@
       ]
     },
     { "banco_legado": "Dados_pg",
-      "banco_moderno": "CQRS",
+      "banco_moderno": "CQRS_Dados_pg",
       "tabelas": [
         {
           "tabela_legada": "orientadores",
           "tabela_moderna": "orientadores",
-          "estrategia": "completa", 
-          "schema": "Dados_pg",
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 10,
           "coluna_last_updated": null,
           "comentario": "Orientadores credenciados.",
@@ -400,8 +394,7 @@
         {
           "tabela_legada": "orientadores_linhaspesq",
           "tabela_moderna": "orientadores_linhaspesq",
-          "estrategia": "completa", 
-          "schema": "Dados_pg",
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 10,
           "coluna_last_updated": null,
           "comentario": "Vinculo n-x-n entre Orientadores e linhas de pesquisa.",
@@ -432,8 +425,7 @@
         {
           "tabela_legada": "linhapesq",
           "tabela_moderna": "linhapesq",
-          "estrategia": "completa", 
-          "schema": "Dados_pg",
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 1,
           "coluna_last_updated": null,
           "comentario": "Linhas de pesquisa.",
@@ -478,8 +470,7 @@
         {
           "tabela_legada": "secretarias",
           "tabela_moderna": "secretarias",
-          "estrategia": "completa", 
-          "schema": "Dados_pg",
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 1,
           "coluna_last_updated": null,
           "comentario": "Secretarias(os) dos programas de Pós.",
@@ -542,8 +533,7 @@
         {
           "tabela_legada": "uploads",
           "tabela_moderna": "uploads",
-          "estrategia": "completa", 
-          "schema": "Dados_pg",
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 10,
           "coluna_last_updated": null,
           "comentario": "Upload de arquivos.",
@@ -603,8 +593,7 @@
         {
           "tabela_legada": "exameSelecaoPosGraduacao",
           "tabela_moderna": "exameSelecaoPosGraduacao",
-          "estrategia": "completa", 
-          "schema": "Dados_pg",
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 1,
           "coluna_last_updated": null,
           "comentario": "Informações do exame de seleção.",
@@ -640,8 +629,7 @@
         {
           "tabela_legada": "areas",
           "tabela_moderna": "areas",
-          "estrategia": "completa", 
-          "schema": "Dados_pg",
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 10,
           "coluna_last_updated": null,
           "comentario": "Informações das áreas de pesquisa.",
@@ -698,8 +686,7 @@
         {
           "tabela_legada": "programas",
           "tabela_moderna": "programas",
-          "estrategia": "completa", 
-          "schema": "Dados_pg",
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 10,
           "coluna_last_updated": null,
           "comentario": "Informações dos programas de pesquisa.",
@@ -837,13 +824,12 @@
       ]
     }, 
     { "banco_legado": "Wffclrp",
-      "banco_moderno": "CQRS",
+      "banco_moderno": "CQRS_Wffclrp",
       "tabelas": [
          {
           "tabela_legada": "noticias",
           "tabela_moderna": "noticias",
-          "estrategia": "completa", 
-          "schema": "Wffclrp",
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 1,
           "coluna_last_updated": null,
           "comentario": "Noticias do site.",
@@ -1009,8 +995,7 @@
         {
           "tabela_legada": "noticias_categorias",
           "tabela_moderna": "noticias_categorias",
-          "estrategia": "completa", 
-          "schema": "Wffclrp",
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 1,
           "coluna_last_updated": null,
           "comentario": "Categorias de Noticias do site.",
@@ -1039,8 +1024,7 @@
         {
           "tabela_legada": "defesas",
           "tabela_moderna": "defesas",
-          "estrategia": "completa", 
-          "schema": "Wffclrp",
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 1,
           "coluna_last_updated": null,
           "comentario": "Dados das defesas de pós graduação.",
@@ -1140,8 +1124,7 @@
         {
           "tabela_legada": "defesas_defendidas",
           "tabela_moderna": "defesas_defendidas",
-          "estrategia": "completa", 
-          "schema": "Wffclrp",
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 1,
           "coluna_last_updated": null,
           "comentario": "Defesas que ja aconteceram.",
@@ -1235,8 +1218,7 @@
         {
           "tabela_legada": "blocos_old",
           "tabela_moderna": "blocos_old",
-          "estrategia": "completa", 
-          "schema": "Wffclrp",
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 1,
           "coluna_last_updated": null,
           "comentario": "Blocos Físicos da Faculdade.",
@@ -1271,8 +1253,7 @@
         {
           "tabela_legada": "salas_old",
           "tabela_moderna": "salas_old",
-          "estrategia": "completa", 
-          "schema": "Wffclrp",
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 1,
           "coluna_last_updated": null,
           "comentario": "Salas físicas da Faculdade.",
@@ -1308,8 +1289,7 @@
         {
           "tabela_legada": "editais",
           "tabela_moderna": "editais",
-          "estrategia": "completa", 
-          "schema": "Wffclrp",
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 1,
           "coluna_last_updated": "data_alteracao",
           "comentario": "Editais cadastrados na Intranet.",
@@ -1389,8 +1369,7 @@
         {
           "tabela_legada": "editais_categorias",
           "tabela_moderna": "editais_categorias",
-          "estrategia": "completa", 
-          "schema": "Wffclrp",
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 1,
           "coluna_last_updated": null,
           "comentario": "Categorias dos Editais cadastrados na Intranet.",
@@ -1415,8 +1394,7 @@
         {
           "tabela_legada": "formularios",
           "tabela_moderna": "formularios",
-          "estrategia": "completa", 
-          "schema": "Wffclrp",
+          "estrategia": "completa",
           "frequencia_sincronizacao_minutos": 1,
           "coluna_last_updated": null,
           "comentario": "Formulários cadastrados na Intranet",
@@ -1499,13 +1477,12 @@
       ]
     },
     { "banco_legado": "Libra",
-        "banco_moderno": "CQRS",
+        "banco_moderno": "CQRS_Libra",
         "tabelas": [
             {
                 "tabela_legada": "indexadorPortalProducoesCientificas",
                 "tabela_moderna": "indexadorPortalProducoesCientificas",
-                "estrategia": "completa", 
-                "schema": "Libra",
+                "estrategia": "completa",
                 "frequencia_sincronizacao_minutos": 1,
                 "coluna_last_updated": null,
                 "comentario": "Indexadores científicos.",
@@ -1546,8 +1523,7 @@
             {
                 "tabela_legada": "idioma",
                 "tabela_moderna": "idioma",
-                "estrategia": "completa", 
-                "schema": "Libra",
+                "estrategia": "completa",
                 "frequencia_sincronizacao_minutos": 1,
                 "coluna_last_updated": null,
                 "comentario": "Idiomas.",
@@ -1587,8 +1563,7 @@
             {
                 "tabela_legada": "CVLATTES",
                 "tabela_moderna": "CVLATTES",
-                "estrategia": "completa", 
-                "schema": "Libra",
+                "estrategia": "completa",
                 "frequencia_sincronizacao_minutos": 1,
                 "coluna_last_updated": null,
                 "comentario": "Códigos dos Lattes dos orientadores e alunos.",
@@ -1623,8 +1598,7 @@
             {
                 "tabela_legada": "FormsOnline",
                 "tabela_moderna": "FormsOnline",
-                "estrategia": "completa", 
-                "schema": "Libra",
+                "estrategia": "completa",
                 "frequencia_sincronizacao_minutos": 1,
                 "coluna_last_updated": null,
                 "comentario": "Formulários Online.",
@@ -1650,8 +1624,7 @@
             {
                 "tabela_legada": "idiomaOferecimentoDisciplina",
                 "tabela_moderna": "idiomaOferecimentoDisciplina",
-                "estrategia": "completa", 
-                "schema": "Libra",
+                "estrategia": "completa",
                 "frequencia_sincronizacao_minutos": 1,
                 "coluna_last_updated": null,
                 "comentario": "Idiomas em que as disciplinas são oferecidas.",
@@ -1692,13 +1665,12 @@
         ]
     },
     {"banco_legado": "FFCLRP",
-    "banco_moderno": "CQRS",
+    "banco_moderno": "CQRS_FFCLRP",
     "tabelas": [
         {
             "tabela_legada": "R25CRECREDOC",
             "tabela_moderna": "R25CRECREDOC",
-            "estrategia": "completa", 
-            "schema": "FFCLRP",
+            "estrategia": "completa",
             "frequencia_sincronizacao_minutos": 1,
             "coluna_last_updated": "dtaultalt",
             "comentario": "Orientadores credenciados nas áreas de concentração.",
@@ -1787,8 +1759,7 @@
         {
             "tabela_legada": "PESSOA",
             "tabela_moderna": "PESSOA",
-            "estrategia": "completa", 
-            "schema": "FFCLRP",
+            "estrategia": "completa",
             "frequencia_sincronizacao_minutos": 1,
             "coluna_last_updated": "dtaultalt",
             "comentario": "Cadastro das Pessoas que possuem algum tipo de vínculo com a USP,",
@@ -1940,8 +1911,7 @@
         {
             "tabela_legada": "AREA",
             "tabela_moderna": "AREA",
-            "estrategia": "completa", 
-            "schema": "FFCLRP",
+            "estrategia": "completa",
             "frequencia_sincronizacao_minutos": 1,
             "coluna_last_updated": null,
             "comentario": "Áreas de concentração vinculadas aos Programas de Pós-graduação",
@@ -1987,8 +1957,7 @@
         {
             "tabela_legada": "NOMECURSO",
             "tabela_moderna": "NOMECURSO",
-            "estrategia": "completa", 
-            "schema": "FFCLRP",
+            "estrategia": "completa",
             "frequencia_sincronizacao_minutos": 1,
             "coluna_last_updated": null,
             "comentario": "Histórico de alterações dos nomes dos cursos de pós-graduação",
@@ -2043,8 +2012,7 @@
         {
             "tabela_legada": "NOMEAREA",
             "tabela_moderna": "NOMEAREA",
-            "estrategia": "completa", 
-            "schema": "FFCLRP",
+            "estrategia": "completa",
             "frequencia_sincronizacao_minutos": 1,
             "coluna_last_updated": null,
             "comentario": "Histórico de alterações do nome das áreas de concentração e do seu vínculo com os cursos de pós-graduação.",
@@ -2100,8 +2068,7 @@
         {
             "tabela_legada": "DISCIPLINA",
             "tabela_moderna": "DISCIPLINA",
-            "estrategia": "completa", 
-            "schema": "FFCLRP",
+            "estrategia": "completa",
             "frequencia_sincronizacao_minutos": 1,
             "coluna_last_updated": "dtaultalt",
             "comentario": "Disciplinas credenciadas junto à Pró-Reitoria de Pós-Graduação.",
@@ -2271,8 +2238,7 @@
         {
             "tabela_legada": "OFERECIMENTO",
             "tabela_moderna": "OFERECIMENTO",
-            "estrategia": "completa", 
-            "schema": "FFCLRP",
+            "estrategia": "completa",
             "frequencia_sincronizacao_minutos": 1,
             "coluna_last_updated": null,
             "comentario": "Oferecimentos das disciplinas, cadastrados pela área de concentração em que a disciplina foi credenciada pela primeira vez - a chamada área 'mãe' da disciplina.",
@@ -2388,8 +2354,7 @@
         {
             "tabela_legada": "ESPACOTURMA",
             "tabela_moderna": "ESPACOTURMA",
-            "estrategia": "completa", 
-            "schema": "FFCLRP",
+            "estrategia": "completa",
             "frequencia_sincronizacao_minutos": 1,
             "coluna_last_updated": null,
             "comentario": "Local e horário dos oferecimentos das disciplinas da pós-graduação.",
@@ -2447,8 +2412,7 @@
         {
             "tabela_legada": "R32TURMINDOC",
             "tabela_moderna": "R32TURMINDOC",
-            "estrategia": "completa", 
-            "schema": "FFCLRP",
+            "estrategia": "completa",
             "frequencia_sincronizacao_minutos": 1,
             "coluna_last_updated": null,
             "comentario": "Ministrante de Disciplina da pós-graduação. Deve ser um dos responsáveis pela disciplina.",
@@ -2488,8 +2452,7 @@
         {
             "tabela_legada": "R27DISMINCRE",
             "tabela_moderna": "R27DISMINCRE",
-            "estrategia": "completa", 
-            "schema": "FFCLRP",
+            "codare": "completa",
             "frequencia_sincronizacao_minutos": 1,
             "coluna_last_updated": null,
             "comentario": "Credenciamento da disciplina em área de concentração, no nível específico.",
@@ -2542,8 +2505,7 @@
         {
             "tabela_legada": "R39PGMORIDOC",
             "tabela_moderna": "R39PGMORIDOC",
-            "estrategia": "completa", 
-            "schema": "FFCLRP",
+            "estrategia": "completa",
             "frequencia_sincronizacao_minutos": 1,
             "coluna_last_updated": "dtaultalt",
             "comentario": "Orientadores e coorientadores de cursos regulares de pós- graduação.",
@@ -2645,8 +2607,7 @@
         {
             "tabela_legada": "R10DOCCOOCUR",
             "tabela_moderna": "R10DOCCOOCUR",
-            "estrategia": "completa", 
-            "schema": "FFCLRP",
+            "estrategia": "completa",
             "frequencia_sincronizacao_minutos": 1,
             "coluna_last_updated": null,
             "comentario": "Docentes USP que exercem função de Coordenador ou Vice-coordenador de um Programa de Pós graduação.",
@@ -2690,8 +2651,7 @@
         {
             "tabela_legada": "QUALIFICACAO",
             "tabela_moderna": "QUALIFICACAO",
-            "estrategia": "completa", 
-            "schema": "FFCLRP",
+            "estrategia": "completa",
             "frequencia_sincronizacao_minutos": 1,
             "coluna_last_updated": null,
             "comentario": "Possui os dados da qualificação de um aluno em um determinado nível. Obs: alunos vinculados ao artigo 103 não precisam de qualificação.",
@@ -2768,8 +2728,7 @@
         {
             "tabela_legada": "VINCULOPESSOAUSP",
             "tabela_moderna": "VINCULOPESSOAUSP",
-            "estrategia": "completa", 
-            "schema": "FFCLRP",
+            "estrategia": "completa",
             "frequencia_sincronizacao_minutos": 1,
             "coluna_last_updated": "dtaultalt",
             "comentario": "Contém a consolidação de determinados dados básicos de cada pessoa da USP com seus vínculos, de forma simplificada e resumida.",
@@ -3052,8 +3011,7 @@
         {
             "tabela_legada": "R48PGMTRBDOC",
             "tabela_moderna": "R48PGMTRBDOC",
-            "estrategia": "completa", 
-            "schema": "FFCLRP",
+            "estrategia": "completa",
             "frequencia_sincronizacao_minutos": 1,
             "coluna_last_updated": null,
             "comentario": "Membros das Bancas de Defesa de Dissertação (mestrado) e de Tese (doutorado).",
@@ -3131,8 +3089,7 @@
         {
             "tabela_legada": "AGPROGRAMA",
             "tabela_moderna": "AGPROGRAMA",
-            "estrategia": "completa", 
-            "schema": "FFCLRP",
+            "estrategia": "completa",
             "frequencia_sincronizacao_minutos": 1,
             "coluna_last_updated": null,
             "comentario": "CURSOS DE PÓS-GRADUAÇÃO(Mestrado ou Doutorado), ao qual o aluno está vinculado, pertencente a uma área de concentração, de um determinado programa de pós-graduação. ",
@@ -3269,8 +3226,7 @@
         {
             "tabela_legada": "CREDAREA",
             "tabela_moderna": "CREDAREA",
-            "estrategia": "completa", 
-            "schema": "FFCLRP",
+            "estrategia": "completa",
             "frequencia_sincronizacao_minutos": 1,
             "coluna_last_updated": null,
             "comentario": "Credenciamento de Área de Concentração. Mantém a data de proposição da Área na Pró-Reitoria de Pós-Graduação e a data da efetiva criação da Área na USP.",
@@ -3325,8 +3281,7 @@
         {
             "tabela_legada": "EMAILPESSOA",
             "tabela_moderna": "EMAILPESSOA",
-            "estrategia": "completa", 
-            "schema": "FFCLRP",
+            "estrategia": "completa",
             "frequencia_sincronizacao_minutos": 1,
             "coluna_last_updated": "dtaultalt",
             "comentario": "Emails das pessoas",
@@ -3394,8 +3349,7 @@
         {
             "tabela_legada": "CURSO",
             "tabela_moderna": "CURSO",
-            "estrategia": "completa", 
-            "schema": "FFCLRP",
+            "estrategia": "completa",
             "frequencia_sincronizacao_minutos": 1,
             "coluna_last_updated": null,
             "comentario": "Esta tabela, apesar do nome CURSO, passou a conter (desde out/2000) os PROGRAMAS DE PÓS-GRADUAÇÃO, definidos como: um conjunto de uma ou mais áreas de concentração sob uma mesma coordenação e recebendo uma avaliação única da CAPES.",
@@ -3472,8 +3426,7 @@
         {
             "tabela_legada": "AGPROGRAMA",
             "tabela_moderna": "AGPROGRAMA",
-            "estrategia": "completa", 
-            "schema": "FFCLRP",
+            "estrategia": "completa",
             "frequencia_sincronizacao_minutos": 1,
             "coluna_last_updated": null,
             "comentario": "Esta tabela, apesar do nome AGPROGRAMA, passou a conter os CURSOS DE PÓS-GRADUAÇÃO(Mestrado ou Doutorado), ao qual o aluno está vinculado, pertencente a uma área de concentração, de um determinado programa de pós-graduação.",
