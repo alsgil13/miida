@@ -31,6 +31,7 @@ class LimpezaOrfaosProcessor
         $bancoModerno  = $banco['banco_moderno'];
         $tabelaLegada  = $tabela['tabela_legada'];
         $tabelaModerna = $tabela['tabela_moderna'];
+        $schemaModerno = $tabela['schema'] ?? 'dbo';
 
         // 1. MAPEAMENTO DINÂMICO DE PKS VIA CONFIG_JSON
         $pksOrigem  = [];
@@ -52,7 +53,7 @@ class LimpezaOrfaosProcessor
             $pksDestino[] = $pkPadrao;
         }
 
-        $chaveCronometro = "{$bancoModerno}.{$tabelaModerna}";
+        $chaveCronometro = "{$bancoModerno}.{$schemaModerno}.{$tabelaModerna}";
         $pksLogStr = implode(' + ', $pksDestino);
         echo "\n [" . date('H:i:s') . "] Iniciando auditoria de órfãos em: [{$chaveCronometro}] via PKs [{$pksLogStr}]\n";
 
@@ -70,7 +71,7 @@ class LimpezaOrfaosProcessor
             $hashesLegado = $stmtLegado->fetchAll(PDO::FETCH_COLUMN, 0);
 
             // Coleta hashes de PK no banco Moderno
-            $sqlModerno = "SELECT {$concatDestino} AS pk_virtual FROM {$bancoModerno}.dbo.{$tabelaModerna}";
+            $sqlModerno = "SELECT {$concatDestino} AS pk_virtual FROM {$bancoModerno}.{$schemaModerno}.{$tabelaModerna}";
             $stmtModerno = $this->connModerno->query($sqlModerno);
             $hashesModerno = $stmtModerno->fetchAll(PDO::FETCH_COLUMN, 0);
 
@@ -96,7 +97,7 @@ class LimpezaOrfaosProcessor
                     }
 
                     $whereString = implode(' AND ', $whereClauses);
-                    $sqlDelete = "DELETE FROM {$bancoModerno}.dbo.{$tabelaModerna} WHERE {$whereString}";
+                    $sqlDelete = "DELETE FROM {$bancoModerno}.{$schemaModerno}.{$tabelaModerna} WHERE {$whereString}";
                     
                     $registrosExcluidos += $this->connModerno->exec($sqlDelete);
                 }
