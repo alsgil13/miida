@@ -31,14 +31,15 @@ class DataSyncProcessor
         $bancoLegado   = $configBanco['banco_legado'];
         $bancoModerno  = $configBanco['banco_moderno'];
         $tabelaLegada  = $configTabela['tabela_legada'];
+        $schemaLegado = $configTabela['schema_legado'] ?? "dbo";
         $tabelaModerna = $configTabela['tabela_moderna'];
-        $schemaModerno = is_null($configTabela['schema']) ? "dbo" : $configTabela['schema'];
+        $schemaModerno = $configTabela['schema_moderno'] ?? "dbo";
         $colunaUpdate  = $configTabela['coluna_last_updated'];
 
         $timestampCiclo = date('Y-m-d H:i:s');
         $componenteNome = "DataSyncProcessor -> {$schemaModerno}.{$tabelaModerna}";
         
-        echo "  ├── Sincronizando: [{$bancoLegado}].[{$tabelaLegada}] -> [{$bancoModerno}].[{$schemaModerno}].[{$tabelaModerna}]\n";
+        echo "  ├── Sincronizando: [{$bancoLegado}].[{$schemaLegado}].[{$tabelaLegada}] -> [{$bancoModerno}].[{$schemaModerno}].[{$tabelaModerna}]\n";
 
         try {
             $inicioMiliAllSinc = microtime(true);
@@ -48,9 +49,9 @@ class DataSyncProcessor
             $dataCorte = $this->controlRepo->obterUltimaDataSincronizacao($bancoModerno, $tabelaModerna);
 
             if ($colunaUpdate !== null) {
-                $sqlExtracao = "SELECT * FROM [{$tabelaLegada}] WHERE [{$colunaUpdate}] >= :dataCorte";
+                $sqlExtracao = "SELECT * FROM [{$bancoLegado}].[{$schemaLegado}].[{$tabelaLegada}] WHERE [{$colunaUpdate}] >= :dataCorte";
             } else {
-                $sqlExtracao = "SELECT * FROM [{$tabelaLegada}]";
+                $sqlExtracao = "SELECT * FROM [{$bancoLegado}].[{$schemaLegado}].[{$tabelaLegada}]";
             }
 
             $stmtExtracao = $this->connLegado->prepare($sqlExtracao);
@@ -65,7 +66,7 @@ class DataSyncProcessor
             }
 ##### Parei aquiiiiiiiiii
             if (empty($chavesPrimarias)) {
-                throw new Exception("A tabela {$schemaModerno}.{$tabelaModerna} não possui nenhuma Chave Primária ('pk') mapeada no JSON.");
+                throw new Exception("A tabela {$bancoModerno}.{$schemaModerno}.{$tabelaModerna} não possui nenhuma Chave Primária ('pk') mapeada no JSON.");
             }
 
             // Identifica os campos timestamp
@@ -146,7 +147,8 @@ class DataSyncProcessor
     {
         $bancoModerno  = $configBanco['banco_moderno'];
         $tabelaModerna = $configTabela['tabela_moderna'];
-        $schemaModerno = $configTabela['schema'] ?? 'dbo'; 
+        //$schemaLegado = $configTabela['schema_legado'] ?? "dbo";
+        $schemaModerno = $configTabela['schema_moderno'] ?? "dbo";
         $colunaUpdate  = $configTabela['coluna_last_updated'];
         $tabelaModernaFQ = $bancoModerno.".".$schemaModerno.".".$tabelaModerna;
         $registrosBatchProcessados = 0;

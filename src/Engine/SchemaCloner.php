@@ -161,7 +161,7 @@ class SchemaCloner
     {
         $tabelaDestino = $configTabela['tabela_moderna'];
         // CORREÇÃO: Alinhado com a chave do seu JSON reorganizado
-        $schemaDestino = $configTabela['schema'] ?? 'dbo'; 
+        $schemaDestino = $configTabela['schema_moderno'] ?? 'dbo'; 
         $mapeamento = $configTabela['camada_anticorrupcao']['mapeamento_colunas'];
 
         $colunasDdl = [];

@@ -31,7 +31,8 @@ class LimpezaOrfaosProcessor
         $bancoModerno  = $banco['banco_moderno'];
         $tabelaLegada  = $tabela['tabela_legada'];
         $tabelaModerna = $tabela['tabela_moderna'];
-        $schemaModerno = $tabela['schema'] ?? 'dbo';
+        $schemaModerno = $tabela['schema_moderno'] ?? 'dbo';
+        $schemaLegado = $tabela['schema_legado'] ?? 'dbo';
 
         // 1. MAPEAMENTO DINÂMICO DE PKS VIA CONFIG_JSON
         $pksOrigem  = [];
@@ -66,12 +67,12 @@ class LimpezaOrfaosProcessor
             $concatDestino = implode(" + '-' + ", array_map(function($col) { return "CAST({$col} AS VARCHAR(64))"; }, $pksDestino));
 
             // Coleta hashes de PK no banco Legado
-            $sqlLegado = "SELECT {$concatOrigem} AS pk_virtual FROM {$bancoLegado}.dbo.{$tabelaLegada}";
+            $sqlLegado = "SELECT {$concatOrigem} AS pk_virtual FROM [{$bancoLegado}].[{$schemaLegado}].[{$tabelaLegada}]";
             $stmtLegado = $this->connLegado->query($sqlLegado);
             $hashesLegado = $stmtLegado->fetchAll(PDO::FETCH_COLUMN, 0);
 
             // Coleta hashes de PK no banco Moderno
-            $sqlModerno = "SELECT {$concatDestino} AS pk_virtual FROM {$bancoModerno}.{$schemaModerno}.{$tabelaModerna}";
+            $sqlModerno = "SELECT {$concatDestino} AS pk_virtual FROM [{$bancoModerno}].[{$schemaModerno}].[{$tabelaModerna}]";
             $stmtModerno = $this->connModerno->query($sqlModerno);
             $hashesModerno = $stmtModerno->fetchAll(PDO::FETCH_COLUMN, 0);
 
