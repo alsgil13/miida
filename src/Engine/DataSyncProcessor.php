@@ -131,7 +131,7 @@ class DataSyncProcessor
         } catch (Exception $e) {
             $bancoModerno  = $configBanco['banco_moderno'];
             $tabelaModerna = $configTabela['tabela_moderna'];
-            $schemaModerno = $configTabela['schema'];
+            $schemaModerno = $configTabela['schema_moderno'];
             $this->controlRepo->atualizarEstadoSincronizacao($bancoModerno, $schemaModerno.".".$tabelaModerna, 'ERRO', 0, $timestampCiclo);
             
             // LOG DE ERRO OPERACIONAL
