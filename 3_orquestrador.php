@@ -1,43 +1,44 @@
 <?php
 
 /**
- * MIIDA - Middleware de Ingestão, Integração e Desacoplamento de Arquiteturas
- * Daemon Orquestrador de Sincronização Contínua (Worker Process)
+ * MIIDA - Middleware de Ingestao, Integracao e Desacoplamento de Arquiteturas
+ * Daemon Orquestrador de Sincronizacao Continua (Worker Process) - Versao Multi-SGBD Limpa
  */
 
 set_time_limit(0);
 
 require_once __DIR__ . '/autoload.php';
-require_once __DIR__ . '/4_limpeza_orfaos.php'; // Inclui o novo arquivo de limpeza
 
 use Miida\Database\ConnectionFactory;
 use Miida\Database\ControlRepository;
+use Miida\Database\Syntax\SqlServerSyntax;
+use Miida\Database\Syntax\MySqlSyntax;
+use Miida\Database\Syntax\PostgresSyntax;
 use Miida\Services\AntiCorruptionLayer;
 use Miida\Services\Logger;
 use Miida\Engine\DataSyncProcessor;
-use Miida\Engine\LimpezaOrfaosProcessor; // Namespace da nova classe
+use Miida\Engine\LimpezaOrfaosProcessor;
 
 $jsonPath = __DIR__ . '/config/pipeline_config.json';
 
 if (!file_exists($jsonPath)) {
-    die("ERRO: Arquivo de parametrização 'pipeline_config.json' não foi encontrado.\n");
+    die("ERRO: Arquivo de parametrizacao 'pipeline_config.json' nao foi encontrado.\n");
 }
 
 echo "=========================================================\n";
 echo "           MIIDA - MOTOR DAEMON ORQUESTRADOR             \n";
 echo "=========================================================\n";
-echo "[*] Iniciando Worker em segundo plano (Loop Contínuo)...\n";
-echo "[*] Monitorando alterações cadastrais e de infraestrutura...\n\n";
+echo "[*] Iniciando Worker em segundo plano (Loop Continuo)...\n";
+echo "[*] Monitorando alteracoes cadastrais e de infraestrutura...\n\n";
 
-// LÊ O CONFIG APENAS UMA VEZ NA INICIALIZAÇÃO
 $config = json_decode(file_get_contents($jsonPath), true);
 if (json_last_error() !== JSON_ERROR_NONE) {
-    die("ERRO: Falha de sintaxe estrutural no JSON inicial.\n");
+    die("ERRO: O arquivo JSON possui erros de sintaxe: " . json_last_error_msg() . "\n");
 }
 
 $infra = $config['configuracao_infraestrutura'];
 
-// PROCESSA AS SENHAS E CONEXÕES DO .ENV UMA ÚNICA VEZ FORA DO LAÇO
+// --- PROCESSAMENTO DAS VARIAVEIS DE AMBIENTE (.ENV) ---
 foreach (['origem_command', 'destino_query'] as $no) {
     foreach ($infra[$no] as $chave => $valor) {
         if (strpos((string)$valor, 'env:') === 0) {
@@ -47,55 +48,79 @@ foreach (['origem_command', 'destino_query'] as $no) {
     }
 }
 
-$tempoLoopControle = (int)($infra['intervalo_verificacao_segundos'] ?? 5);
-$intervaloLimpezaMinutos = (int)($infra['intervalo_limpeza_orfaos_minutos'] ?? 60);
+try {
+    // 1. RESOLUCAO DOS DIALETOS DE SGBD (PADRAO STRATEGY)
+    $sgbdOrigem = strtolower($infra['origem_command']['sgbd'] ?? 'sqlserver');
+    switch ($sgbdOrigem) {
+        case 'postgres':
+        case 'postgresql': $syntaxLegado = new PostgresSyntax(); break;
+        case 'mysql':      $syntaxLegado = new MySqlSyntax(); break;
+        case 'sqlserver':
+        default:           $syntaxLegado = new SqlServerSyntax(); break;
+    }
 
-$cronometroTabelas = [];
-$proximaLimpezaOrfaos = time(); // Agenda a primeira auditoria de órfãos imediatamente ao iniciar
+    $sgbdDestino = strtolower($infra['destino_query']['sgbd'] ?? 'sqlserver');
+    switch ($sgbdDestino) {
+        case 'postgres':
+        case 'postgresql': $syntaxModerno = new PostgresSyntax(); break;
+        case 'mysql':      $syntaxModerno = new MySqlSyntax(); break;
+        case 'sqlserver':
+        default:           $syntaxModerno = new SqlServerSyntax(); break;
+    }
 
-while (true) {
-    try {
-        $connLegado  = ConnectionFactory::getLegadoConnection($infra, 'master');
-        $connModerno = ConnectionFactory::getModernoConnection($infra, 'master');
+    echo "[*] Conectando ao Banco Legado de Origem...\n";
+    $connLegado = ConnectionFactory::getLegadoConnection($infra);
 
-        $controlRepo = new ControlRepository($connModerno);
-        $acl         = new AntiCorruptionLayer();
-        $logger      = new Logger($connModerno);
-        
-        $processor   = new DataSyncProcessor($connLegado, $connModerno, $controlRepo, $acl, $logger);
-        $limpador    = new LimpezaOrfaosProcessor($connLegado, $connModerno, $logger);
+    echo "[*] Conectando ao Banco Moderno de Destino...\n";
+    $connModerno = ConnectionFactory::getModernoConnection($infra);
+    echo "[OK] Inicializacao de conexoes e motores efetuada com sucesso.\n\n";
 
+    // 2. INJECAO DE DEPENDENCIAS DE INFRAESTRUTURA
+    $controlRepo = new ControlRepository($connModerno, $syntaxModerno);
+    $acl = new AntiCorruptionLayer();
+    $logger = new Logger($connModerno, $syntaxModerno);
+    
+    // Processadores configurados com suporte Multi-SGBD nativo
+    $sincronizador = new DataSyncProcessor($connLegado, $connModerno, $syntaxLegado, $syntaxModerno, $controlRepo, $acl, $logger);
+    $limpador = new LimpezaOrfaosProcessor($connLegado, $connModerno, $syntaxLegado, $syntaxModerno, $logger);
+
+    // 3. ESTRUTURAÇÃO DOS MARCADORES DE CRONOMETRO EM MEMORIA
+    $cronometroTabelas = [];
+    $intervaloLimpezaMinutos = (int)($config['configuracao_global']['intervalo_limpeza_orfaos_minutos'] ?? 60);
+    $proximaLimpezaOrfaos = time() + ($intervaloLimpezaMinutos * 60);
+
+    echo "Orquestrador rodando. Intervalo de limpeza de orfaos configurado para " . $intervaloLimpezaMinutos . " minutos.\n";
+    echo "Iniciando loop de captura incremental...\n\n";
+
+    // LOOP INFINITO DE ORQUESTRAÇÃO DO INGESTION ENGINE
+    while (true) {
         $agora = time();
 
-        // ---------------------------------------------------------------------
-        // SUB-PIPELINE 1: CAPTURA INCREMENTAL (INSERÇÕES / ATUALIZAÇÕES)
-        // ---------------------------------------------------------------------
+        // SUB-PIPELINE 1: CAPTURA INCREMENTAL DAS ALTERAÇÕES (DATA SYNC)
         foreach ($config['bancos_gerenciados'] as $banco) {
             foreach ($banco['tabelas'] as $tabela) {
-                $tabelaModerna = $tabela['tabela_moderna'];
-                $frequenciaMinutos = (int)($tabela['frequencia_sincronizacao_minutos'] ?? 1);
-                $intervaloSegundos = $frequenciaMinutos * 60;
-                $chaveCronometro = $banco['banco_moderno'] . '.' . $tabelaModerna;
+                
+                $chaveCronometro = $banco['banco_moderno'] . "." . $tabela['tabela_moderna'];
+                $intervaloTabelaSegundos = (int)($tabela['intervalo_sincronizacao_segundos'] ?? 10);
 
-                if (!isset($cronometroTabelas[$chaveCronometro]) || ($agora - $cronometroTabelas[$chaveCronometro]) >= $intervaloSegundos) {
-                    echo "\n [" . date('H:i:s') . "] Alocando pipeline incremental para: [{$chaveCronometro}]\n";
-                    $inicioMili = microtime(true);
+                if (!isset($cronometroTabelas[$chaveCronometro])) {
+                    $cronometroTabelas[$chaveCronometro] = 0;
+                }
 
-                    $processor->sincronizarTabela($banco, $tabela);
+                if ($agora >= ($cronometroTabelas[$chaveCronometro] + $intervaloTabelaSegundos)) {
                     
-                    $tempoGastoMili = round((microtime(true) - $inicioMili) * 1000, 2);
-                    echo " [" . date('H:i:s') . "] Concluído: [{$chaveCronometro}] em {$tempoGastoMili} ms\n";
+                    // Executa a carga incremental isolada
+                    $sincronizador->sincronizarTabela($banco, $tabela);
                     
+                    // Atualiza o marcador temporal da tabela para o proximo ciclo
                     $cronometroTabelas[$chaveCronometro] = time();
                 }
             }
         }
 
-        // ---------------------------------------------------------------------
-        // SUB-PIPELINE 2: AUDITORIA CRONOMETRADA DE EXPURGO DE ÓRFÃOS (DELEÇÕES)
-        // ---------------------------------------------------------------------
+        // SUB-PIPELINE 2: AUDITORIA CRONOMETRADA DE EXPURGO DE ORFAOS
         if ($agora >= $proximaLimpezaOrfaos) {
-            echo "\n\n [⚠️ " . date('H:i:s') . "] ALERTA DE CRON: Disparando ciclo global de limpeza de registros órfãos...\n";
+            echo "\n\n [ALERTA] Disparando ciclo global de limpeza de registros orfaos...\n";
             $inicioLimpeza = microtime(true);
 
             foreach ($config['bancos_gerenciados'] as $banco) {
@@ -105,18 +130,20 @@ while (true) {
             }
 
             $tempoGastoLimpeza = round((microtime(true) - $inicioLimpeza) * 1000, 2);
-            echo " [✔ " . date('H:i:s') . "] Ciclo de limpeza finalizado em {$tempoGastoLimpeza} ms.\n\n";
+            echo " [OK] Ciclo de limpeza finalizado em " . $tempoGastoLimpeza . " ms.\n\n";
 
-            // reagenda a próxima execução de limpeza baseado no tempo configurado no JSON
+            // Reagenda a proxima execucao baseando-se no tempo definido no JSON
             $proximaLimpezaOrfaos = time() + ($intervaloLimpezaMinutos * 60);
         }
 
-    } catch (Exception $e) {
-        echo "ERRO NO ORQUESTRADOR: " . $e->getMessage() . "\n";
-        echo "[*] Liberando canais de comunicação e preparando auto-recuperação...\n";
-    } finally {
-        ConnectionFactory::killConnections();
+        // Descanso defensivo do processador para evitar consumo de 100% de CPU thread lock
+        usleep(200000); // 200 milissegundos
     }
 
-    sleep($tempoLoopControle);
+} catch (Exception $e) {
+    echo "ERRO NO ORQUESTRADOR: " . $e->getMessage() . "\n";
+    if (isset($logger)) {
+        $logger->error("DataSyncOrchestrator Daemon", "Falha fatal no loop do orquestrador", $e->getMessage());
+    }
+    exit(1);
 }

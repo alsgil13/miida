@@ -4,18 +4,19 @@ namespace Miida\Services;
 
 use PDO;
 use Exception;
+use Miida\Database\Syntax\SgbdSyntaxInterface;
 
 class Logger
 {
     private ?PDO $connModerno;
     private string $logFolder;
     private string $logFile;
+    private string $tabelaLogs;
 
     /**
-     * O construtor aceita a conexão do banco moderno de forma opcional.
-     * Se o banco cair, o Logger continua gravando no arquivo físico de forma segura!
+     * O construtor agora aceita opcionalmente a estratégia de sintaxe do SGBD de destino
      */
-    public function __construct(?PDO $connModerno = null)
+    public function __construct(?PDO $connModerno = null, ?SgbdSyntaxInterface $syntax = null)
     {
         $this->connModerno = $connModerno;
         $this->logFolder = __DIR__ . '/../../logs';
@@ -24,6 +25,13 @@ class Logger
         // Garante que a pasta /logs exista na raiz do projeto
         if (!is_dir($this->logFolder)) {
             mkdir($this->logFolder, 0777, true);
+        }
+
+        // Se houver uma estratégia de sintaxe injetada, qualifica a tabela de logs dinamicamente
+        if ($syntax !== null) {
+            $this->tabelaLogs = $syntax->obterNomeQualificado('master', 'dbo', 'miida_logs_sistema');
+        } else {
+            $this->tabelaLogs = '"public"."miida_logs_sistema"'; // Fallback genérico ANSI
         }
     }
 
@@ -35,13 +43,14 @@ class Logger
         $dataAtual = date('Y-m-d H:i:s');
 
         // 1. GRAVAÇÃO NO ARQUIVO FÍSICO (.log) - À prova de falhas de banco
-        $linhaLog = sprintf("[%s] [%s] [%s]: %s %s\n", $dataAtual, strtoupper($nivel), $componente, $mensagem, $detalhes ? "({$detalhes})" : "");
+        $linhaLog = sprintf("[%s] [%s] [%s]: %s %s\n", $dataAtual, strtoupper($nivel), strtoupper($componente), $mensagem, $detalhes ? "| Detalhes: " . $detalhes : "");
         file_put_contents($this->logFile, $linhaLog, FILE_APPEND);
 
-        // 2. GRAVAÇÃO NA TABELA DO BANCO DE DADOS (Se a conexão estiver ativa)
-        if ($this->connModerno) {
+        // 2. PERSISTÊNCIA NO BANCO DE DADOS DE LEITURA/AUDITORIA
+        if ($this->connModerno !== null) {
             try {
-                $sql = "INSERT INTO [master].[dbo].[miida_log_eventos] (data_evento, nivel, componente, mensagem, detalhes_tecnicos) 
+                // Query com o nome de tabela dinâmico e parâmetros ANSI padrão funcionais em qualquer SGBD
+                $sql = "INSERT INTO {$this->tabelaLogs} (data_log, nivel, componente, mensagem, detalhes) 
                         VALUES (:data, :nivel, :componente, :mensagem, :detalhes)";
                 
                 $stmt = $this->connModerno->prepare($sql);
@@ -54,7 +63,7 @@ class Logger
                 ]);
             } catch (Exception $e) {
                 // Se falhar o insert no banco, grava o erro da falha no próprio arquivo de log físico
-                $linhaErroBanco = sprintf("[%s] [CRITICAL] [Logger]: Falha ao persistir log no SQL Server: %s\n", $dataAtual, $e->getMessage());
+                $linhaErroBanco = sprintf("[%s] [CRITICAL] [Logger]: Falha ao persistir log no SGBD de Destino: %s\n", $dataAtual, $e->getMessage());
                 file_put_contents($this->logFile, $linhaErroBanco, FILE_APPEND);
             }
         }

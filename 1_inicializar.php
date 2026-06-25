@@ -2,12 +2,15 @@
 
 /**
  * MIIDA - Middleware de Ingestão, Integração e Desacoplamento de Arquiteturas
- * Script CLI de Inicialização, Provisionamento e Auditoria de Infraestrutura
+ * Script CLI de Inicialização, Provisionamento e Auditoria de Infraestrutura (Multi-SGBD)
  */
 
 require_once __DIR__ . '/autoload.php';
 
 use Miida\Database\ConnectionFactory;
+use Miida\Database\Syntax\SqlServerSyntax;
+use Miida\Database\Syntax\MySqlSyntax;
+use Miida\Database\Syntax\PostgresSyntax;
 use Miida\Engine\SchemaCloner;
 
 $jsonPath = __DIR__ . '/config/pipeline_config.json';
@@ -17,7 +20,7 @@ if (!file_exists($jsonPath)) {
 }
 
 echo "=========================================================\n";
-echo "           MIIDA - INICIALIZANDO SUBSISTEMA             \n";
+echo "      MIIDA - INICIALIZANDO SUBSISTEMA (MULTI-SGBD)      \n";
 echo "=========================================================\n";
 echo "[*] Carregando mapa de metadados declarativo...\n";
 
@@ -32,68 +35,108 @@ $infra = $config['configuracao_infraestrutura'];
 foreach (['origem_command', 'destino_query'] as $no) {
     foreach ($infra[$no] as $chave => $valor) {
         if (strpos((string)$valor, 'env:') === 0) {
-            $envVarName = substr($valor, 4);
-            $infra[$no][$chave] = getenv($envVarName) ?: '';
+            $infra[$no][$chave] = getenv(substr($valor, 4)) ?: '';
         }
     }
 }
 
 try {
-    echo "[...] Estabelecendo conexão inicial com o nó moderno (SQL 2022)...\n";
-    $connModerno = ConnectionFactory::getModernoConnection($infra, 'master');
-    echo " -> Conexão ativa via driver: " . ($infra['destino_query']['driver'] ?? 'padrão') . "\n\n";
-
-    // FASE 1: AUTO-PROVISIONAMENTO DA TABELA DE CONTROLE OPERACIONAL (MIIDA)
-    echo "[1/2] Verificando repositório de controle operacional...\n";
+    // 1. IDENTIFICAÇÃO E INSTANCIAÇÃO DO PADRÃO STRATEGY PARA O DESTINO
+    $sgbdDestino = strtolower($infra['destino_query']['sgbd'] ?? 'sqlserver');
     
-    $sqlTabelaControle = "
-        IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'miida_controle_sincronizacao')
-        BEGIN
-            CREATE TABLE miida_controle_sincronizacao (
-                banco_nome VARCHAR(128) NOT NULL,
-                tabela_nome VARCHAR(128) NOT NULL,
-                ultima_sincronizacao DATETIME NOT NULL,
-                status_execucao VARCHAR(32) NOT NULL,
-                registros_afetados INT NOT NULL DEFAULT 0,
-                PRIMARY KEY (banco_nome, tabela_nome)
-            );
-        END;
+    switch ($sgbdDestino) {
+        case 'postgres':
+        case 'postgresql':
+            $syntaxModerno = new PostgresSyntax();
+            break;
+        case 'mysql':
+            $syntaxModerno = new MySqlSyntax();
+            break;
+        case 'sqlserver':
+        default:
+            $syntaxModerno = new SqlServerSyntax();
+            break;
+    }
+
+    echo " -> Motores detetados. Destino configurado como: [" . strtoupper($sgbdDestino) . "]\n";
+    echo "[1/2] Conectando ao servidor moderno e preparando metadados...\n";
+
+    // Estabelece a conexão centralizada através da nossa Factory (Agnóstica a banco na DSN)
+    $connModerno = ConnectionFactory::getModernoConnection($infra);
+
+    // Resolve os nomes qualificados das tabelas globais baseado no dialeto do banco ativo
+    $tabelaControle = $syntaxModerno->obterNomeQualificado('master', 'dbo', 'miida_controle_sincronizacao');
+    $tabelaLogs     = $syntaxModerno->obterNomeQualificado('master', 'dbo', 'miida_logs_sistema');
+
+    // Executa a criação do Schema lógico (se o SGBD der suporte, ex: Postgres)
+    $sqlSchemaMaster = $syntaxModerno->obterDdlCriarSchema('dbo');
+    $connModerno->exec($sqlSchemaMaster);
+
+    // FASE 1: PROVISIONAMENTO DAS TABELAS DE INTEGRALIDADE E MIDDLEWARE
+    
+    // Tabela de Controle de Cursores Temporais (Estrutura ANSI compatível com todos os SGBDs)
+    $corpoControle = "
+        banco_nome VARCHAR(128) NOT NULL,
+        tabela_nome VARCHAR(128) NOT NULL,
+        ultima_sincronizacao DATETIME NOT NULL,
+        status_execucao VARCHAR(16) NOT NULL,
+        registros_afetados INT NOT NULL,
+        PRIMARY KEY (banco_nome, tabela_nome)
     ";
+    // Ajusta o tipo DATETIME para TIMESTAMP se for Postgres para manter compatibilidade nativa de tipos
+    if ($sgbdDestino === 'postgres' || $sgbdDestino === 'postgresql') {
+        $corpoControle = str_replace('DATETIME', 'TIMESTAMP', $corpoControle);
+    }
     
-    $connModerno->exec($sqlTabelaControle);
-    echo " -> Tabela [master].[dbo].[miida_controle_sincronizacao] checada/criada com sucesso.\n\n";
+    $sqlCreateTableControle = $syntaxModerno->obterDdlCriarTabela('dbo', 'miida_controle_sincronizacao', $corpoControle);
+    $connModerno->exec($sqlCreateTableControle);
 
-    // Tabela de Log Histórico de Eventos
-    $sqlTabelaLogs = "
-        IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'miida_log_eventos')
-        BEGIN
-            CREATE TABLE miida_log_eventos (
-                id INT IDENTITY(1,1) PRIMARY KEY,
-                data_evento DATETIME NOT NULL DEFAULT GETDATE(),
-                nivel VARCHAR(16) NOT NULL,
-                componente VARCHAR(64) NOT NULL,
-                mensagem VARCHAR(MAX) NOT NULL,
-                detalhes_tecnicos VARCHAR(MAX) NULL
-            );
-        END;
+    // Tabela Centralizada de Auditoria e Logs do MIIDA
+    $corpoLogs = "
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        data_log DATETIME NOT NULL,
+        nivel VARCHAR(16) NOT NULL,
+        componente VARCHAR(64) NOT NULL,
+        mensagem TEXT NOT NULL,
+        detalhes TEXT NULL
     ";
-    $connModerno->exec($sqlTabelaLogs);
-    
-    echo " -> Tabelas de controle e logs checadas/criadas com sucesso no banco master.\n\n";
+    // Ajustes finos sintáticos por dialeto para a tabela de logs
+    if ($sgbdDestino === 'postgres' || $sgbdDestino === 'postgresql') {
+        $corpoLogs = "
+            id SERIAL PRIMARY KEY,
+            data_log TIMESTAMP NOT NULL,
+            nivel VARCHAR(16) NOT NULL,
+            componente VARCHAR(64) NOT NULL,
+            mensagem TEXT NOT NULL,
+            detalhes TEXT NULL
+        ";
+    } elseif ($sgbdDestino === 'sqlserver') {
+        $corpoLogs = "
+            id INT IDENTITY(1,1) PRIMARY KEY,
+            data_log DATETIME NOT NULL,
+            nivel VARCHAR(16) NOT NULL,
+            componente VARCHAR(64) NOT NULL,
+            mensagem VARCHAR(MAX) NOT NULL,
+            detalhes VARCHAR(MAX) NULL
+        ";
+    }
 
-    // FASE 2: CLONAGEM E ENGENHARIA REVERSA DOS BANCOS DE NEGÓCIO
+    $sqlCreateTableLogs = $syntaxModerno->obterDdlCriarTabela('dbo', 'miida_logs_sistema', $corpoLogs);
+    $connModerno->exec($sqlCreateTableLogs);
+    
+    echo " -> Tabelas de controle e logs checadas/criadas com sucesso no nó de destino.\n\n";
+
+    // FASE 2: CLONAGEM E ENGENHERIA REVERSA DOS BANCOS DE NEGÓCIO
     echo "[2/2] Iniciando clonagem declarativa dos esquemas de negócio...\n";
-    $cloner = new SchemaCloner($connModerno);
+    
+    // Injeta a estratégia de sintaxe diretamente no Cloner multi-SGBD
+    $cloner = new SchemaCloner($connModerno, $syntaxModerno);
     $cloner->clonar($config['bancos_gerenciados']);
 
     echo "\n[ OK ] Todo o ecossistema (Controle + Negócio) foi provisionado com sucesso!\n";
     echo "=========================================================\n";
 
 } catch (Exception $e) {
-    echo "\n[ X ] ERRO DURANTE A EXECUÇÃO DO MIDDLEWARE:\n";
-    echo "Mensagem: " . $e->getMessage() . "\n";
-    echo "=========================================================\n";
-} finally {
-    ConnectionFactory::killConnections();
-    echo "[...] Conexões finalizadas de forma segura.\n";
+    echo "\n[ X ] ERRO CRÍTICO DURANTE A EXECUÇÃO:\n " . $e->getMessage() . "\n";
+    exit(1);
 }

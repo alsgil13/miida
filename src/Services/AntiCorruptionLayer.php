@@ -7,10 +7,6 @@ class AntiCorruptionLayer
     /**
      * Processa e higieniza uma única linha (registro) vinda do banco legado,
      * transformando-a no formato aceito pelo nó moderno.
-     *
-     * @param array $linhaBruta Registro retornado do SQL Server 2005
-     * @param array $configTabela Sub-nó do JSON contendo as regras da tabela atual
-     * @return array Registro higienizado pronto para inserção/comparação
      */
     public function processarLinha(array $linhaBruta, array $configTabela): array
     {
@@ -28,30 +24,32 @@ class AntiCorruptionLayer
         foreach ($mapeamento as $colunaLegada => $detalhes) {
             $nomeDestino = $detalhes['nome_destino'] ?? $colunaLegada;
             
-            // Se a coluna não existir no retorno do banco por algum motivo, inicializa como nulo
+            // Se a coluna não existir no retorno bruto do legado, define como nula defensivamente
             $valor = $linhaBruta[$colunaLegada] ?? null;
 
             if ($valor !== null) {
-                // Aplica regras de higienização de string baseadas no JSON
-                if (is_string($valor)) {
-                    if ($removerEspacos) {
-                        $valor = trim($valor);
-                    }
-                    if ($forcarUtf8) {
-                        // Converte de CP1252/ISO-8859-1 para UTF-8 caso venha corrompido do SQL 2005
-                        $valor = mb_convert_encoding($valor, 'UTF-8', 'UTF-8, ISO-8859-1, Windows-1252');
+                // Higienização de strings contra espaços indesejados
+                if ($removerEspacos && is_string($valor)) {
+                    $valor = trim(preg_replace('/\s+/', ' ', $valor));
+                }
+
+                // Conversão forçada e segura para UTF-8 de bases antigas
+                if ($forcarUtf8 && is_string($valor)) {
+                    if (!mb_check_encoding($valor, 'UTF-8')) {
+                        $valor = mb_convert_encoding($valor, 'UTF-8', 'ISO-8859-1');
                     }
                 }
                 
-                // Coerção Estrita de Tipos (Type Casting) baseado no JSON para blindar o SQL 2022
+                // Coerção Estrita de Tipos baseada no JSON para blindar o SGBD moderno
                 $tipoLower = strtolower($detalhes['tipo']);
                 if (strpos($tipoLower, 'int') !== false) {
                     $valor = (int)$valor;
                 } elseif (strpos($tipoLower, 'float') !== false || strpos($tipoLower, 'decimal') !== false) {
-                    $valueLower = strtolower((string)$valor);
                     $valor = (float)$valor;
-                } elseif ($tipoLower === 'bit') {
-                    $valor = (bool)$valor ? 1 : 0;
+                } elseif ($tipoLower === 'bit' || $tipoLower === 'bool' || $tipoLower === 'boolean') { 
+                    // EVOLUÇÃO MULTI-SGBD: Passamos a retornar booleano real do PHP.
+                    // O PDO se encarrega de mapear para true/false no Postgres e 1/0 no MySQL/SQL Server.
+                    $valor = filter_var($valor, FILTER_VALIDATE_BOOLEAN);
                 }
             }
 
@@ -66,9 +64,8 @@ class AntiCorruptionLayer
         }
 
         // Calcula o Hash de Versão MD5 (Coração da detecção de alterações do MIIDA)
-        // Ordena os campos para garantir que a assinatura seja sempre idêntica se os dados forem iguais
         sort($valoresParaHash);
-        $linhaTratada['hash_versao'] = md5(implode('|', $valoresParaHash));
+        $linhaTratada['hash_versao'] = md5(implode(';', $valoresParaHash));
 
         return $linhaTratada;
     }

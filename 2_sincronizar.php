@@ -1,14 +1,17 @@
 <?php
 
 /**
- * MIIDA - Middleware de Ingestão, Integration e Desacoplamento de Arquiteturas
- * Script Principal CLI de Execução e Orquestração do Pipeline de Dados
+ * MIIDA - Middleware de Ingestão, Integração e Desacoplamento de Arquiteturas
+ * Script Principal CLI de Execução e Orquestração do Pipeline de Dados (Multi-SGBD)
  */
 
 require_once __DIR__ . '/autoload.php';
 
 use Miida\Database\ConnectionFactory;
 use Miida\Database\ControlRepository;
+use Miida\Database\Syntax\SqlServerSyntax;
+use Miida\Database\Syntax\MySqlSyntax;
+use Miida\Database\Syntax\PostgresSyntax;
 use Miida\Services\AntiCorruptionLayer;
 use Miida\Services\Logger;
 use Miida\Engine\DataSyncProcessor;
@@ -33,25 +36,47 @@ foreach (['origem_command', 'destino_query'] as $no) {
 }
 
 echo "=========================================================\n";
-echo "          MIIDA - INICIANDO PIPELINE DE DADOS            \n";
+echo "    MIIDA - INICIANDO PIPELINE DE DADOS (MULTI-SGBD)     \n";
 echo "=========================================================\n";
 
 try {
-    echo "[*] Conectando ao Nó de Escrita Legado (SQL 2005)...\n";
-    $connLegado = ConnectionFactory::getLegadoConnection($infra, 'master');
-    
-    echo "[*] Conectando ao Nó de Leitura Moderno (SQL 2022)...\n";
-    $connModerno = ConnectionFactory::getModernoConnection($infra, 'master');
-    echo "[OK] Conexões estabelecidas com sucesso.\n\n";
+    // 1. INSTANCIAÇÃO DINÂMICA DA ESTRATÉGIA DO LEGADO (ORIGEM)
+    $sgbdOrigem = strtolower($infra['origem_command']['sgbd'] ?? 'sqlserver');
+    switch ($sgbdOrigem) {
+        case 'postgres':
+        case 'postgresql': $syntaxLegado = new PostgresSyntax(); break;
+        case 'mysql':      $syntaxLegado = new MySqlSyntax(); break;
+        case 'sqlserver':
+        default:           $syntaxLegado = new SqlServerSyntax(); break;
+    }
 
-    $controlRepo = new ControlRepository($connModerno);
+    // 2. INSTANCIAÇÃO DINÂMICA DA ESTRATÉGIA DO MODERNO (DESTINO)
+    $sgbdDestino = strtolower($infra['destino_query']['sgbd'] ?? 'sqlserver');
+    switch ($sgbdDestino) {
+        case 'postgres':
+        case 'postgresql': $syntaxModerno = new PostgresSyntax(); break;
+        case 'mysql':      $syntaxModerno = new MySqlSyntax(); break;
+        case 'sqlserver':
+        default:           $syntaxModerno = new SqlServerSyntax(); break;
+    }
+
+    echo "[*] Conectando ao Nó de Extração Legado [" . strtoupper($sgbdOrigem) . "]...\n";
+    $connLegado = ConnectionFactory::getLegadoConnection($infra);
+
+    echo "[*] Conectando ao Nó de Escrita Moderno [" . strtoupper($sgbdDestino) . "]...\n";
+    $connModerno = ConnectionFactory::getModernoConnection($infra);
+    echo "[OK] Conexões agnósticas estabelecidas com sucesso.\n\n";
+
+    // 3. INJEÇÃO DOS DIALETOS NOS COMPONENTES CORE
+    $controlRepo = new ControlRepository($connModerno, $syntaxModerno);
     $acl = new AntiCorruptionLayer();
-    $logger = new Logger($connModerno);
+    $logger = new Logger($connModerno, $syntaxModerno); // Agora grava logs usando o dialeto correto
 
-    $processor = new DataSyncProcessor($connLegado, $connModerno, $controlRepo, $acl, $logger);
+    // O processador agora recebe os dois dialetos isolados para gerir o cruzamento de dados
+    $processor = new DataSyncProcessor($connLegado, $connModerno, $syntaxLegado, $syntaxModerno, $controlRepo, $acl, $logger);
 
     foreach ($config['bancos_gerenciados'] as $banco) {
-        echo "Processando pipeline do Banco de Dados: [{$banco['banco_legado']}]\n";
+        echo "Processando pipeline do Banco de Dados: [{$banco['banco_legado']}] -> [{$banco['banco_moderno']}]\n";
         
         foreach ($banco['tabelas'] as $tabela) {
             $processor->sincronizarTabela($banco, $tabela);
@@ -64,10 +89,6 @@ try {
     echo "=========================================================\n";
 
 } catch (Exception $e) {
-    echo "\nERRO NO PROCESSAMENTO DO PIPELINE:\n";
-    echo $e->getMessage() . "\n";
-    echo "=========================================================\n";
-} finally {
-    ConnectionFactory::killConnections();
-    echo "[*] Conexões encerradas de forma segura.\n";
+    echo "\n[ X ] ERRO CRÍTICO NO PIPELINE:\n " . $e->getMessage() . "\n";
+    exit(1);
 }

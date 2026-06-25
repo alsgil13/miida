@@ -3,19 +3,19 @@
     "descricao": "Configuracoes de acesso aos nos de Escrita (Legado) e Leitura (Moderno)",
     "intervalo_verificacao_segundos": 10,
     "intervalo_limpeza_orfaos_minutos": 1,
-    "origem_command": {
+"origem_command": {
+      "sgbd": "sqlserver", 
       "host": "env:DB_ORIGEM_HOST",
       "usuario": "env:DB_ORIGEM_USER",
       "senha": "env:DB_ORIGEM_PASS",
-      "porta": "env:DB_ORIGEM_PORT",
-      "driver": "env:DB_ORIGEM_DRIVER"
+      "porta": "env:DB_ORIGEM_PORT"
     },
     "destino_query": {
+      "sgbd": "postgres",
       "host": "env:DB_DESTINO_HOST",
       "usuario": "env:DB_DESTINO_USER",
       "senha": "env:DB_DESTINO_PASS",
-      "porta": "env:DB_DESTINO_PORT",
-      "driver": "env:DB_DESTINO_DRIVER"
+      "porta": "env:DB_DESTINO_PORT"
     }
   },
   
