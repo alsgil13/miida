@@ -7267,3 +7267,4 @@
 [2026-06-23 17:50:09] [SUCCESS] [LimpezaOrfaos]: Auditoria e expurgo concluído para CQRS.FFCLRP.EMAILPESSOA ({"tabela":"CQRS.FFCLRP.EMAILPESSOA","pks_utilizadas":["codpes","numseqema"],"registros_deletados":0,"tempo_processamento_ms":995.99})
 [2026-06-23 17:50:09] [SUCCESS] [LimpezaOrfaos]: Auditoria e expurgo concluído para CQRS.FFCLRP.CURSO ({"tabela":"CQRS.FFCLRP.CURSO","pks_utilizadas":["codcur"],"registros_deletados":0,"tempo_processamento_ms":15.61})
 [2026-06-23 17:50:09] [SUCCESS] [LimpezaOrfaos]: Auditoria e expurgo concluído para CQRS.FFCLRP.AGPROGRAMA ({"tabela":"CQRS.FFCLRP.AGPROGRAMA","pks_utilizadas":["codare","codpes","numseqpgm"],"registros_deletados":0,"tempo_processamento_ms":198.16})
+[2026-06-25 18:46:03] [ERROR] [DATASYNCPROCESSOR -> [DW_MODERNO_DB].[PUBLIC].[USUARIOS]]: Falha crítica durante a sincronização incremental. | Detalhes: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'middleware_last_updated' in 'where clause'

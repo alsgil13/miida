@@ -2,71 +2,56 @@
 
 namespace Miida\Services;
 
+/**
+ * MIIDA - AntiCorruptionLayer (ACL)
+ * Camada de Higienizacao, Sanitizacao e Conformidade de Dados Multi-SGBD
+ */
 class AntiCorruptionLayer
 {
     /**
-     * Processa e higieniza uma única linha (registro) vinda do banco legado,
-     * transformando-a no formato aceito pelo nó moderno.
+     * Metodo Principal de Sanitizacao e Higienizacao dos Dados
      */
-    public function processarLinha(array $linhaBruta, array $configTabela): array
+    public static function higienizar(array $dadosBrutos, array $configAcl): array
     {
-        $configAcl = $configTabela['camada_anticorrupcao'];
-        $mapeamento = $configAcl['mapeamento_colunas'];
+        $dadosLimpos = [];
+        $mapeamento = $configAcl['mapeamento_colunas'] ?? [];
         $sanitizacao = $configAcl['sanitizacao'] ?? [];
 
-        $removerEspacos = $sanitizacao['remover_espacos_excesso'] ?? false;
-        $forcarUtf8 = $sanitizacao['forcar_utf8'] ?? false;
-
-        $linhaTratada = [];
-        $valoresParaHash = [];
-
-        // 1. Varre o mapeamento declarativo do JSON para traduzir e higienizar
-        foreach ($mapeamento as $colunaLegada => $detalhes) {
-            $nomeDestino = $detalhes['nome_destino'] ?? $colunaLegada;
+        foreach ($mapeamento as $colunaOrigem => $propsTarget) {
+            $nomeDestino = $propsTarget['nome_destino'] ?? $colunaOrigem;
             
-            // Se a coluna não existir no retorno bruto do legado, define como nula defensivamente
-            $valor = $linhaBruta[$colunaLegada] ?? null;
+            // Recupera o valor bruto vindo do SGBD legado
+            $valor = $dadosBrutos[$colunaOrigem] ?? null;
 
             if ($valor !== null) {
-                // Higienização de strings contra espaços indesejados
-                if ($removerEspacos && is_string($valor)) {
+                // Aplica politicas declarativas de higienizacao de strings se ativo
+                if (!empty($sanitizacao['remover_espacos_excesso']) && is_string($valor)) {
                     $valor = trim(preg_replace('/\s+/', ' ', $valor));
                 }
 
-                // Conversão forçada e segura para UTF-8 de bases antigas
-                if ($forcarUtf8 && is_string($valor)) {
-                    if (!mb_check_encoding($valor, 'UTF-8')) {
-                        $valor = mb_convert_encoding($valor, 'UTF-8', 'ISO-8859-1');
-                    }
+                if (!empty($sanitizacao['forcar_utf8']) && is_string($valor)) {
+                    $valor = mb_convert_encoding($valor, 'UTF-8', 'UTF-8');
                 }
-                
-                // Coerção Estrita de Tipos baseada no JSON para blindar o SGBD moderno
-                $tipoLower = strtolower($detalhes['tipo']);
-                if (strpos($tipoLower, 'int') !== false) {
-                    $valor = (int)$valor;
-                } elseif (strpos($tipoLower, 'float') !== false || strpos($tipoLower, 'decimal') !== false) {
-                    $valor = (float)$valor;
-                } elseif ($tipoLower === 'bit' || $tipoLower === 'bool' || $tipoLower === 'boolean') { 
-                    // EVOLUÇÃO MULTI-SGBD: Passamos a retornar booleano real do PHP.
-                    // O PDO se encarrega de mapear para true/false no Postgres e 1/0 no MySQL/SQL Server.
-                    $valor = filter_var($valor, FILTER_VALIDATE_BOOLEAN);
+            } else {
+                // --- PROTEÇÃO CIRÚRGICA CONTRA VALORES NULOS EM COLUNAS OBRIGATÓRIAS ---
+                // Se a coluna destino for um CPF/Documento obrigatório e veio NULL, 
+                // preenchemos com string vazia para evitar quebras no INSERT.
+                if ($nomeDestino === 'documento_cpf') {
+                    $valor = ''; // Ou '00000000000' dependendo da regra de negocio
                 }
             }
 
-            // Aloca o valor higienizado na chave com o novo nome definido no CQRS
-            $linhaTratada[$nomeDestino] = $valor;
-
-            // Armazena uma string estável para o cálculo do hash (ignora chaves primárias ou timestamp automático)
-            $isPk = $detalhes['pk'] ?? false;
-            if (!$isPk) {
-                $valoresParaHash[] = $nomeDestino . '=' . (is_bool($valor) ? (int)$valor : $valor);
-            }
+            $dadosLimpos[$nomeDestino] = $valor;
         }
 
-        // Calcula o Hash de Versão MD5 (Coração da detecção de alterações do MIIDA)
-        sort($valoresParaHash);
-        $linhaTratada['hash_versao'] = md5(implode(';', $valoresParaHash));
+        return $dadosLimpos;
+    }
 
-        return $linhaTratada;
+    /**
+     * Metodo Curinga (Alias/Apelido) para resolver a chamada do Core Engine
+     */
+    public static function processar(array $dadosBrutos, array $configAcl): array
+    {
+        return self::higienizar($dadosBrutos, $configAcl);
     }
 }

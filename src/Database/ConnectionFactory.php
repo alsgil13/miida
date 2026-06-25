@@ -4,121 +4,135 @@ namespace Miida\Database;
 
 use PDO;
 use PDOException;
-use Exception;
 
+/**
+ * MIIDA - ConnectionFactory
+ * Fabrica de Conexoes Centralizada com Provisionamento de Bancos de Dados
+ */
 class ConnectionFactory
 {
-    /**
-     * O Multiton armazena instâncias indexadas por uma chave única estendida.
-     * Exemplo de índice: "sqlserver:host_ip:Dados_hp"
-     */
     private static array $legadoInstances = [];
     private static array $modernoInstances = [];
 
     /**
-     * Instancia e retorna uma conexão PDO baseada dinamicamente nas propriedades do Servidor/Nó
+     * Estabece conexao com o no Legado (Origem)
      */
-    private static function createConnection(array $nodeConfig, bool $isModerno): PDO
-    {
-        // Captura o SGBD direto do nó do Servidor no JSON (Default: sqlserver se não informado)
-        $sgbdType = strtolower($nodeConfig['sgbd'] ?? 'sqlserver');
-        
-        $host   = $nodeConfig['host'];
-        $user   = $nodeConfig['usuario'];
-        $pass   = $nodeConfig['senha'] ?? '';
-        $driver = $nodeConfig['driver'] ?? null;
-
-        try {
-            switch ($sgbdType) {
-                case 'sqlserver':
-                    // Se o driver no .env/JSON for nulo, deduz dinamicamente com base nas extensões do PHP
-                    $driver = $driver ?? (extension_loaded('pdo_sqlsrv') ? 'pdo_sqlsrv' : 'pdo_dblib');
-                    $porta  = $nodeConfig['porta'] ?? 1433;
-
-                    if ($driver === 'pdo_sqlsrv' || $driver === 'sqlsrv') {
-                        $dsn = "sqlsrv:Server={$host},{$porta}";
-                        // SQL Server 2022 frequentemente exige TrustServerCertificate em Docker
-                        $dsn .= $isModerno ? ";TrustServerCertificate=true" : ";Encrypt=false";
-                    } else { 
-                        // Fallback pdo_dblib (FreeTDS para Linux/Docker)
-                        $dsn = "dblib:host={$host}:{$porta};version=7.0;charset=UTF-8";
-                    }
-                    break;
-
-                case 'mysql':
-                    $porta = $nodeConfig['porta'] ?? 3306;
-                    $dsn = "mysql:host={$host};port={$porta};charset=utf8mb4";
-                    break;
-
-                case 'postgre':
-                case 'postgres':
-                case 'postgresql':
-                    $porta = $nodeConfig['porta'] ?? 5432;
-                    $dsn = "pgsql:host={$host};port={$porta}";
-                    break;
-
-                default:
-                    throw new Exception("O SGBD do servidor especificado '{$sgbdType}' não é suportado pelo motor MIIDA.");
-            }
-
-            // Configurações universais de resiliência para Daemons/Workers CLI de longa execução
-            $options = [
-                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_TIMEOUT            => 5, 
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                // Desativa emulação para herdar tipos nativos do MySQL/Postgres (evita converter int para string)
-                PDO::ATTR_EMULATE_PREPARES   => false 
-            ];
-
-            return new PDO($dsn, $user, $pass, $options);
-
-        } catch (PDOException $e) {
-            $contexto = $isModerno ? "Moderno ({$sgbdType})" : "Legado ({$sgbdType})";
-            throw new Exception("Falha na Camada de Persistência MIIDA ao conectar no servidor {$contexto} [Host: {$host}]: " . $e->getMessage());
-        }
-    }
-
-    /**
-     * Garante e recupera a conexão correta do servidor Legado (Origem)
-     */
-    public static function getLegadoConnection(array $infraConfig): PDO
+    public static function getLegadoConnection(array $infraConfig, ?string $banco = null): PDO
     {
         $nodeConfig = $infraConfig['origem_command'];
-        $sgbd  = $nodeConfig['sgbd'] ?? 'sqlserver';
-        $host  = $nodeConfig['host'];
+        $sgbd = strtolower($nodeConfig['sgbd'] ?? 'mysql');
+        $host = $nodeConfig['host'];
+        $dbNome = $banco ?? $nodeConfig['banco'] ?? '';
         
-        // A chave única do Multiton agora se baseia no servidor físico
-        $chave = "{$sgbd}:{$host}";
+        $chave = "{$sgbd}:{$host}:{$dbNome}";
 
         if (!isset(self::$legadoInstances[$chave])) {
-            self::$legadoInstances[$chave] = self::createConnection($nodeConfig, false);
+            $config = $nodeConfig;
+            if ($dbNome) {
+                $config['banco'] = $dbNome;
+            }
+            self::$legadoInstances[$chave] = self::createConnection($config, false);
         }
         return self::$legadoInstances[$chave];
     }
 
     /**
-     * Garante e recupera a conexão correta do servidor Moderno (Destino)
+     * Estabece conexao com o no Moderno (Destino) com Auto-Criacao de Banco de Dados
      */
-    public static function getModernoConnection(array $infraConfig): PDO
+    public static function getModernoConnection(array $infraConfig, ?string $bancoAlvo = null): PDO
     {
         $nodeConfig = $infraConfig['destino_query'];
-        $sgbd  = $nodeConfig['sgbd'] ?? 'sqlserver';
+        $sgbd  = strtolower($nodeConfig['sgbd'] ?? 'sqlserver');
         $host  = $nodeConfig['host'];
         
-        $chave = "{$sgbd}:{$host}";
+        // Se um banco alvo foi pedido, tentamos garantir a existencia dele primeiro
+        if ($bancoAlvo !== null) {
+            self::garantirExistenciaBanco($nodeConfig, $sgbd, $bancoAlvo);
+        }
+
+        $dbNome = $bancoAlvo ?? $nodeConfig['banco'] ?? 'master';
+        $chave = "{$sgbd}:{$host}:{$dbNome}";
 
         if (!isset(self::$modernoInstances[$chave])) {
-            self::$modernoInstances[$chave] = self::createConnection($nodeConfig, true);
+            $configTemporaria = $nodeConfig;
+            $configTemporaria['banco'] = $dbNome;
+            self::$modernoInstances[$chave] = self::createConnection($configTemporaria, true);
         }
+
         return self::$modernoInstances[$chave];
     }
 
     /**
-     * Libera explicitamente a memória e fecha todos os sockets abertos com os SGBDs
+     * Metodo interno isolado para forcar a criacao fisica do Banco no SGBD de destino
      */
-    public static function killConnections(): void
+    private static function garantirExistenciaBanco(array $nodeConfig, string $sgbd, string $bancoAlvo): void
     {
-        self::$legadoInstances = [];
-        self::$modernoInstances = [];
+        // Conecta na base administrativa padrao do servidor que sempre existe
+        $configBase = $nodeConfig;
+        $configBase['banco'] = ($sgbd === 'postgres') ? 'postgres' : (($sgbd === 'mysql') ? 'mysql' : 'master');
+
+        try {
+            $conexaoAdmin = self::createConnection($configBase, true);
+            
+            if ($sgbd === 'sqlserver') {
+                // No SQL Server, checa a sys.databases. Se nao houver, cria imediatamente.
+                $stmt = $conexaoAdmin->query("SELECT database_id FROM sys.databases WHERE name = '{$bancoAlvo}'");
+                if (!$stmt->fetch()) {
+                    // Executa fora de transacao implicitamente para o SQL Server nao reter o comando
+                    $conexaoAdmin->exec("CREATE DATABASE [{$bancoAlvo}];");
+                }
+            } elseif ($sgbd === 'postgres') {
+                $stmt = $conexaoAdmin->query("SELECT 1 FROM pg_database WHERE datname = '{$bancoAlvo}'");
+                if (!$stmt->fetch()) {
+                    $conexaoAdmin->exec("CREATE DATABASE \"{$bancoAlvo}\";");
+                }
+            } else {
+                $conexaoAdmin->exec("CREATE DATABASE IF NOT EXISTS `{$bancoAlvo}`;");
+            }
+            
+            $conexaoAdmin = null; // Fecha a conexao administrativa para consolidar no disco
+        } catch (PDOException $e) {
+            // Se falhar porque nao tem permissao ou erro de rede, repassa o erro
+            throw new \Exception("Erro na Camada de Persistencia ao tentar auto-criar o banco [{$bancoAlvo}]: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Fabrica primitiva de instanciacao do PDO baseada no driver
+     */
+    private static function createConnection(array $node, bool $isDestino): PDO
+    {
+        $sgbd = strtolower($node['sgbd'] ?? ($isDestino ? 'sqlserver' : 'mysql'));
+        $host = $node['host'];
+        $port = $node['porta'];
+        $user = $node['usuario'] ?? $node['user'] ?? '';
+        $pass = $node['senha'] ?? $node['password'] ?? $node['pass'] ?? '';
+        $db   = $node['banco'] ?? '';
+
+        if ($sgbd === 'sqlserver' || $sgbd === 'dblib') {
+            // Sintaxe DSN FreeTDS / DBLIB usada no Linux para conectar ao SQL Server
+            $dsn = "dblib:host={$host};port={$port}";
+            if ($db) {
+                $dsn .= ";dbname={$db}";
+            }
+        } elseif ($sgbd === 'postgres' || $sgbd === 'pgsql') {
+            $dsn = "pgsql:host={$host};port={$port}";
+            if ($db) {
+                $dsn .= ";dbname={$db}";
+            }
+        } else {
+            // Padrao MySQL
+            $dsn = "mysql:host={$host};port={$port}";
+            if ($db) {
+                $dsn .= ";dbname={$db}";
+            }
+        }
+
+        $options = [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        ];
+
+        return new PDO($dsn, $user, $pass, $options);
     }
 }

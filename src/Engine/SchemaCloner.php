@@ -6,121 +6,133 @@ use PDO;
 use Exception;
 use Miida\Database\Syntax\SgbdSyntaxInterface;
 
+/**
+ * MIIDA - SchemaCloner
+ * Mecanismo de Engenharia Reversa e Clonagem Estrutural Declarativa (Multi-SGBD)
+ */
 class SchemaCloner
 {
-    private PDO $connModerno;
+    private PDO $destino;
     private SgbdSyntaxInterface $syntax;
 
-    /**
-     * O Cloner agora recebe a conexão e a estratégia de dialeto do SGBD moderno (Destino)
-     */
-    public function __construct(PDO $connModerno, SgbdSyntaxInterface $syntax)
+    public function __construct(PDO $destino, SgbdSyntaxInterface $syntax)
     {
-        $this->connModerno = $connModerno;
+        $this->destino = $destino;
         $this->syntax = $syntax;
     }
 
     /**
-     * Executa a criação das estruturas mapeadas no JSON
+     * Executa o provisionamento estrutural baseado nos bancos gerenciados do manifesto JSON
      */
     public function clonar(array $bancosGerenciados): void
     {
-        echo "=========================================================\n";
-        echo "   MIIDA - EXECUTANDO SCHEMA CLONER (MULTI-SGBD)\n";
-        echo "=========================================================\n\n";
+        foreach ($bancosGerenciados as $bancoConfig) {
+            $bancoModerno = $bancoConfig['banco_moderno'];
+            $sgbdNome = strtolower(get_class($this->syntax));
 
-        foreach ($bancosGerenciados as $banco) {
-            $bancoDestino = $banco['banco_moderno'];
+            if (strpos($sgbdNome, 'sqlserver') !== false) {
+                $stmtUse = $this->destino->query("USE [{$bancoModerno}];");
+                if ($stmtUse) {
+                    $stmtUse->closeCursor();
+                }
+            } elseif (strpos($sgbdNome, 'mysql') !== false) {
+                $this->destino->exec("USE `{$bancoModerno}`;");
+            }
 
-            // Como MySQL/Postgres não usam "USE banco" de forma intercambiável,
-            // as estruturas e tabelas passam a ser qualificadas pelo nome completo nas queries.
-            foreach ($banco['tabelas'] as $tabela) {
-                $tabelaDestino = $tabela['tabela_moderna'];
-                echo "  ├── Construindo DDL para a tabela: [{$tabelaDestino}]... ";
+            foreach ($bancoConfig['tabelas'] as $tabelaConfig) {
+                $tabelaModerna = $tabelaConfig['tabela_moderna'];
+                $schemaModerno = $tabelaConfig['schema_moderno'] ?? 'dbo';
+                $mapeamento    = $tabelaConfig['camada_anticorrupcao']['mapeamento_colunas'] ?? [];
+
+                // AJUSTE DE COMPATIBILIDADE SUTIL:
+                // SQL Server nao usa o schema 'public' por padrao (isso e do Postgres).
+                // Se o manifesto json veio com public, convertemos para dbo no SQL Server.
+                if (strpos($sgbdNome, 'sqlserver') !== false && strtolower($schemaModerno) === 'public') {
+                    $schemaModerno = 'dbo';
+                }
+
+                echo "  ├── Provisionando estrutura: [{$bancoModerno}].[{$schemaModerno}].[{$tabelaModerna}]\n";
+
+                // 1. Cria o Schema lógico se o SGBD der suporte
+                $sqlSchema = $this->syntax->obterDdlCriarSchema($schemaModerno);
+                if (!empty($sqlSchema) && strtolower($schemaModerno) !== 'dbo') {
+                    try {
+                        $stmtSchema = $this->destino->query($sqlSchema);
+                        if ($stmtSchema) {
+                            $stmtSchema->closeCursor();
+                        }
+                    } catch (Exception $e) {
+                        // Ignora se o schema ja existir
+                    }
+                }
+
+                // 2. Monta dinamicamente as colunas do DDL baseando-se no mapa da ACL do JSON
+                $colunasDdl = [];
+                foreach ($mapeamento as $colunaOrigem => $props) {
+                    $nomeColDestino = $props['nome_destino'];
+                    $tipoDestino    = strtoupper($props['tipo_destino'] ?? 'VARCHAR(255)');
+                    
+                    if (strpos($sgbdNome, 'sqlserver') !== false && $tipoDestino === 'TEXT') {
+                        $tipoDestino = 'VARCHAR(MAX)';
+                    }
+
+                    $restricao = '';
+                    if (!empty($props['pk'])) {
+                        $restricao = ' NOT NULL';
+                    }
+
+                    $colunasDdl[] = "[{$nomeColDestino}] {$tipoDestino}{$restricao}";
+                }
+
+                $colunaLastUpdated = $tabelaConfig['coluna_last_updated'] ?? 'middleware_last_updated';
                 
-                $this->construirETestarTabela($bancoDestino, $tabela);
+                if (strpos($sgbdNome, 'postgres') !== false) {
+                    $colunasDdl[] = "[\"{$colunaLastUpdated}\"] TIMESTAMP NOT NULL";
+                    $colunasDdl[] = "[\"hash_versao\"] VARCHAR(32) NOT NULL";
+                } else {
+                    $colunasDdl[] = "[{$colunaLastUpdated}] DATETIME NOT NULL";
+                    $colunasDdl[] = "[hash_versao] VARCHAR(32) NOT NULL";
+                }
+
+                $pks = [];
+                foreach ($mapeamento as $colunaOrigem => $props) {
+                    if (!empty($props['pk'])) {
+                        $pks[] = "[{$props['nome_destino']}]";
+                    }
+                }
+                
+                if (!empty($pks)) {
+                    $colunasDdl[] = "PRIMARY KEY (" . implode(', ', $pks) . ")";
+                }
+
+                $corpoTabelaSql = implode(",\n        ", $colunasDdl);
+
+                if (strpos($sgbdNome, 'mysql') !== false) {
+                    $corpoTabelaSql = str_replace(['[', ']'], ['`', '`'], $corpoTabelaSql);
+                } elseif (strpos($sgbdNome, 'postgres') !== false) {
+                    $corpoTabelaSql = str_replace(['[', ']'], ['"', '"'], $corpoTabelaSql);
+                }
+
+                // 4. Executa a criação física da tabela de negócio no destino
+                $sqlCriarTabela = $this->syntax->obterDdlCriarTabela($schemaModerno, $tabelaModerna, $corpoTabelaSql);
+                
+                // Limpezas extras de DDL para garantir isolamento no banco corrente
+                $sqlCriarTabela = str_replace("[master].", "", $sqlCriarTabela);
+                if (strpos($sgbdNome, 'sqlserver') !== false) {
+                    $sqlCriarTabela = str_replace("[public].", "[{$schemaModerno}].", $sqlCriarTabela);
+                }
+
+                try {
+                    $stmtTable = $this->destino->query($sqlCriarTabela);
+                    if ($stmtTable) {
+                        $stmtTable->closeCursor();
+                    }
+                } catch (Exception $e) {
+                    if (strpos($e->getMessage(), 'already') === false && strpos($e->getMessage(), 'exist') === false) {
+                        throw new Exception("Falha ao criar tabela de negócio {$tabelaModerna}: " . $e->getMessage());
+                    }
+                }
             }
-            echo "\n";
-        }
-        echo "=========================================================\n";
-        echo "       SCHEMA CLONER CONCLUÍDO COM SUCESSO!\n";
-        echo "=========================================================\n";
-    }
-
-    /**
-     * Monta dinamicamente o comando CREATE TABLE com base na Estratégia de Sintaxe
-     */
-    private function construirETestarTabela(string $bancoDestino, array $configTabela): void
-    {
-        $tabelaDestino = $configTabela['tabela_moderna'];
-        $schemaDestino = $configTabela['schema_moderno'] ?? null; 
-        $mapeamento = $configTabela['camada_anticorrupcao']['mapeamento_colunas'];
-
-        $colunasDdl = [];
-        $chavesPrimarias = [];
-
-        // Processa as colunas vindas do mapeamento da ACL
-        foreach ($mapeamento as $colunaLegada => $detalhes) {
-            $nomeColunaNova = $detalhes['nome_destino'] ?? $colunaLegada;
-            $tipoColunaNova = trim($detalhes['tipo']);
-
-            // Remove colchetes fixos para manter compatibilidade com MySQL/Postgres
-            $linhaColuna = "{$nomeColunaNova} {$tipoColunaNova}";
-
-            $isPk = isset($detalhes['pk']) && $detalhes['pk'] === true;
-            $isNotNull = isset($detalhes['not_null']) && $detalhes['not_null'] === true;
-
-            if ($isPk) {
-                $linhaColuna .= " NOT NULL";
-                $chavesPrimarias[] = "{$nomeColunaNova}";
-            } elseif ($isNotNull) {
-                $linhaColuna .= " NOT NULL";
-            } else {
-                $linhaColuna .= " NULL";
-            }
-
-            $colunasDdl[] = $linhaColuna;
-        }
-
-        if (!empty($chavesPrimarias)) {
-            $stringPks = implode(", ", $chavesPrimarias);
-            $colunasDdl[] = "PRIMARY KEY ({$stringPks})";
-        }
-
-        // Respeita o padrão de timestamp padrão de cada SGBD caso a coluna de atualização seja nula
-        if ($configTabela['coluna_last_updated'] === null) {
-            $colunasDdl[] = "middleware_last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP";
-        }
-
-        $colunasDdl[] = "hash_versao VARCHAR(32) NOT NULL";
-
-        $stringColunas = implode(",\n    ", $colunasDdl);
-
-        // O STRATEGY EM AÇÃO: Deixamos de usar blocos procedurais IF NOT EXISTS hardcoded
-        $sqlCreateSchema = $this->syntax->obterDdlCriarSchema($schemaDestino);
-        $sqlCreateTable  = $this->syntax->obterDdlCriarTabela($schemaDestino, $tabelaDestino, $stringColunas);
-
-        try {
-            // Executa a query de criação de schema (Retorna query neutra em SGBDs que não possuem schemas isolados)
-            $stmtSchema = $this->connModerno->prepare($sqlCreateSchema);
-            $stmtSchema->execute();
-            $stmtSchema->closeCursor(); 
-            
-            echo "OK (Schema) -> ";
-        } catch (Exception $e) {
-            echo "FALHA SCHEMA!\n";
-            throw new Exception("Erro ao executar DDL do schema {$schemaDestino}: " . $e->getMessage());
-        }
-
-        try {
-            $stmtTable = $this->connModerno->prepare($sqlCreateTable);
-            $stmtTable->execute();
-            $stmtTable->closeCursor(); 
-            
-            echo "OK (Estrutura gerada)\n";
-        } catch (Exception $e) {
-            echo "FALHA TABELA!\n";
-            throw new Exception("Erro ao executar DDL da tabela {$tabelaDestino}: " . $e->getMessage());
         }
     }
 }
