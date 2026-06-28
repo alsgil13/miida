@@ -52,8 +52,12 @@ try {
         default:           $syntaxModerno = new SqlServerSyntax(); break;
     }
 
-    $connLegado  = ConnectionFactory::getLegadoConnection($infra);
-    $connModerno = ConnectionFactory::getModernoConnection($infra);
+    // Correção de contexto de banco para o dblib/Pool de conexões
+    $primeiroBancoLegado = $config['bancos_gerenciados'][0]['banco_legado'] ?? '';
+    $primeiroBancoModerno = $config['bancos_gerenciados'][0]['banco_moderno'] ?? 'dw_moderno_db';
+
+    $connLegado  = ConnectionFactory::getLegadoConnection($infra, $primeiroBancoLegado);
+    $connModerno = ConnectionFactory::getModernoConnection($infra, $primeiroBancoModerno);
     $logger      = new Logger($connModerno, $syntaxModerno);
 
     $limpador = new LimpezaOrfaosProcessor($connLegado, $connModerno, $syntaxLegado, $syntaxModerno, $logger);
@@ -65,6 +69,12 @@ try {
     $inicioCiclo = microtime(true);
     foreach ($config['bancos_gerenciados'] as $banco) {
         foreach ($banco['tabelas'] as $tabela) {
+            
+            // Tratamento preventivo: Altera 'public' para 'dbo' em tempo de execucao no SQL Server
+            if ($sgbdDestino === 'sqlserver' && isset($tabela['schema_moderno']) && strtolower($tabela['schema_moderno']) === 'public') {
+                $tabela['schema_moderno'] = 'dbo';
+            }
+
             $limpador->executarLimpeza($banco, $tabela);
         }
     }

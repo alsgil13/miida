@@ -69,19 +69,20 @@ try {
     }
 
     echo "[*] Conectando ao Banco Legado de Origem...\n";
-    $connLegado = ConnectionFactory::getLegadoConnection($infra);
+    $primeiroBancoLegado = $config['bancos_gerenciados'][0]['banco_legado'] ?? '';
+    $connLegado = ConnectionFactory::getLegadoConnection($infra, $primeiroBancoLegado);
 
     echo "[*] Conectando ao Banco Moderno de Destino...\n";
-    $connModerno = ConnectionFactory::getModernoConnection($infra);
+    $primeiroBancoModerno = $config['bancos_gerenciados'][0]['banco_moderno'] ?? 'dw_moderno_db';
+    $connModerno = ConnectionFactory::getModernoConnection($infra, $primeiroBancoModerno);
     echo "[OK] Inicializacao de conexoes e motores efetuada com sucesso.\n\n";
 
     // 2. INJECAO DE DEPENDENCIAS DE INFRAESTRUTURA
     $controlRepo = new ControlRepository($connModerno, $syntaxModerno);
-    $acl = new AntiCorruptionLayer();
     $logger = new Logger($connModerno, $syntaxModerno);
     
-    // Processadores configurados com suporte Multi-SGBD nativo
-    $sincronizador = new DataSyncProcessor($connLegado, $connModerno, $syntaxLegado, $syntaxModerno, $controlRepo, $acl, $logger);
+    // Processadores reconfigurados com a assinatura exata esperada pelo construtor correto
+    $sincronizador = new DataSyncProcessor($connLegado, $connModerno, $controlRepo, $syntaxModerno);
     $limpador = new LimpezaOrfaosProcessor($connLegado, $connModerno, $syntaxLegado, $syntaxModerno, $logger);
 
     // 3. ESTRUTURAÇÃO DOS MARCADORES DE CRONOMETRO EM MEMORIA
@@ -100,7 +101,13 @@ try {
         foreach ($config['bancos_gerenciados'] as $banco) {
             foreach ($banco['tabelas'] as $tabela) {
                 
-                $chaveCronometro = $banco['banco_moderno'] . "." . $tabela['tabela_moderna'];
+                $tabelaModerna = $tabela['tabela_moderna'];
+                $schemaModerno = $tabela['schema_moderno'] ?? 'dbo';
+                if ($sgbdDestino === 'sqlserver' && strtolower($schemaModerno) === 'public') {
+                    $schemaModerno = 'dbo';
+                }
+
+                $chaveCronometro = $banco['banco_moderno'] . "." . $tabelaModerna;
                 $intervaloTabelaSegundos = (int)($tabela['intervalo_sincronizacao_segundos'] ?? 10);
 
                 if (!isset($cronometroTabelas[$chaveCronometro])) {
