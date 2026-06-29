@@ -100,4 +100,50 @@ class SqlServerSyntax implements SgbdSyntaxInterface
     {
         return "[master].[dbo].[miida_controle_sincronizacao]";
     }
+
+    public function obterSqlSelecaoIncremental(string $banco, string $tabela, string $colunaControle): string
+    {
+        // SQL Server usa colchetes e paginação ou ordenação compatível
+        return "SELECT * FROM [{$banco}].[dbo].[{$tabela}] WHERE [{$colunaControle}] > :ultima_data ORDER BY [{$colunaControle}] ASC";
+    }
+
+    public function executarUpsert(\PDO $destino, string $tabelaQualificada, array $registro, array $pks): void
+    {
+        $colunas = array_keys($registro);
+        
+        // Condição de junção baseada nas chaves primárias
+        $joinConds = [];
+        foreach ($pks as $pk) {
+            $joinConds[] = "target.[{$pk}] = source.[{$pk}]";
+        }
+
+        $updateFields = [];
+        $insertCols = [];
+        $insertVals = [];
+
+        foreach ($colunas as $coluna) {
+            $insertCols[] = "[{$coluna}]";
+            $insertVals[] = "source.[{$coluna}]";
+            if (!in_array($coluna, $pks)) {
+                $updateFields[] = "target.[{$coluna}] = source.[{$coluna}]";
+            }
+        }
+
+        // O MERGE exige uma tabela de origem temporária ou simulada por variáveis
+        $selectSource = [];
+        foreach ($registro as $coluna => $valor) {
+            $selectSource[] = ":{$coluna} AS [{$coluna}]";
+        }
+
+        $sql = "MERGE {$tabelaQualificada} AS target
+                USING (SELECT " . implode(', ', $selectSource) . ") AS source
+                ON (" . implode(' AND ', $joinConds) . ")
+                WHEN MATCHED THEN
+                    UPDATE SET " . implode(', ', $updateFields) . "
+                WHEN NOT MATCHED THEN
+                    INSERT (" . implode(', ', $insertCols) . ") VALUES (" . implode(', ', $insertVals) . ");";
+
+        $stmt = $destino->prepare($sql);
+        $stmt->execute($registro);
+    }
 }

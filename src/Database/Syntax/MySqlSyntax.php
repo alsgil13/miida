@@ -94,4 +94,29 @@ class MySqlSyntax implements SgbdSyntaxInterface
         return "`mysql`.`miida_controle_sincronizacao`";
     }
 
+    public function obterSqlSelecaoIncremental(string $banco, string $tabela, string $colunaControle): string
+    {
+        return "SELECT * FROM `{$banco}`.`{$tabela}` WHERE `{$colunaControle}` > :ultima_data ORDER BY `{$colunaControle}` ASC";
+    }
+
+    public function executarUpsert(\PDO $destino, string $tabelaQualificada, array $registro, array $pks): void
+    {
+        $colunas = array_keys($registro);
+        $listaColunas = '`' . implode('`, `', $colunas) . '`';
+        $placeholders = ':' . implode(', :', $colunas);
+
+        $updates = [];
+        foreach ($colunas as $coluna) {
+            if (!in_array($coluna, $pks)) {
+                $updates[] = "`{$coluna}` = VALUES(`{$coluna}`)";
+            }
+        }
+
+        $sql = "INSERT INTO {$tabelaQualificada} ({$listaColunas}) VALUES ({$placeholders}) 
+                ON DUPLICATE KEY UPDATE " . implode(', ', $updates);
+
+        $stmt = $destino->prepare($sql);
+        $stmt->execute($registro);
+    }
+
 }

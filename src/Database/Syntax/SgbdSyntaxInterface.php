@@ -46,4 +46,13 @@ interface SgbdSyntaxInterface
 
     // Retorna o nome qualificado específico para a tabela interna de controle de sincronização do middleware.
     public function obterNomeQualificadoTabelaControle(): string;
+
+    // Monta o SQL agnóstico de extração incremental para o banco de origem.
+    public function obterSqlSelecaoIncremental(string $banco, string $tabela, string $colunaControle): string;
+
+    /**
+     * Gera e executa o comando atômico ou instrução estruturada de UPSERT (Merge/Insert or Update)
+     * apropriado e otimizado para o dialeto do SGBD de destino.
+     */
+    public function executarUpsert(\PDO $destino, string $tabelaQualificada, array $registro, array $pks): void;
 }
