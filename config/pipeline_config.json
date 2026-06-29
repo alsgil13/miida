@@ -27,7 +27,7 @@
                     "tabela_moderna": "usuarios",
                     "schema_legado": "dbo",
                     "schema_moderno": "public",
-                    "coluna_timestamp_controle": "dt_cadastro",
+                    "coluna_timestamp_controle": null,
                     "coluna_last_updated": "middleware_last_updated",
                     "intervalo_sincronizacao_segundos": 1,
                     "camada_anticorrupcao": {

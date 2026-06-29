@@ -68,21 +68,21 @@ try {
         default:           $syntaxModerno = new SqlServerSyntax(); break;
     }
 
+    // Adaptação: Injeção das instâncias de Strategy na criação das conexões da Factory
     echo "[*] Conectando ao Banco Legado de Origem...\n";
-    $primeiroBancoLegado = $config['bancos_gerenciados'][0]['banco_legado'] ?? '';
-    $connLegado = ConnectionFactory::getLegadoConnection($infra, $primeiroBancoLegado);
+    $connLegado = ConnectionFactory::getLegadoConnection($infra, $syntaxLegado);
 
     echo "[*] Conectando ao Banco Moderno de Destino...\n";
-    $primeiroBancoModerno = $config['bancos_gerenciados'][0]['banco_moderno'] ?? 'dw_moderno_db';
-    $connModerno = ConnectionFactory::getModernoConnection($infra, $primeiroBancoModerno);
+    $connModerno = ConnectionFactory::getModernoConnection($infra, $syntaxModerno);
     echo "[OK] Inicializacao de conexoes e motores efetuada com sucesso.\n\n";
 
     // 2. INJECAO DE DEPENDENCIAS DE INFRAESTRUTURA
     $controlRepo = new ControlRepository($connModerno, $syntaxModerno);
+    $acl = new AntiCorruptionLayer();
     $logger = new Logger($connModerno, $syntaxModerno);
     
-    // Processadores reconfigurados com a assinatura correta
-    $sincronizador = new DataSyncProcessor($connLegado, $connModerno, $controlRepo, $syntaxModerno);
+    // Processadores configurados com suporte Multi-SGBD nativo
+    $sincronizador = new DataSyncProcessor($connLegado, $connModerno, $syntaxLegado, $syntaxModerno, $controlRepo);
     $limpador = new LimpezaOrfaosProcessor($connLegado, $connModerno, $syntaxLegado, $syntaxModerno, $logger);
 
     // 3. ESTRUTURAÇÃO DOS MARCADORES DE CRONOMETRO EM MEMORIA
@@ -101,13 +101,7 @@ try {
         foreach ($config['bancos_gerenciados'] as $banco) {
             foreach ($banco['tabelas'] as $tabela) {
                 
-                $tabelaModerna = $tabela['tabela_moderna'];
-                $schemaModerno = $tabela['schema_moderno'] ?? 'dbo';
-                if ($sgbdDestino === 'sqlserver' && strtolower($schemaModerno) === 'public') {
-                    $schemaModerno = 'dbo';
-                }
-
-                $chaveCronometro = $banco['banco_moderno'] . "." . $tabelaModerna;
+                $chaveCronometro = $banco['banco_moderno'] . "." . $tabela['tabela_moderna'];
                 $intervaloTabelaSegundos = (int)($tabela['intervalo_sincronizacao_segundos'] ?? 10);
 
                 if (!isset($cronometroTabelas[$chaveCronometro])) {
@@ -116,15 +110,8 @@ try {
 
                 if ($agora >= ($cronometroTabelas[$chaveCronometro] + $intervaloTabelaSegundos)) {
                     
-                    $horaFormatada = date('H:i:s');
-                    echo "[{$horaFormatada}] Verificando incrementos para: {$banco['banco_legado']}.{$tabela['tabela_legada']}...\n";
-                    
                     // Executa a carga incremental isolada
-                    $linhas = $sincronizador->sincronizarTabela($banco, $tabela);
-                    
-                    if ($linhas > 0) {
-                        echo "   └── [ OK ] +{$linhas} novos registros sincronizados.\n";
-                    }
+                    $sincronizador->sincronizarTabela($banco, $tabela);
                     
                     // Atualiza o marcador temporal da tabela para o proximo ciclo
                     $cronometroTabelas[$chaveCronometro] = time();
@@ -139,9 +126,6 @@ try {
 
             foreach ($config['bancos_gerenciados'] as $banco) {
                 foreach ($banco['tabelas'] as $tabela) {
-                    if ($sgbdDestino === 'sqlserver' && isset($tabela['schema_moderno']) && strtolower($tabela['schema_moderno']) === 'public') {
-                        $tabela['schema_moderno'] = 'dbo';
-                    }
                     $limpador->executarLimpeza($banco, $tabela);
                 }
             }
@@ -149,7 +133,7 @@ try {
             $tempoGastoLimpeza = round((microtime(true) - $inicioLimpeza) * 1000, 2);
             echo " [OK] Ciclo de limpeza finalizado em " . $tempoGastoLimpeza . " ms.\n\n";
 
-            // Reagenda a proxima execucao
+            // Reagenda a proxima execucao baseando-se no tempo definido no JSON
             $proximaLimpezaOrfaos = time() + ($intervaloLimpezaMinutos * 60);
         }
 

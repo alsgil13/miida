@@ -4,10 +4,12 @@ namespace Miida\Database;
 
 use PDO;
 use PDOException;
+use Exception;
+use Miida\Database\Syntax\SgbdSyntaxInterface;
 
 /**
  * MIIDA - ConnectionFactory
- * Fabrica de Conexoes Centralizada com Provisionamento de Bancos de Dados
+ * Fábrica de Conexões Centralizada e Agnóstica baseada no Padrão Strategy
  */
 class ConnectionFactory
 {
@@ -15,118 +17,95 @@ class ConnectionFactory
     private static array $modernoInstances = [];
 
     /**
-     * Estabece conexao com o no Legado (Origem)
+     * Estabelece conexão com o nó Legado (Origem)
      */
-    public static function getLegadoConnection(array $infraConfig, ?string $banco = null): PDO
+    public static function getLegadoConnection(array $infraConfig, SgbdSyntaxInterface $syntax, ?string $banco = null): PDO
     {
         $nodeConfig = $infraConfig['origem_command'];
-        $sgbd = strtolower($nodeConfig['sgbd'] ?? 'mysql');
         $host = $nodeConfig['host'];
         $dbNome = $banco ?? $nodeConfig['banco'] ?? '';
         
-        $chave = "{$sgbd}:{$host}:{$dbNome}";
+        $chave = get_class($syntax) . ":{$host}:{$dbNome}";
 
         if (!isset(self::$legadoInstances[$chave])) {
             $config = $nodeConfig;
             if ($dbNome) {
                 $config['banco'] = $dbNome;
             }
-            self::$legadoInstances[$chave] = self::createConnection($config, false);
+            self::$legadoInstances[$chave] = self::createConnection($config, $syntax);
         }
         return self::$legadoInstances[$chave];
     }
 
     /**
-     * Estabece conexao com o no Moderno (Destino) com Auto-Criacao de Banco de Dados
+     * Estabelece conexão com o nó Moderno (Destino) com Auto-Criação de Banco de Dados
      */
-    public static function getModernoConnection(array $infraConfig, ?string $bancoAlvo = null): PDO
+    public static function getModernoConnection(array $infraConfig, SgbdSyntaxInterface $syntax, ?string $bancoAlvo = null): PDO
     {
         $nodeConfig = $infraConfig['destino_query'];
-        $sgbd  = strtolower($nodeConfig['sgbd'] ?? 'sqlserver');
-        $host  = $nodeConfig['host'];
+        $host = $nodeConfig['host'];
         
-        // Se um banco alvo foi pedido, tentamos garantir a existencia dele primeiro
         if ($bancoAlvo !== null) {
-            self::garantirExistenciaBanco($nodeConfig, $sgbd, $bancoAlvo);
+            self::garantirExistenciaBanco($nodeConfig, $syntax, $bancoAlvo);
         }
 
-        $dbNome = $bancoAlvo ?? $nodeConfig['banco'] ?? 'master';
-        $chave = "{$sgbd}:{$host}:{$dbNome}";
+        $dbNome = $bancoAlvo ?? $nodeConfig['banco'] ?? $syntax->obterBancoAdministrativo();
+        $chave = get_class($syntax) . ":{$host}:{$dbNome}";
 
         if (!isset(self::$modernoInstances[$chave])) {
             $configTemporaria = $nodeConfig;
             $configTemporaria['banco'] = $dbNome;
-            self::$modernoInstances[$chave] = self::createConnection($configTemporaria, true);
+            self::$modernoInstances[$chave] = self::createConnection($configTemporaria, $syntax);
         }
 
         return self::$modernoInstances[$chave];
     }
 
     /**
-     * Metodo interno isolado para forcar a criacao fisica do Banco no SGBD de destino
+     * Garante a existência física do Banco delegando as regras à Strategy ativa
      */
-    private static function garantirExistenciaBanco(array $nodeConfig, string $sgbd, string $bancoAlvo): void
+    private static function garantirExistenciaBanco(array $nodeConfig, SgbdSyntaxInterface $syntax, string $bancoAlvo): void
     {
-        // Conecta na base administrativa padrao do servidor que sempre existe
         $configBase = $nodeConfig;
-        $configBase['banco'] = ($sgbd === 'postgres') ? 'postgres' : (($sgbd === 'mysql') ? 'mysql' : 'master');
+        $configBase['banco'] = $syntax->obterBancoAdministrativo();
 
         try {
-            $conexaoAdmin = self::createConnection($configBase, true);
+            $conexaoAdmin = self::createConnection($configBase, $syntax);
+            $ddlConfig = $syntax->obterDdlGarantirBanco($bancoAlvo);
             
-            if ($sgbd === 'sqlserver') {
-                // No SQL Server, checa a sys.databases. Se nao houver, cria imediatamente.
-                $stmt = $conexaoAdmin->query("SELECT database_id FROM sys.databases WHERE name = '{$bancoAlvo}'");
-                if (!$stmt->fetch()) {
-                    // Executa fora de transacao implicitamente para o SQL Server nao reter o comando
-                    $conexaoAdmin->exec("CREATE DATABASE [{$bancoAlvo}];");
+            $precisaCriar = true;
+
+            // Se a estratégia exigir uma checagem prévia em tabelas de catálogo do sistema
+            if (!empty($ddlConfig['checagem'])) {
+                $stmt = $conexaoAdmin->query($ddlConfig['checagem']);
+                if ($stmt->fetch()) {
+                    $precisaCriar = false;
                 }
-            } elseif ($sgbd === 'postgres') {
-                $stmt = $conexaoAdmin->query("SELECT 1 FROM pg_database WHERE datname = '{$bancoAlvo}'");
-                if (!$stmt->fetch()) {
-                    $conexaoAdmin->exec("CREATE DATABASE \"{$bancoAlvo}\";");
-                }
-            } else {
-                $conexaoAdmin->exec("CREATE DATABASE IF NOT EXISTS `{$bancoAlvo}`;");
+            }
+
+            if ($precisaCriar && !empty($ddlConfig['criacao'])) {
+                $conexaoAdmin->exec($ddlConfig['criacao']);
             }
             
-            $conexaoAdmin = null; // Fecha a conexao administrativa para consolidar no disco
+            $conexaoAdmin = null; 
         } catch (PDOException $e) {
-            // Se falhar porque nao tem permissao ou erro de rede, repassa o erro
-            throw new \Exception("Erro na Camada de Persistencia ao tentar auto-criar o banco [{$bancoAlvo}]: " . $e->getMessage());
+            throw new Exception("Erro na Camada de Persistência ao tentar auto-criar o banco [{$bancoAlvo}]: " . $e->getMessage());
         }
     }
 
     /**
-     * Fabrica primitiva de instanciacao do PDO baseada no driver
+     * Instanciação purificada do PDO através de sua Strategy dedicada
      */
-    private static function createConnection(array $node, bool $isDestino): PDO
+    private static function createConnection(array $node, SgbdSyntaxInterface $syntax): PDO
     {
-        $sgbd = strtolower($node['sgbd'] ?? ($isDestino ? 'sqlserver' : 'mysql'));
         $host = $node['host'];
-        $port = $node['porta'];
+        $port = (int)$node['porta'];
         $user = $node['usuario'] ?? $node['user'] ?? '';
         $pass = $node['senha'] ?? $node['password'] ?? $node['pass'] ?? '';
         $db   = $node['banco'] ?? '';
 
-        if ($sgbd === 'sqlserver' || $sgbd === 'dblib') {
-            // Sintaxe DSN FreeTDS / DBLIB usada no Linux para conectar ao SQL Server
-            $dsn = "dblib:host={$host};port={$port}";
-            if ($db) {
-                $dsn .= ";dbname={$db}";
-            }
-        } elseif ($sgbd === 'postgres' || $sgbd === 'pgsql') {
-            $dsn = "pgsql:host={$host};port={$port}";
-            if ($db) {
-                $dsn .= ";dbname={$db}";
-            }
-        } else {
-            // Padrao MySQL
-            $dsn = "mysql:host={$host};port={$port}";
-            if ($db) {
-                $dsn .= ";dbname={$db}";
-            }
-        }
+        // Montagem 100% dinâmica delegada à Strategy
+        $dsn = $syntax->obterDsn($host, $port, $db);
 
         $options = [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,

@@ -50,4 +50,48 @@ class MySqlSyntax implements SgbdSyntaxInterface
         return "INSERT INTO {$tabelaQualificada} ({$listaColunas}) VALUES ({$valores}) 
                 ON DUPLICATE KEY UPDATE {$stringUpdate}";
     }
+
+    public function escaparColuna(string $coluna): string
+    {
+        return "`{$coluna}`";
+    }
+
+    public function obterComandoTrocaBanco(string $banco): string
+    {
+        return "USE `{$banco}`;";
+    }
+
+    public function obterTipoTextoLongo(): string
+    {
+        return "LONGTEXT";
+    }
+
+    public function obterTipoDataHora(): string
+    {
+        return "DATETIME";
+    }
+
+    public function obterDsn(string $host, int $port, string $banco): string
+    {
+        return "mysql:host={$host};port={$port}" . ($banco ? ";dbname={$banco}" : "");
+    }
+
+    public function obterBancoAdministrativo(): string
+    {
+        return "mysql";
+    }
+
+    public function obterDdlGarantirBanco(string $bancoAlvo): array
+    {
+        return [
+            'checagem' => null, // MySQL aceita IF NOT EXISTS direto
+            'criacao'  => "CREATE DATABASE IF NOT EXISTS `{$bancoAlvo}`;"
+        ];
+    }    
+    
+    public function obterNomeQualificadoTabelaControle(): string
+    {
+        return "`mysql`.`miida_controle_sincronizacao`";
+    }
+
 }

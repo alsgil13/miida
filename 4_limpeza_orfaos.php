@@ -34,7 +34,7 @@ foreach (['origem_command', 'destino_query'] as $no) {
 
 try {
     // RESOLUCAO DOS DIALETOS DE SGBD (PADRAO STRATEGY)
-    $sgbdOrigem = strtolower($infra['origem_command']['sgbd'] ?? 'sqlserver');
+    $sgbdOrigem = strtolower($infra['origem_command']['sgbd'] ?? 'mysql');
     switch ($sgbdOrigem) {
         case 'postgres':
         case 'postgresql': $syntaxLegado = new PostgresSyntax(); break;
@@ -52,12 +52,9 @@ try {
         default:           $syntaxModerno = new SqlServerSyntax(); break;
     }
 
-    // Correção de contexto de banco para o dblib/Pool de conexões
-    $primeiroBancoLegado = $config['bancos_gerenciados'][0]['banco_legado'] ?? '';
-    $primeiroBancoModerno = $config['bancos_gerenciados'][0]['banco_moderno'] ?? 'dw_moderno_db';
-
-    $connLegado  = ConnectionFactory::getLegadoConnection($infra, $primeiroBancoLegado);
-    $connModerno = ConnectionFactory::getModernoConnection($infra, $primeiroBancoModerno);
+    // Adaptação: Injeção das instâncias de Strategy na criação das conexões da Factory
+    $connLegado  = ConnectionFactory::getLegadoConnection($infra, $syntaxLegado);
+    $connModerno = ConnectionFactory::getModernoConnection($infra, $syntaxModerno);
     $logger      = new Logger($connModerno, $syntaxModerno);
 
     $limpador = new LimpezaOrfaosProcessor($connLegado, $connModerno, $syntaxLegado, $syntaxModerno, $logger);
@@ -69,12 +66,6 @@ try {
     $inicioCiclo = microtime(true);
     foreach ($config['bancos_gerenciados'] as $banco) {
         foreach ($banco['tabelas'] as $tabela) {
-            
-            // Tratamento preventivo: Altera 'public' para 'dbo' em tempo de execucao no SQL Server
-            if ($sgbdDestino === 'sqlserver' && isset($tabela['schema_moderno']) && strtolower($tabela['schema_moderno']) === 'public') {
-                $tabela['schema_moderno'] = 'dbo';
-            }
-
             $limpador->executarLimpeza($banco, $tabela);
         }
     }
