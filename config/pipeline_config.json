@@ -1,6 +1,6 @@
 {
     "configuracao_infraestrutura": {
-        "intervalo_verificacao_segundos": 10,
+        "intervalo_verificacao_segundos": 1,
         "intervalo_limpeza_orfaos_minutos": 5,
         "origem_command": {
             "sgbd": "mysql",
@@ -29,7 +29,7 @@
                     "schema_moderno": "public",
                     "coluna_timestamp_controle": "dt_cadastro",
                     "coluna_last_updated": "middleware_last_updated",
-                    "intervalo_sincronizacao_segundos": 5,
+                    "intervalo_sincronizacao_segundos": 1,
                     "camada_anticorrupcao": {
                         "sanitizacao": {
                             "remover_espacos_excesso": true,
@@ -67,7 +67,7 @@
                     "schema_moderno": "public",
                     "coluna_timestamp_controle": "dt_alteracao",
                     "coluna_last_updated": "middleware_last_updated",
-                    "intervalo_sincronizacao_segundos": 10,
+                    "intervalo_sincronizacao_segundos": 1,
                     "camada_anticorrupcao": {
                         "sanitizacao": {
                             "remover_espacos_excesso": false,

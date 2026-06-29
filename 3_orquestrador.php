@@ -81,7 +81,7 @@ try {
     $controlRepo = new ControlRepository($connModerno, $syntaxModerno);
     $logger = new Logger($connModerno, $syntaxModerno);
     
-    // Processadores reconfigurados com a assinatura exata esperada pelo construtor correto
+    // Processadores reconfigurados com a assinatura correta
     $sincronizador = new DataSyncProcessor($connLegado, $connModerno, $controlRepo, $syntaxModerno);
     $limpador = new LimpezaOrfaosProcessor($connLegado, $connModerno, $syntaxLegado, $syntaxModerno, $logger);
 
@@ -116,8 +116,15 @@ try {
 
                 if ($agora >= ($cronometroTabelas[$chaveCronometro] + $intervaloTabelaSegundos)) {
                     
+                    $horaFormatada = date('H:i:s');
+                    echo "[{$horaFormatada}] Verificando incrementos para: {$banco['banco_legado']}.{$tabela['tabela_legada']}...\n";
+                    
                     // Executa a carga incremental isolada
-                    $sincronizador->sincronizarTabela($banco, $tabela);
+                    $linhas = $sincronizador->sincronizarTabela($banco, $tabela);
+                    
+                    if ($linhas > 0) {
+                        echo "   └── [ OK ] +{$linhas} novos registros sincronizados.\n";
+                    }
                     
                     // Atualiza o marcador temporal da tabela para o proximo ciclo
                     $cronometroTabelas[$chaveCronometro] = time();
@@ -132,6 +139,9 @@ try {
 
             foreach ($config['bancos_gerenciados'] as $banco) {
                 foreach ($banco['tabelas'] as $tabela) {
+                    if ($sgbdDestino === 'sqlserver' && isset($tabela['schema_moderno']) && strtolower($tabela['schema_moderno']) === 'public') {
+                        $tabela['schema_moderno'] = 'dbo';
+                    }
                     $limpador->executarLimpeza($banco, $tabela);
                 }
             }
@@ -139,7 +149,7 @@ try {
             $tempoGastoLimpeza = round((microtime(true) - $inicioLimpeza) * 1000, 2);
             echo " [OK] Ciclo de limpeza finalizado em " . $tempoGastoLimpeza . " ms.\n\n";
 
-            // Reagenda a proxima execucao baseando-se no tempo definido no JSON
+            // Reagenda a proxima execucao
             $proximaLimpezaOrfaos = time() + ($intervaloLimpezaMinutos * 60);
         }
 

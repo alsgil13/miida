@@ -47,10 +47,14 @@ class DataSyncProcessor
         $colunaControleOrigem = $tabelaConfig['coluna_timestamp_controle'];
         $colunaControleDestino = $tabelaConfig['coluna_last_updated'] ?? 'middleware_last_updated';
 
+        // 1. Recupera o cursor salvo
         $ultimaData = $this->controlRepo->obterUltimaDataSincronizacao($bancoModerno, "{$schemaModerno}.{$tabelaModerna}");
-        $novaDataSincronizacao = date('Y-m-d H:i:s');
+        
+        // Mantemos um fallback caso o lote venha vazio
+        $novaDataSincronizacao = $ultimaData; 
 
-        $sqlOrigem = "SELECT * FROM `{$bancoLegado}`.`{$tabelaLegada}` WHERE `{$colunaControleOrigem}` > :ultima_data";
+        // 2. Extração no MySQL
+        $sqlOrigem = "SELECT * FROM `{$bancoLegado}`.`{$tabelaLegada}` WHERE `{$colunaControleOrigem}` > :ultima_data ORDER BY `{$colunaControleOrigem}` ASC";
         
         $stmtOrigem = $this->origem->prepare($sqlOrigem);
         $stmtOrigem->execute([':ultima_data' => $ultimaData]);
@@ -58,7 +62,6 @@ class DataSyncProcessor
 
         $totalProcessados = count($registros);
         if ($totalProcessados === 0) {
-            $this->controlRepo->atualizarEstadoSincronizacao($bancoModerno, "{$schemaModerno}.{$tabelaModerna}", 'SUCESSO', 0, $novaDataSincronizacao);
             return 0;
         }
 
@@ -74,12 +77,19 @@ class DataSyncProcessor
         $this->destino->beginTransaction();
         try {
             foreach ($registros as $linha) {
+                // CORREÇÃO ESTRATÉGICA:
+                // A nova data do cursor passa a ser exatamente a data do registro da origem.
+                // Isso elimina qualquer problema de fuso horário desalinhado entre os servidores.
+                if (!empty($linha[$colunaControleOrigem])) {
+                    $novaDataSincronizacao = $linha[$colunaControleOrigem];
+                }
+
                 $registroHigienizado = AntiCorruptionLayer::processar($linha, $tabelaConfig['camada_anticorrupcao']);
                 
-                $registroHigienizado[$colunaControleDestino] = $novaDataSincronizacao;
+                // Grava no destino a hora em que o dado foi de fato inserido
+                $registroHigienizado[$colunaControleDestino] = date('Y-m-d H:i:s');
                 $registroHigienizado['hash_versao'] = md5(json_encode($registroHigienizado));
 
-                // --- NOVO SISTEMA DE UPSERT SEGURO E SEPARADO EM DOIS PASSOS ---
                 $camposUpdate = [];
                 $clausulaWhere = [];
                 $paramsPdo = [];
@@ -93,12 +103,12 @@ class DataSyncProcessor
                     }
                 }
 
-                // Passo 1: Executa o UPDATE condicional
+                // Passo 1: UPDATE
                 $sqlUpdate = "UPDATE {$tabelaDestinoQualificada} SET " . implode(', ', $camposUpdate) . " WHERE " . implode(' AND ', $clausulaWhere);
                 $stmtUpdate = $this->destino->prepare($sqlUpdate);
                 $stmtUpdate->execute($paramsPdo);
 
-                // Passo 2: Se o registro nao existia, faz o INSERT nativo
+                // Passo 2: INSERT se não afetou linhas
                 if ($stmtUpdate->rowCount() === 0) {
                     $colunasInsert = array_keys($registroHigienizado);
                     $listaColunas = '[' . implode('], [', $colunasInsert) . ']';
@@ -111,11 +121,13 @@ class DataSyncProcessor
             }
             
             $this->destino->commit();
+            
+            // Salva o cursor temporal usando a data real do último registro vindo do MySQL
             $this->controlRepo->atualizarEstadoSincronizacao($bancoModerno, "{$schemaModerno}.{$tabelaModerna}", 'SUCESSO', $totalProcessados, $novaDataSincronizacao);
             
         } catch (Exception $e) {
             $this->destino->rollBack();
-            $this->controlRepo->atualizarEstadoSincronizacao($bancoModerno, "{$schemaModerno}.{$tabelaModerna}", 'ERRO', 0, $novaDataSincronizacao);
+            $this->controlRepo->atualizarEstadoSincronizacao($bancoModerno, "{$schemaModerno}.{$tabelaModerna}", 'ERRO', 0, date('Y-m-d H:i:s'));
             throw $e;
         }
 
