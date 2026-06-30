@@ -108,42 +108,78 @@ class SqlServerSyntax implements SgbdSyntaxInterface
     }
 
     public function executarUpsert(\PDO $destino, string $tabelaQualificada, array $registro, array $pks): void
-    {
-        $colunas = array_keys($registro);
-        
-        // Condição de junção baseada nas chaves primárias
-        $joinConds = [];
-        foreach ($pks as $pk) {
-            $joinConds[] = "target.[{$pk}] = source.[{$pk}]";
+{
+    $colunas = array_keys($registro);
+
+    // 1. QUERY DE SELEÇÃO (CHECK)
+    $whereConds = [];
+    $whereParams = [];
+    foreach ($pks as $pk) {
+        if (array_key_exists($pk, $registro)) {
+            $whereConds[] = "[{$pk}] = :pk_{$pk}";
+            $whereParams[":pk_{$pk}"] = $registro[$pk];
         }
+    }
 
+    $sqlCheck = "SELECT 1 FROM {$tabelaQualificada} WHERE " . implode(' AND ', $whereConds);
+    $stmtCheck = $destino->prepare($sqlCheck);
+    
+    // Faz o bind forçado dos parâmetros do WHERE
+    foreach ($whereParams as $token => $valor) {
+        $stmtCheck->bindValue($token, $valor);
+    }
+    $stmtCheck->execute();
+    $existe = $stmtCheck->fetchColumn();
+
+    // 2. DECISÃO ENTRE UPDATE OU INSERT
+    if ($existe) {
         $updateFields = [];
-        $insertCols = [];
-        $insertVals = [];
-
+        $updateParams = [];
+        
         foreach ($colunas as $coluna) {
-            $insertCols[] = "[{$coluna}]";
-            $insertVals[] = "source.[{$coluna}]";
             if (!in_array($coluna, $pks)) {
-                $updateFields[] = "target.[{$coluna}] = source.[{$coluna}]";
+                $updateFields[] = "[{$coluna}] = :up_{$coluna}";
+                $updateParams[":up_{$coluna}"] = $registro[$coluna];
             }
         }
 
-        // O MERGE exige uma tabela de origem temporária ou simulada por variáveis
-        $selectSource = [];
-        foreach ($registro as $coluna => $valor) {
-            $selectSource[] = ":{$coluna} AS [{$coluna}]";
+        if (empty($updateFields)) {
+            return; // Nada para atualizar além da PK
         }
 
-        $sql = "MERGE {$tabelaQualificada} AS target
-                USING (SELECT " . implode(', ', $selectSource) . ") AS source
-                ON (" . implode(' AND ', $joinConds) . ")
-                WHEN MATCHED THEN
-                    UPDATE SET " . implode(', ', $updateFields) . "
-                WHEN NOT MATCHED THEN
-                    INSERT (" . implode(', ', $insertCols) . ") VALUES (" . implode(', ', $insertVals) . ");";
+        // Adiciona os mesmos parâmetros do WHERE para o UPDATE encontrar o registro
+        foreach ($pks as $pk) {
+            $updateParams[":pk_{$pk}"] = $registro[$pk];
+        }
 
-        $stmt = $destino->prepare($sql);
-        $stmt->execute($registro);
+        $sqlUpdate = "UPDATE {$tabelaQualificada} SET " . implode(', ', $updateFields) . " WHERE " . implode(' AND ', $whereConds);
+        $stmtUpdate = $destino->prepare($sqlUpdate);
+        
+        // Faz o bind forçado limpando qualquer token fantasma
+        foreach ($updateParams as $token => $valor) {
+            $stmtUpdate->bindValue($token, $valor);
+        }
+        $stmtUpdate->execute();
+
+    } else {
+        $insertCols = [];
+        $insertTokens = [];
+        $insertParams = [];
+
+        foreach ($colunas as $coluna) {
+            $insertCols[] = "[{$coluna}]";
+            $insertTokens[] = ":ins_{$coluna}";
+            $insertParams[":ins_{$coluna}"] = $registro[$coluna];
+        }
+
+        $sqlInsert = "INSERT INTO {$tabelaQualificada} (" . implode(', ', $insertCols) . ") VALUES (" . implode(', ', $insertTokens) . ")";
+        $stmtInsert = $destino->prepare($sqlInsert);
+        
+        // Faz o bind forçado garantindo paridade total 1:1
+        foreach ($insertParams as $token => $valor) {
+            $stmtInsert->bindValue($token, $valor);
+        }
+        $stmtInsert->execute();
     }
+}
 }

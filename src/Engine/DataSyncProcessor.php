@@ -2,203 +2,142 @@
 
 namespace Miida\Engine;
 
-use PDO;
-use Exception;
 use Miida\Database\ControlRepository;
 use Miida\Database\Syntax\SgbdSyntaxInterface;
 use Miida\Services\AntiCorruptionLayer;
 
 /**
  * MIIDA - DataSyncProcessor
- * Core Engine: Orquestrador de Extração, ACL e Carga Híbrida (Incremental / Full-Hash)
- * Implementação Pura do Padrão Strategy (100% Agnóstica a SGBDs)
+ * Motor de Sincronizacao de Dados de Alta Performance Multi-SGBD
  */
 class DataSyncProcessor
 {
-    private PDO $origem;
-    private PDO $destino;
+    private \PDO $connLegado;
+    private \PDO $connModerno;
     private SgbdSyntaxInterface $syntaxLegado;
     private SgbdSyntaxInterface $syntaxModerno;
     private ControlRepository $controlRepo;
 
     public function __construct(
-        PDO $origem, 
-        PDO $destino, 
-        SgbdSyntaxInterface $syntaxLegado, 
-        SgbdSyntaxInterface $syntaxModerno, 
+        \PDO $connLegado,
+        \PDO $connModerno,
+        SgbdSyntaxInterface $syntaxLegado,
+        SgbdSyntaxInterface $syntaxModerno,
         ControlRepository $controlRepo
     ) {
-        $this->origem = $origem;
-        $this->destino = $destino;
+        $this->connLegado   = $connLegado;
+        $this->connModerno  = $connModerno;
         $this->syntaxLegado = $syntaxLegado;
         $this->syntaxModerno = $syntaxModerno;
-        $this->controlRepo = $controlRepo;
+        $this->controlRepo  = $controlRepo;
     }
 
     /**
-     * Executa a sincronização baseando-se em metadados json (Incremental Temporal ou Comparação por Hash)
+     * Sincroniza uma tabela individual baseando-se no Manifesto JSON
      */
-    public function sincronizarTabela(array $bancoConfig, array $tabelaConfig): int
+    public function sincronizarTabela(array $configBanco, array $configTabela): int
     {
-        $bancoLegado   = $bancoConfig['banco_legado'];
-        $bancoModerno  = $bancoConfig['banco_moderno'];
+        $nomeBancoDestino  = $configBanco['banco_moderno'];
+        $schemaDestino     = $configTabela['schema_moderno'] ?? 'dbo';
+        $tabelaDestino     = $configTabela['tabela_moderna'];
+        $tabelaOrigem      = $configTabela['tabela_legada'];
         
-        $tabelaLegada  = $tabelaConfig['tabela_legada'];
-        $tabelaModerna = $tabelaConfig['tabela_moderna'];
-        
-        $schemaLegado  = $tabelaConfig['schema_legado'] ?? 'dbo';
-        $schemaModerno = $tabelaConfig['schema_moderno'] ?? 'dbo';
+        // Define o nome qualificado estrutural da tabela destino no SQL Server
+        $tabelaQualificada = "[{$nomeBancoDestino}].[{$schemaDestino}].[{$tabelaDestino}]";
 
-        $colunaControleOrigem = $tabelaConfig['coluna_timestamp_controle'] ?? null;
-        $colunaControleDestino = $tabelaConfig['coluna_last_updated'] ?? 'middleware_last_updated';
+        // CORREÇÃO PRECISA: Acessa o mapeamento dentro do nó 'camada_anticorrupcao' igual ao seu JSON
+        $mapeamento = $configTabela['camada_anticorrupcao']['mapeamento_colunas'] ?? [];
 
-        $chavesPrimarias = [];
-        foreach ($tabelaConfig['camada_anticorrupcao']['mapeamento_colunas'] as $colOrigem => $props) {
+        if (empty($mapeamento)) {
+            throw new \Exception("Erro de Modelagem: O bloco [mapeamento_colunas] nao foi encontrado dentro de [camada_anticorrupcao] para a tabela [{$tabelaDestino}].");
+        }
+
+        // 1. Identifica as Chaves Primarias (PKs) configuradas no mapeamento
+        $pks = [];
+        foreach ($mapeamento as $colOriginal => $props) {
             if (!empty($props['pk'])) {
-                $chavesPrimarias[] = $props['nome_destino'];
+                $pks[] = $props['nome_destino'] ?? $colOriginal;
             }
         }
 
-        // Resolução Simétrica: Cada Strategy lida com sua própria normalização interna de schema e delimitadores
-        $tabelaOrigemQualificada  = $this->syntaxLegado->obterNomeQualificado($bancoLegado, $schemaLegado, $tabelaLegada);
-        $tabelaDestinoQualificada = $this->syntaxModerno->obterNomeQualificado($bancoModerno, $schemaModerno, $tabelaModerna);
-
-        // --- 1. RESOLUÇÃO DA ESTRATÉGIA DE EXTRAÇÃO ---
-        $modoPorHash = empty($colunaControleOrigem);
-        $novaDataSincronizacao = date('Y-m-d H:i:s');
-
-        if (!$modoPorHash) {
-            // Estratégia A: Captura Incremental baseada em data/hora de controle
-            $ultimaData = $this->controlRepo->obterUltimaDataSincronizacao($bancoModerno, "{$schemaModerno}.{$tabelaModerna}");
-            $novaDataSincronizacao = $ultimaData; 
-
-            // Escapa a coluna de controle na origem delegando para a Strategy Legada
-            $colControleOrigemEscapada = $this->syntaxLegado->escaparColuna($colunaControleOrigem);
-
-            $sqlOrigem = "SELECT * FROM {$tabelaOrigemQualificada} WHERE {$colControleOrigemEscapada} > :ultima_data ORDER BY {$colControleOrigemEscapada} ASC";
-            $stmtOrigem = $this->origem->prepare($sqlOrigem);
-            $stmtOrigem->execute([':ultima_data' => $ultimaData]);
-        } else {
-            // Estratégia B: Fallback por Hash Semântico (Carga total de validação)
-            $sqlOrigem = "SELECT * FROM {$tabelaOrigemQualificada}";
-            $stmtOrigem = $this->origem->query($sqlOrigem);
+        if (empty($pks)) {
+            throw new \Exception("Erro de Modelagem: A tabela [{$tabelaDestino}] nao possui Chaves Primarias (pk: true) mapeadas no JSON.");
         }
 
-        $registros = $stmtOrigem->fetchAll(PDO::FETCH_ASSOC);
-        $totalLote = count($registros);
-        
-        if ($totalLote === 0) {
-            return 0;
+        // 2. Recupera de forma blindada a data da ultima sincronizacao bem-sucedida
+        $ultimaData = $this->obterDataUltimaSincronizacao($nomeBancoDestino, $tabelaDestino);
+
+        // 3. Registra o inicio da execucao na tabela tecnica de controle
+        $this->controlRepo->atualizarVersao($nomeBancoDestino, $tabelaDestino, 'PROCESSANDO', 0);
+
+        // 4. Mapeia a coluna incremental real baseada na chave do seu JSON (coluna_timestamp_controle)
+        $colunaIncremental = $configTabela['coluna_timestamp_controle'] ?? null;
+
+        // 5. Monta a query delta de extracao incremental na Origem (MySQL)
+        $sqlExtracao = "SELECT * FROM `{$tabelaOrigem}`";
+        if ($ultimaData && !empty($colunaIncremental)) {
+            $sqlExtracao .= " WHERE `{$colunaIncremental}` > :ultima_data";
         }
 
-        $linhasSincronizadasEfetivas = 0;
-        $this->destino->beginTransaction();
+        $stmtOrigem = $this->connLegado->prepare($sqlExtracao);
+        if ($ultimaData && !empty($colunaIncremental)) {
+            $stmtOrigem->bindValue(':ultima_data', $ultimaData);
+        }
+        $stmtOrigem->execute();
 
+        $linhasProcessadas = 0;
+
+        // 6. Inicia o loop atomico de carga registro por registro
+        $this->connModerno->beginTransaction();
         try {
-            foreach ($registros as $linha) {
-                if (!$modoPorHash && !empty($linha[$colunaControleOrigem])) {
-                    $novaDataSincronizacao = $linha[$colunaControleOrigem];
-                }
+            while ($registroBruto = $stmtOrigem->fetch(\PDO::FETCH_ASSOC)) {
+                
+                // Passa os dados pela ACL purificada (Higienizacao dinamica sem hardcodes)
+                $registroLimpo = AntiCorruptionLayer::processar($registroBruto, $configTabela);
 
-                // Passagem obrigatória pela Camada de Anticorrupção (ACL)
-                $registroHigienizado = AntiCorruptionLayer::processar($linha, $tabelaConfig['camada_anticorrupcao']);
-                $hashVersao = md5(json_encode($registroHigienizado));
-
-                // Injeção dos dados técnicos e metadados de rastreabilidade
-                $registroHigienizado[$colunaControleDestino] = date('Y-m-d H:i:s');
-                $registroHigienizado['hash_versao'] = $hashVersao;
-
-                $camposUpdate = [];
-                $clausulaWhere = [];
-                $paramsPdo = [];
-
-                foreach ($registroHigienizado as $coluna => $valor) {
-                    $placeholder = ":" . str_replace([' ', '-', '.'], '_', $coluna);
-                    $paramsPdo[$placeholder] = $valor;
-
-                    // Uso nativo e agnóstico da Strategy destino para escapar as colunas
-                    $colunaEscapada = $this->syntaxModerno->escaparColuna($coluna);
-
-                    if (in_array($coluna, $chavesPrimarias)) {
-                        $clausulaWhere[] = "{$colunaEscapada} = {$placeholder}";
-                    } elseif ($coluna !== $colunaControleDestino && $coluna !== 'hash_versao') {
-                        $camposUpdate[] = "{$colunaEscapada} = {$placeholder}";
-                    }
-                }
-
-                // Se operando em Fallback de Carga Total por Hash, checa mutações de dados
-                if ($modoPorHash) {
-                    $condicaoWhereString = implode(' AND ', $clausulaWhere);
-                    
-                    // Escapa a coluna hash_versao dinamicamente na query de verificação
-                    $colHashCheckEscapada = $this->syntaxModerno->escaparColuna('hash_versao');
-                    $sqlCheck = "SELECT {$colHashCheckEscapada} FROM {$tabelaDestinoQualificada} WHERE {$condicaoWhereString}";
-                    
-                    $stmtCheck = $this->destino->prepare($sqlCheck);
-                    
-                    $paramsPkCheck = [];
-                    foreach ($chavesPrimarias as $pkCol) {
-                        $pKey = ":" . str_replace([' ', '-', '.'], '_', $pkCol);
-                        $paramsPkCheck[$pKey] = $registroHigienizado[$pkCol];
-                    }
-                    
-                    $stmtCheck->execute($paramsPkCheck);
-                    $registroModernoExistente = $stmtCheck->fetch(PDO::FETCH_ASSOC);
-
-                    // Se hashes idênticos na comparação semântica, evita gravação de I/O desnecessária
-                    if ($registroModernoExistente && $registroModernoExistente['hash_versao'] === $hashVersao) {
-                        continue;
-                    }
-                }
-
-                // Injeta as colunas técnicas no lote final de atualização usando a Strategy de destino
-                $camposUpdate[] = $this->syntaxModerno->escaparColuna($colunaControleDestino) . " = :{$colunaControleDestino}";
-                $camposUpdate[] = $this->syntaxModerno->escaparColuna('hash_versao') . " = :hash_versao";
-
-                // PASSO 1: Tenta realizar o UPDATE
-                $sqlUpdate = "UPDATE {$tabelaDestinoQualificada} SET " . implode(', ', $camposUpdate) . " WHERE " . implode(' AND ', $clausulaWhere);
-                $stmtUpdate = $this->destino->prepare($sqlUpdate);
-                $stmtUpdate->execute($paramsPdo);
-
-                // PASSO 2: Caso o registro seja inédito (0 linhas afetadas), realiza o INSERT
-                if ($stmtUpdate->rowCount() === 0) {
-                    $colunasInsert = array_keys($registroHigienizado);
-                    
-                    // Formata as colunas do INSERT dinamicamente via Strategy
-                    $listaColunasFormatadas = array_map(function($col) {
-                        return $this->syntaxModerno->escaparColuna($col);
-                    }, $colunasInsert);
-
-                    $listaPlaceholders = ':' . implode(', :|:', array_map(function($col) {
-                        return str_replace([' ', '-', '.'], '_', $col);
-                    }, $colunasInsert));
-                    $listaPlaceholders = str_replace('|', '', $listaPlaceholders);
-
-                    $sqlInsert = "INSERT INTO {$tabelaDestinoQualificada} (" . implode(', ', $listaColunasFormatadas) . ") VALUES ({$listaPlaceholders})";
-                    $stmtInsert = $this->destino->prepare($sqlInsert);
-                    $stmtInsert->execute($paramsPdo);
-                }
-
-                $linhasSincronizadasEfetivas++;
+                // Executa a Strategy de persistencia do SQL Server de forma segura
+                $this->syntaxModerno->executarUpsert($this->connModerno, $tabelaQualificada, $registroLimpo, $pks);
+                
+                $linhasProcessadas++;
             }
             
-            $this->destino->commit();
-            
-            // Grava os metadados agregados do ciclo na tabela técnica de controle
-            $this->controlRepo->atualizarEstadoSincronizacao(
-                $bancoModerno, 
-                "{$schemaModerno}.{$tabelaModerna}", 
-                'SUCESSO', 
-                $linhasSincronizadasEfetivas, 
-                $modoPorHash ? date('Y-m-d H:i:s') : $novaDataSincronizacao
-            );
-            
-        } catch (Exception $e) {
-            $this->destino->rollBack();
-            $this->controlRepo->atualizarEstadoSincronizacao($bancoModerno, "{$schemaModerno}.{$tabelaModerna}", 'ERRO', 0, date('Y-m-d H:i:s'));
+            $this->connModerno->commit();
+
+        } catch (\Exception $e) {
+            $this->connModerno->rollBack();
+            $this->controlRepo->atualizarVersao($nomeBancoDestino, $tabelaDestino, 'FALHA', $linhasProcessadas);
             throw $e;
         }
 
-        return $linhasSincronizadasEfetivas;
+        // 7. Atualiza o status final de sucesso da esteira de dados
+        $this->controlRepo->atualizarVersao($nomeBancoDestino, $tabelaDestino, 'SUCESSO', $linhasProcessadas);
+
+        return $linhasProcessadas;
+    }
+
+    /**
+     * Busca de forma isolada e blindada o timestamp da ultima execucao bem-sucedida
+     */
+    private function obterDataUltimaSincronizacao(string $banco, string $tabela): ?string
+    {
+        $tabelaControle = $this->syntaxModerno->obterNomeQualificadoTabelaControle();
+
+        $sql = "SELECT ultima_sincronizacao 
+                FROM {$tabelaControle} 
+                WHERE banco_nome = :banco 
+                  AND tabela_nome = :tabela 
+                  AND status_execucao = 'SUCESSO'";
+
+        try {
+            $stmt = $this->connModerno->prepare($sql);
+            $stmt->bindValue(':banco', $banco);
+            $stmt->bindValue(':tabela', $tabela);
+            $stmt->execute();
+            
+            $resultado = $stmt->fetchColumn();
+            return $resultado ? $resultado : null;
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }

@@ -2,103 +2,56 @@
 
 namespace Miida\Database;
 
-use PDO;
-use Exception;
-use Miida\Database\Syntax\SgbdSyntaxInterface;
-
-/**
- * MIIDA - ControlRepository
- * Guardião relacional do estado temporal das tabelas e cursores de sincronização
- * Implementação purificada e agnóstica (Multi-SGBD)
- */
 class ControlRepository
 {
-    private PDO $conexao;
-    private SgbdSyntaxInterface $syntax;
-    private string $tabelaControleQualificada;
+    private \PDO $conexao;
+    private $syntax;
 
-    public function __construct(PDO $conexao, SgbdSyntaxInterface $syntax)
+    public function __construct(\PDO $conexao, $syntax)
     {
         $this->conexao = $conexao;
         $this->syntax = $syntax;
-        
-        $this->tabelaControleQualificada = $this->syntax->obterNomeQualificadoTabelaControle();
     }
 
     /**
-     * Recupera a última data em que uma tabela específica foi sincronizada com sucesso
+     * Atualiza ou Insere o estado de sincronização de uma tabela
      */
-    public function obterUltimaSincronizacao(string $banco, string $tabela): string
+    public function atualizarVersao(string $banco, string $tabela, string $status, int $afetados): void
     {
-        $sql = "SELECT ultima_sincronizacao FROM {$this->tabelaControleQualificada} 
-                WHERE banco_nome = :banco AND tabela_nome = :tabela";
-                
-        $stmt = $this->conexao->prepare($sql);
-        $stmt->execute([
-            ':banco' => $banco,
-            ':tabela' => $tabela
-        ]);
-        
-        $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        // Se nunca foi sincronizada, retorna uma data base antiga para forçar a carga inicial total
-        return $resultado['ultima_sincronizacao'] ?? '1970-01-01 00:00:00';
-    }
+        $tabelaControle = $this->syntax->obterNomeQualificadoTabelaControle();
 
-    /**
-     * Método Auxiliar (Alias/Apelido) para manter compatibilidade com o DataSyncProcessor
-     */
-    public function obterUltimaDataSincronizacao(string $banco, string $tabela): string
-    {
-        return $this->obterUltimaSincronizacao($banco, $tabela);
-    }
+        // 1. Verifica se o registro de controle já existe para esta tabela específica
+        $sqlCheck = "SELECT 1 FROM {$tabelaControle} WHERE banco_nome = :banco AND tabela_nome = :tabela";
+        $stmtCheck = $this->conexao->prepare($sqlCheck);
+        $stmtCheck->bindValue(':banco', $banco);
+        $stmtCheck->bindValue(':tabela', $tabela);
+        $stmtCheck->execute();
+        $existe = $stmtCheck->fetchColumn();
 
-    /**
-     * Atualiza o estado temporal, status e volumetria de sincronização de uma tabela
-     */
-    public function atualizarEstadoSincronizacao(
-        string $banco, 
-        string $tabela, 
-        string $status, 
-        int $registrosAfetados, 
-        string $dataSincronizacao
-    ): void {
-        try {
-            // Estratégia Agnóstica de Upsert Manual livre de erros de parâmetros:
-            // Passo 1: Tenta realizar um UPDATE na chave composta
-            $sqlUpdate = "UPDATE {$this->tabelaControleQualificada} 
-                          SET ultima_sincronizacao = :ultima_sincronizacao, 
-                              status_execucao = :status_execucao, 
-                              registros_afetados = :registros_afetados 
-                          WHERE banco_nome = :banco_nome AND tabela_nome = :tabela_nome";
-
-            $stmtUpdate = $this->conexao->prepare($sqlUpdate);
-            $stmtUpdate->execute([
-                ':banco_nome' => $banco,
-                ':tabela_nome' => $tabela,
-                ':ultima_sincronizacao' => $dataSincronizacao,
-                ':status_execucao' => $status,
-                ':registros_afetados' => $registrosAfetados
-            ]);
-
-            // Passo 2: Se nenhuma linha foi alterada (registro novo), executa o INSERT nativo
-            if ($stmtUpdate->rowCount() === 0) {
-                $sqlInsert = "INSERT INTO {$this->tabelaControleQualificada} 
-                              (banco_nome, tabela_nome, ultima_sincronizacao, status_execucao, registros_afetados) \r
-                              VALUES (:banco_nome, :tabela_nome, :ultima_sincronizacao, :status_execucao, :registros_afetados)";
-
-                $stmtInsert = $this->conexao->prepare($sqlInsert);
-                $stmtInsert->execute([
-                    ':banco_nome' => $banco,
-                    ':tabela_nome' => $tabela,
-                    ':ultima_sincronizacao' => $dataSincronizacao,
-                    ':status_execucao' => $status,
-                    ':registros_afetados' => $registrosAfetados
-                ]);
-            }
+        if ($existe) {
+            // 2. Se já existe, faz o UPDATE com os tokens exatos
+            $sqlUpdate = "UPDATE {$tabelaControle} 
+                          SET ultima_sincronizacao = CURRENT_TIMESTAMP, 
+                              status_execucao = :status, 
+                              registros_afetados = :afetados 
+                          WHERE banco_nome = :banco AND tabela_nome = :tabela";
             
-        } catch (Exception $e) {
-            throw new Exception("Falha ao registrar estado de sincronizacao no ControlRepository: " . $e->getMessage());
+            $stmt = $this->conexao->prepare($sqlUpdate);
+        } else {
+            // 3. Se não existe, faz o INSERT inicial
+            $sqlInsert = "INSERT INTO {$tabelaControle} 
+                          (banco_nome, tabela_nome, ultima_sincronizacao, status_execucao, registros_afetados) 
+                          VALUES (:banco, :tabela, CURRENT_TIMESTAMP, :status, :afetados)";
+            
+            $stmt = $this->conexao->prepare($sqlInsert);
         }
+
+        // Bind manual e seguro de todos os tokens para evitar o erro HY093 no dblib
+        $stmt->bindValue(':banco', $banco);
+        $stmt->bindValue(':tabela', $tabela);
+        $stmt->bindValue(':status', $status);
+        $stmt->bindValue(':afetados', $afetados, \PDO::PARAM_INT);
+
+        $stmt->execute();
     }
 }

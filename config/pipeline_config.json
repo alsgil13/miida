@@ -25,8 +25,8 @@
                 {
                     "tabela_legada": "tb_usuarios",
                     "tabela_moderna": "usuarios",
-                    "schema_legado": "dbo",
-                    "schema_moderno": "public",
+                    "schema_legado": null,
+                    "schema_moderno": "dbo",
                     "coluna_timestamp_controle": null,
                     "coluna_last_updated": "middleware_last_updated",
                     "intervalo_sincronizacao_segundos": 1,
@@ -63,8 +63,8 @@
                 {
                     "tabela_legada": "tb_vendas_itens",
                     "tabela_moderna": "vendas_itens",
-                    "schema_legado": "dbo",
-                    "schema_moderno": "public",
+                    "schema_legado": null,
+                    "schema_moderno": "dbo",
                     "coluna_timestamp_controle": "dt_alteracao",
                     "coluna_last_updated": "middleware_last_updated",
                     "intervalo_sincronizacao_segundos": 1,

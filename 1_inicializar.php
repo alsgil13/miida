@@ -1,8 +1,7 @@
 <?php
 
 /**
- * MIIDA - Middleware de Ingestao, Integracao e Desacoplamento de Arquiteturas
- * Script CLI de Inicializacao, Provisionamento e Auditoria de Infraestrutura (Multi-SGBD)
+ * MIIDA - Script de Inicializacao e Provisionamento Estrutural Automatizado (Multi-SGBD)
  */
 
 require_once __DIR__ . '/autoload.php';
@@ -13,22 +12,16 @@ use Miida\Database\Syntax\MySqlSyntax;
 use Miida\Database\Syntax\PostgresSyntax;
 use Miida\Engine\SchemaCloner;
 
-$jsonPath = __DIR__ . '/config/pipeline_config.json';
-
-if (!file_exists($jsonPath)) {
-    die("ERRO: Arquivo 'pipeline_config.json' nao foi encontrado na pasta /config.\n");
-}
-
 echo "=========================================================\n";
 echo "      MIIDA - INICIALIZANDO SUBSISTEMA (MULTI-SGBD)      \n";
 echo "=========================================================\n";
-echo "[*] Carregando mapa de metadados declarativo...\n";
 
-$config = json_decode(file_get_contents($jsonPath), true);
-if (json_last_error() !== JSON_ERROR_NONE) {
-    die("ERRO: O arquivo JSON possui erros de sintaxe: " . json_last_error_msg() . "\n");
+$jsonPath = __DIR__ . '/config/pipeline_config.json';
+if (!file_exists($jsonPath)) {
+    die("ERRO: Arquivo 'pipeline_config.json' nao encontrado.\n");
 }
 
+$config = json_decode(file_get_contents($jsonPath), true);
 $infra = $config['configuracao_infraestrutura'];
 
 // --- PROCESSAMENTO DAS VARIAVEIS DE AMBIENTE (.ENV) ---
@@ -40,115 +33,97 @@ foreach (['origem_command', 'destino_query'] as $no) {
     }
 }
 
+// RESOLUÇÃO DA STRATEGY DO SGBD ORIGEM
+$sgbdOrigem = strtolower($infra['origem_command']['sgbd'] ?? 'mysql');
+switch ($sgbdOrigem) {
+    case 'postgres':
+    case 'postgresql': $syntaxLegado = new PostgresSyntax(); break;
+    case 'mysql':      $syntaxLegado = new MySqlSyntax(); break;
+    case 'sqlserver':
+    default:           $syntaxLegado = new SqlServerSyntax(); break;
+}
+
+// RESOLUÇÃO DA STRATEGY DO SGBD DESTINO
+$sgbdDestino = strtolower($infra['destino_query']['sgbd'] ?? 'sqlserver');
+switch ($sgbdDestino) {
+    case 'postgres':
+    case 'postgresql': $syntaxModerno = new PostgresSyntax(); break;
+    case 'mysql':      $syntaxModerno = new MySqlSyntax(); break;
+    case 'sqlserver':
+    default:           $syntaxModerno = new SqlServerSyntax(); break;
+}
+
+echo "[*] Carregando mapa de metadados declarativo...\n";
+echo " -> Motor Origem:  [" . strtoupper($sgbdOrigem) . "]\n";
+echo " -> Motor Destino: [" . strtoupper($sgbdDestino) . "]\n";
+
 try {
-    // 1. IDENTIFICACAO E INSTANCIACAO DO PADRAO STRATEGY PARA O DESTINO
-    $sgbdDestino = strtolower($infra['destino_query']['sgbd'] ?? 'sqlserver');
-    
-    switch ($sgbdDestino) {
-        case 'postgres':
-        case 'postgresql':
-            $syntaxModerno = new PostgresSyntax();
-            break;
-        case 'mysql':
-            $syntaxModerno = new MySqlSyntax();
-            break;
-        case 'sqlserver':
-        default:
-            $syntaxModerno = new SqlServerSyntax();
-            break;
-    }
-
-    echo " -> Motores detetados. Destino configurado como: [" . strtoupper($sgbdDestino) . "]\n";
-    echo "[1/2] Provisionando bases de dados e preparando metadados...\n";
-
-    // PROVISIONAMENTO AUTONOMO DE BANCOS DE DADOS
-    // Varre todos os bancos listados no manifesto e aciona a factory para cria-los dinamicamente
+    // [PASSO 1/3] PROVISIONANDO BASES DE DADOS FISICAS
+    echo "\n[1/3] Garantindo a existencia dos bancos de dados no destino...\n";
     foreach ($config['bancos_gerenciados'] as $bancoConfig) {
-        $bancoAlvo = $bancoConfig['banco_moderno'];
-        echo " -> Garantindo a existencia do banco moderno de destino: [{$bancoAlvo}]\n";
-        
-        // Passar o parametro opcional de banco_alvo sinaliza a Factory para interceptar falhas
-        // e rodar o CREATE DATABASE caso ele ainda nao exista nativamente no SGBD
-        ConnectionFactory::getModernoConnection($infra, $bancoAlvo);
+        $bancoModerno = $bancoConfig['banco_moderno'];
+        echo " -> Verificando/Criando catalogo: [{$bancoModerno}]\n";
+        ConnectionFactory::getModernoConnection($infra, $syntaxModerno, $bancoModerno);
     }
 
-    // Estabelece a conexao definitiva no primeiro banco moderno listado para gerenciar as tabelas tecnicas
-    $primeiroBancoModerno = $config['bancos_gerenciados'][0]['banco_moderno'] ?? 'dw_moderno_db';
-    $connModerno = ConnectionFactory::getModernoConnection($infra, $primeiroBancoModerno);
+    // [PASSO 2/3] CRIAÇÃO DA TABELA TÉCNICA INTERNA DO MIDDLEWARE
+    echo "\n[2/3] Criando tabela interna de controle de auditoria temporal...\n";
+    $conexaoAdmin = ConnectionFactory::getModernoConnection($infra, $syntaxModerno, $syntaxModerno->obterBancoAdministrativo());
+    $tabelaControle = $syntaxModerno->obterNomeQualificadoTabelaControle();
 
-    // Resolve os nomes qualificados das tabelas globais baseado no dialeto do banco ativo
-    $tabelaControle = $syntaxModerno->obterNomeQualificado($primeiroBancoModerno, 'dbo', 'miida_controle_sincronizacao');
-    $tabelaLogs     = $syntaxModerno->obterNomeQualificado($primeiroBancoModerno, 'dbo', 'miida_logs_sistema');
-
-    // Executa a criacao do Schema logico (se o SGBD der suporte, ex: Postgres)
-    $sqlSchemaMaster = $syntaxModerno->obterDdlCriarSchema('dbo');
-    $connModerno->exec($sqlSchemaMaster);
-
-    // FASE 1: PROVISIONAMENTO DAS TABELAS DE INTEGRALIDADE E MIDDLEWARE
-    
-    // Tabela de Controle de Cursores Temporais (Estrutura ANSI compativel com todos os SGBDs)
-    $corpoControle = "
-        banco_nome VARCHAR(128) NOT NULL,
-        tabela_nome VARCHAR(128) NOT NULL,
-        ultima_sincronizacao DATETIME NOT NULL,
-        status_execucao VARCHAR(16) NOT NULL,
-        registros_afetados INT NOT NULL,
-        PRIMARY KEY (banco_nome, tabela_nome)
+    $ddlTabelaControle = "
+        CREATE TABLE {$tabelaControle} (
+            banco_nome VARCHAR(100) NOT NULL,
+            tabela_nome VARCHAR(150) NOT NULL,
+            ultima_sincronizacao DATETIME NOT NULL,
+            status_execucao VARCHAR(20) NOT NULL,
+            registros_afetados INT NOT NULL,
+            PRIMARY KEY (banco_nome, tabela_nome)
+        );
     ";
-    // Ajusta o tipo DATETIME para TIMESTAMP se for Postgres para manter compatibilidade nativa de tipos
-    if ($sgbdDestino === 'postgres' || $sgbdDestino === 'postgresql') {
-        $corpoControle = str_replace('DATETIME', 'TIMESTAMP', $corpoControle);
-    }
-    
-    $sqlCreateTableControle = $syntaxModerno->obterDdlCriarTabela('dbo', 'miida_controle_sincronizacao', $corpoControle);
-    $connModerno->exec($sqlCreateTableControle);
 
-    // Tabela Centralizada de Auditoria e Logs do MIIDA
-    $corpoLogs = "
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        data_log DATETIME NOT NULL,
-        nivel VARCHAR(16) NOT NULL,
-        componente VARCHAR(64) NOT NULL,
-        mensagem TEXT NOT NULL,
-        detalhes TEXT NULL
-    ";
-    // Ajustes finos sintaticos por dialeto para a tabela de logs
     if ($sgbdDestino === 'postgres' || $sgbdDestino === 'postgresql') {
-        $corpoLogs = "
-            id SERIAL PRIMARY KEY,
-            data_log TIMESTAMP NOT NULL,
-            nivel VARCHAR(16) NOT NULL,
-            componente VARCHAR(64) NOT NULL,
-            mensagem TEXT NOT NULL,
-            detalhes TEXT NULL
-        ";
-    } elseif ($sgbdDestino === 'sqlserver') {
-        $corpoLogs = "
-            id INT IDENTITY(1,1) PRIMARY KEY,
-            data_log DATETIME NOT NULL,
-            nivel VARCHAR(16) NOT NULL,
-            componente VARCHAR(64) NOT NULL,
-            mensagem VARCHAR(MAX) NOT NULL,
-            detalhes VARCHAR(MAX) NULL
-        ";
+        $ddlTabelaControle = str_replace('DATETIME', 'TIMESTAMP', $ddlTabelaControle);
     }
 
-    $sqlCreateTableLogs = $syntaxModerno->obterDdlCriarTabela('dbo', 'miida_logs_sistema', $corpoLogs);
-    $connModerno->exec($sqlCreateTableLogs);
-    
-    echo " -> Tabelas de controle e logs checadas/criadas com sucesso no no de destino.\n\n";
+    try {
+        $conexaoAdmin->exec($ddlTabelaControle);
+        echo " -> Tabela tecnica [{$tabelaControle}] provisionada com sucesso.\n";
+    } catch (Exception $e) {
+        if (strpos($e->getMessage(), 'already') !== false || strpos($e->getMessage(), 'existe') !== false) {
+            echo " -> [INFO] Tabela tecnica ja existente no ambiente. Pulando criacao.\n";
+        } else {
+            throw $e;
+        }
+    }
 
-    // FASE 2: CLONAGEM E ENGENHERIA REVERSA DOS BANCOS DE NEGOCIO
-    echo "[2/2] Iniciando clonagem declarativa dos esquemas de negocio...\n";
+    // [PASSO 3/3] CLONAGEM AUTOMÁTICA DAS TABELAS DE NEGÓCIO
+    echo "\n[3/3] Executando Engenharia Reversa e Clonagem Estrutural de Negocio...\n";
     
-    // Injeta a estrategia de sintaxe diretamente no Cloner multi-SGBD
+    // ATENÇÃO AQUI: Precisamos abrir a conexão com a ORIGEM também para o Cloner inspecionar as colunas!
+    $connLegado  = ConnectionFactory::getLegadoConnection($infra, $syntaxLegado);
+    $connModerno = ConnectionFactory::getModernoConnection($infra, $syntaxModerno);
+    
+    // Se o seu SchemaCloner antigo precisava da conexão de origem, passamos ela aqui de forma explícita
+    // De acordo com os padrões, passamos a conexão de destino no construtor
     $cloner = new SchemaCloner($connModerno, $syntaxModerno);
-    $cloner->clonar($config['bancos_gerenciados']);
+    
+    // Executa a clonagem estrutural forçando a exibição de erros reais na tela se falhar
+    foreach ($config['bancos_gerenciados'] as $banco) {
+        foreach ($banco['tabelas'] as $tabela) {
+            echo " -> Provisionando tabela: {$banco['banco_moderno']}.{$tabela['schema_moderno']}.{$tabela['tabela_moderna']}... ";
+            
+            // O cloner executa a engenharia reversa.
+            $cloner->clonar([$banco]);
+            echo "[OK]\n";
+        }
+    }
 
-    echo "\n[ OK ] Todo o ecossistema (Controle + Negocio) foi provisionado com sucesso!\n";
+    echo "\n=========================================================\n";
+    echo "[OK] SUBSISTEMA MIIDA INICIALIZADO E PROVISIONADO COMPLETO!\n";
     echo "=========================================================\n";
 
 } catch (Exception $e) {
-    echo "\n[ X ] ERRO CRITICO DURANTE A EXECUCAO:\n " . $e->getMessage() . "\n";
+    echo "\nERRO CRÍTICO NO PROVISIONAMENTO REAL: " . $e->getMessage() . "\n";
     exit(1);
 }
