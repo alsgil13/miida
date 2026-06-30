@@ -19,19 +19,31 @@ class ConnectionFactory
     /**
      * Estabelece conexão com o nó Legado (Origem)
      */
+/**
+     * Estabelece conexão com o nó Legado (Origem) com Fallback Inteligente de Banco
+     */
     public static function getLegadoConnection(array $infraConfig, SgbdSyntaxInterface $syntax, ?string $banco = null): PDO
     {
-        $nodeConfig = $infraConfig['origem_command'];
-        $host = $nodeConfig['host'];
-        $dbNome = $banco ?? $nodeConfig['banco'] ?? '';
+        // Se foi passado o array completo do JSON em vez de apenas o nó de infra, resolve adequadamente
+        $nodeConfig = $infraConfig['origem_command'] ?? $infraConfig['configuracao_infraestrutura']['origem_command'] ?? $infraConfig;
+        $host = $nodeConfig['host'] ?? 'localhost';
         
+        // CORREÇÃO: Fallback dinâmico para buscar o banco de dados legados se não estiver explícito no nó
+        $dbNome = $banco;
+        if (empty($dbNome)) {
+            $dbNome = $nodeConfig['banco'] ?? $nodeConfig['banco_legado'] ?? '';
+        }
+        
+        // Se ainda estiver vazio, inspeciona o escopo global para capturar o banco mapeado nos gerenciados
+        if (empty($dbNome) && isset($infraConfig['bancos_gerenciados'][0]['banco_legado'])) {
+            $dbNome = $infraConfig['bancos_gerenciados'][0]['banco_legado'];
+        }
+
         $chave = get_class($syntax) . ":{$host}:{$dbNome}";
 
         if (!isset(self::$legadoInstances[$chave])) {
             $config = $nodeConfig;
-            if ($dbNome) {
-                $config['banco'] = $dbNome;
-            }
+            $config['banco'] = $dbNome;
             self::$legadoInstances[$chave] = self::createConnection($config, $syntax);
         }
         return self::$legadoInstances[$chave];

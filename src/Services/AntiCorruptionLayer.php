@@ -5,7 +5,6 @@ namespace Miida\Services;
 /**
  * MIIDA - AntiCorruptionLayer (ACL)
  * Camada de Higienizacao, Sanitizacao e Conformidade de Dados Multi-SGBD
- * Implementação purificada e automatizada contra quebras de valores nulos
  */
 class AntiCorruptionLayer
 {
@@ -15,14 +14,30 @@ class AntiCorruptionLayer
     public static function higienizar(array $dadosBrutos, array $configAcl): array
     {
         $dadosLimpos = [];
-        $mapeamento = $configAcl['mapeamento_colunas'] ?? [];
-        $sanitizacao = $configAcl['sanitizacao'] ?? [];
+        
+        // Resolve o aninhamento correto do bloco de configuracao vindo do JSON
+        $configReal = $configAcl['camada_anticorrupcao'] ?? $configAcl;
+        $mapeamento = $configReal['mapeamento_colunas'] ?? [];
+        $sanitizacao = $configReal['sanitizacao'] ?? [];
 
         foreach ($mapeamento as $colunaOrigem => $propsTarget) {
             $nomeDestino = $propsTarget['nome_destino'] ?? $colunaOrigem;
             
-            // Recupera o valor bruto vindo do SGBD legado
-            $valor = $dadosBrutos[$colunaOrigem] ?? null;
+            // Busca insensivel a maiusculas/minusculas no array vindo do banco legado
+            $valor = null;
+            $encontrado = false;
+            foreach ($dadosBrutos as $chaveBruta => $valBruto) {
+                if (strcasecmp((string)$chaveBruta, (string)$colunaOrigem) === 0) {
+                    $valor = $valBruto;
+                    $encontrado = true;
+                    break;
+                }
+            }
+
+            // Fallback se nao achou no loop de comparacao de strings
+            if (!$encontrado) {
+                $valor = $dadosBrutos[$colunaOrigem] ?? null;
+            }
 
             if ($valor !== null) {
                 // Aplica politicas declarativas de higienizacao de strings se ativo
@@ -34,30 +49,35 @@ class AntiCorruptionLayer
                     $valor = mb_convert_encoding($valor, 'UTF-8', 'UTF-8');
                 }
             } else {
-                // SOLUÇÃO INVISÍVEL E AUTOMÁTICA: 
-                // Se o dado veio nulo da origem, mas o seu mapeamento indica que ele faz parte 
-                // da Chave Primária (PK), nós aplicamos um fallback seguro baseado no tipo 
-                // para evitar que o banco de destino rejeite o INSERT/UPSERT.
-                if (!empty($propsTarget['pk'])) {
-                    $tipo = strtoupper($propsTarget['tipo_destino'] ?? 'VARCHAR');
-                    
-                    if (strpos($tipo, 'INT') !== false || strpos($tipo, 'NUMERIC') !== false || strpos($tipo, 'DECIMAL') !== false) {
-                        $valor = 0;
-                    } else {
-                        $valor = ''; // Fallback seguro para strings/identificadores textuais obrigatórios
-                    }
+                // BLINDAGEM CONTRA NOT NULL: Se o dado veio nulo da origem (como o CPF do usuario 3),
+                // trata dinamicamente baseado no tipo esperado para nao quebrar as constraints do SQL Server
+                $tipo = strtoupper($propsTarget['tipo'] ?? $propsTarget['tipo_destino'] ?? 'VARCHAR');
+                if (strpos($tipo, 'INT') !== false || strpos($tipo, 'NUMERIC') !== false || strpos($tipo, 'DECIMAL') !== false) {
+                    $valor = 0;
+                } else {
+                    $valor = ''; // Substitui o NULL por uma string vazia segura
                 }
             }
 
             $dadosLimpos[$nomeDestino] = $valor;
         }
 
+        // -------------------------------------------------------------------------
+        // INJEÇÃO AUTOMÁTICA DA COLUNA DE TIMESTAMPS DE AUDITORIA (MIDDLEWARE)
+        // -------------------------------------------------------------------------
+        $colunaAudit = $configAcl['coluna_last_updated'] ?? null;
+        if (!empty($colunaAudit)) {
+            $dadosLimpos[$colunaAudit] = date('Y-m-d H:i:s');
+        }
+
+        // -------------------------------------------------------------------------
+        // INJEÇÃO DINÂMICA DO HASH DE VERSÃO DA ACL
+        // -------------------------------------------------------------------------
+        $dadosLimpos['hash_versao'] = md5(json_encode($dadosLimpos));
+
         return $dadosLimpos;
     }
 
-    /**
-     * Metodo Curinga (Alias/Apelido) para resolver a chamada do Core Engine
-     */
     public static function processar(array $dadosBrutos, array $configAcl): array
     {
         return self::higienizar($dadosBrutos, $configAcl);

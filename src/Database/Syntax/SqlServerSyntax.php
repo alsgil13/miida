@@ -107,75 +107,74 @@ class SqlServerSyntax implements SgbdSyntaxInterface
         return "SELECT * FROM [{$banco}].[dbo].[{$tabela}] WHERE [{$colunaControle}] > :ultima_data ORDER BY [{$colunaControle}] ASC";
     }
 
-    public function executarUpsert(\PDO $destino, string $tabelaQualificada, array $registro, array $pks): void
+
+
+      
+
+  public function executarUpsert(\PDO $destino, string $tabelaQualificada, array $registro, array $pks): void
 {
-    $colunas = array_keys($registro);
-
-    // 1. QUERY DE SELEÇÃO (CHECK)
-    $whereConds = [];
-    $whereParams = [];
-    foreach ($pks as $pk) {
-        if (array_key_exists($pk, $registro)) {
-            $whereConds[] = "[{$pk}] = :pk_{$pk}";
-            $whereParams[":pk_{$pk}"] = $registro[$pk];
-        }
+    if (empty($registro)) {
+        return;
     }
 
-    $sqlCheck = "SELECT 1 FROM {$tabelaQualificada} WHERE " . implode(' AND ', $whereConds);
-    $stmtCheck = $destino->prepare($sqlCheck);
+    // Identifica a chave primária mapeada
+    $pkRealDestino = $pks[0] ?? 'id';
+    $valorPk = $registro[$pkRealDestino] ?? reset($registro);
+
+    $tokenLimpo = str_replace(['[', ']', ' ', '.', '-'], '_', $pkRealDestino);
     
-    // Faz o bind forçado dos parâmetros do WHERE
-    foreach ($whereParams as $token => $valor) {
-        $stmtCheck->bindValue($token, $valor);
-    }
+    $whereConds = ["[{$pkRealDestino}] = :pk_{$tokenLimpo}"];
+
+    // CORREÇÃO DA NAVALHA DE OCCAM: Usar COUNT(*) garante um retorno numérico absoluto (0 ou mais)
+    $sqlCheck = "SELECT COUNT(*) FROM {$tabelaQualificada} WHERE " . $whereConds[0];
+    $stmtCheck = $destino->prepare($sqlCheck);
+    $stmtCheck->bindValue(":pk_{$tokenLimpo}", $valorPk);
     $stmtCheck->execute();
-    $existe = $stmtCheck->fetchColumn();
+    
+    // Força a conversão explicitamente para inteiro
+    $totalEncontrado = (int)$stmtCheck->fetchColumn();
 
-    // 2. DECISÃO ENTRE UPDATE OU INSERT
-    if ($existe) {
+    // Se o contador for maior que zero, a linha realmente existe -> UPDATE
+    if ($totalEncontrado > 0) {
         $updateFields = [];
-        $updateParams = [];
-        
-        foreach ($colunas as $coluna) {
-            if (!in_array($coluna, $pks)) {
-                $updateFields[] = "[{$coluna}] = :up_{$coluna}";
-                $updateParams[":up_{$coluna}"] = $registro[$coluna];
+        $updateParams = [":pk_{$tokenLimpo}" => $valorPk];
+
+        foreach ($registro as $colunaReg => $valorReg) {
+            if ($colunaReg === $pkRealDestino || is_numeric($colunaReg)) {
+                continue;
             }
+            $tkn = str_replace(['[', ']', ' ', '.', '-'], '_', $colunaReg);
+            $updateFields[] = "[{$colunaReg}] = :up_{$tkn}";
+            $updateParams[":up_{$tkn}"] = $valorReg;
         }
 
-        if (empty($updateFields)) {
-            return; // Nada para atualizar além da PK
-        }
+        if (empty($updateFields)) return;
 
-        // Adiciona os mesmos parâmetros do WHERE para o UPDATE encontrar o registro
-        foreach ($pks as $pk) {
-            $updateParams[":pk_{$pk}"] = $registro[$pk];
-        }
-
-        $sqlUpdate = "UPDATE {$tabelaQualificada} SET " . implode(', ', $updateFields) . " WHERE " . implode(' AND ', $whereConds);
+        $sqlUpdate = "UPDATE {$tabelaQualificada} SET " . implode(', ', $updateFields) . " WHERE " . $whereConds[0];
         $stmtUpdate = $destino->prepare($sqlUpdate);
-        
-        // Faz o bind forçado limpando qualquer token fantasma
         foreach ($updateParams as $token => $valor) {
             $stmtUpdate->bindValue($token, $valor);
         }
         $stmtUpdate->execute();
 
     } else {
+        // Se for zero, a linha não existe -> FORÇA O INSERT REAL
         $insertCols = [];
         $insertTokens = [];
         $insertParams = [];
 
-        foreach ($colunas as $coluna) {
-            $insertCols[] = "[{$coluna}]";
-            $insertTokens[] = ":ins_{$coluna}";
-            $insertParams[":ins_{$coluna}"] = $registro[$coluna];
+        foreach ($registro as $colunaReg => $valorReg) {
+            if (is_numeric($colunaReg)) {
+                continue;
+            }
+            $tkn = str_replace(['[', ']', ' ', '.', '-'], '_', $colunaReg);
+            $insertCols[] = "[{$colunaReg}]";
+            $insertTokens[] = ":ins_{$tkn}";
+            $insertParams[":ins_{$tkn}"] = $valorReg;
         }
 
         $sqlInsert = "INSERT INTO {$tabelaQualificada} (" . implode(', ', $insertCols) . ") VALUES (" . implode(', ', $insertTokens) . ")";
         $stmtInsert = $destino->prepare($sqlInsert);
-        
-        // Faz o bind forçado garantindo paridade total 1:1
         foreach ($insertParams as $token => $valor) {
             $stmtInsert->bindValue($token, $valor);
         }
