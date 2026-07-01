@@ -1,0 +1,2 @@
+Problema: está criando middleware_last_updated mesmo quando ja existe coluna de controle na tabela 
+

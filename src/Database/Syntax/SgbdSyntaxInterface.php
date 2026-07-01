@@ -54,5 +54,5 @@ interface SgbdSyntaxInterface
      * Gera e executa o comando atômico ou instrução estruturada de UPSERT (Merge/Insert or Update)
      * apropriado e otimizado para o dialeto do SGBD de destino.
      */
-    public function executarUpsert(\PDO $destino, string $tabelaQualificada, array $registro, array $pks): void;
+    public function executarUpsert(\PDO $destino, string $tabelaQualificada, array $registro, array $pks, array $tabelaConfig): void;
 }

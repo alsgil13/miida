@@ -61,20 +61,25 @@ switch ($sgbdDestino) {
 try {
     echo "[*] Conectando ao No de Extracao Legado [" . strtoupper($sgbdOrigem) . "]...\n";
     $connLegado = ConnectionFactory::getLegadoConnection($config, $syntaxLegado);
+    echo "[OK] Conexão de origem estabelecida com sucesso.\n\n";
 
-    echo "[*] Conectando ao Banco Moderno de Destino [" . strtoupper($sgbdDestino) . "]...\n";
-    $connModerno = ConnectionFactory::getModernoConnection($infra, $syntaxModerno);
+    echo "[*] Iniciando varredura dos bancos e tabelas configuradas...\n";
     
-    echo "[OK] Conexoes estabelecidas com sucesso.\n\n";
-
-    // Instancia o repositorio de controle e o processador
-    $controlRepo = new ControlRepository($connModerno, $syntaxModerno);
-    $processor = new DataSyncProcessor($connLegado, $connModerno, $syntaxLegado, $syntaxModerno, $controlRepo);
-
-    echo "[*] Iniciando varredura das tabelas configuradas...\n";
+    // O laço percorre cada escopo de banco isolado no mesmo servidor destino
     foreach ($config['bancos_gerenciados'] as $banco) {
+        
+        // CAPTURA DINÂMICA: Descobre o banco lógico desta iteração (ex: dw_moderno_db)
+        $bancoModernoAlvo = $banco['banco_moderno'];
+        
+        // Instancia ou recupera do cache a conexão PDO apontando diretamente para este banco
+        $connModerno = ConnectionFactory::getModernoConnection($config, $syntaxModerno, $bancoModernoAlvo);
+        
+        // Instancia o repositório de controle e o processador no contexto correto deste banco
+        $controlRepo = new ControlRepository($connModerno, $syntaxModerno);
+        $processor = new DataSyncProcessor($connLegado, $connModerno, $syntaxLegado, $syntaxModerno, $controlRepo);
+
         foreach ($banco['tabelas'] as $tabela) {
-            echo " -> Sincronizando: {$banco['banco_moderno']}.{$tabela['tabela_moderna']}... ";
+            echo " -> Sincronizando no Banco [{$bancoModernoAlvo}] -> Tabela: {$tabela['tabela_moderna']}... ";
             
             $linhas = $processor->sincronizarTabela($banco, $tabela);
             

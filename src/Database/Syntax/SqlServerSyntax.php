@@ -88,8 +88,9 @@ class SqlServerSyntax implements SgbdSyntaxInterface
     /**
      * Executa a estratégia de UPSERT (Merge/Sincronização) nativa para SQL Server
      * SUPORTA PERFEITAMENTE CHAVES PRIMÁRIAS COMPOSTAS (MULTI-PK)
+     * CORREÇÃO: Adicionado o parâmetro $tabelaConfig em conformidade com a nova assinatura da Interface
      */
-    public function executarUpsert(\PDO $destino, string $tabelaQualificada, array $registro, array $pks): void
+    public function executarUpsert(\PDO $destino, string $tabelaQualificada, array $registro, array $pks, array $tabelaConfig): void
     {
         if (empty($pks)) {
             throw new \Exception("Erro de Sintaxe: Nao e possivel realizar UPSERT sem chaves primarias.");

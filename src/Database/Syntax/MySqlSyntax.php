@@ -83,9 +83,9 @@ class MySqlSyntax implements SgbdSyntaxInterface
 
     /**
      * Executa a estratégia de UPSERT (Merge/Sincronização) nativa para MySQL 8.0
-     * Utiliza a instrução de alta performance: INSERT INTO ... ON DUPLICATE KEY UPDATE
+     * CORREÇÃO: Adicionado o parâmetro $tabelaConfig em conformidade com a nova assinatura da Interface
      */
-    public function executarUpsert(\PDO $destino, string $tabelaQualificada, array $registro, array $pks): void
+    public function executarUpsert(\PDO $destino, string $tabelaQualificada, array $registro, array $pks, array $tabelaConfig): void
     {
         $colunas = array_keys($registro);
         

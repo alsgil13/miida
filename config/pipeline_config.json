@@ -3,14 +3,14 @@
         "intervalo_verificacao_segundos": 1,
         "intervalo_limpeza_orfaos_minutos": 5,
         "origem_command": {
-            "sgbd": "mysql",
+            "sgbd": "postgres",
             "host": "env:DB_ORIGEM_HOST",
             "usuario": "env:DB_ORIGEM_USER",
             "senha": "env:DB_ORIGEM_PASS",
             "porta": "env:DB_ORIGEM_PORT"
         },
         "destino_query": {
-            "sgbd": "mysql",
+            "sgbd": "postgres",
             "host": "env:DB_DESTINO_HOST",
             "usuario": "env:DB_DESTINO_USER",
             "senha": "env:DB_DESTINO_PASS",
@@ -25,7 +25,7 @@
                 {
                     "tabela_legada": "tb_usuarios",
                     "tabela_moderna": "usuarios",
-                    "schema_legado": null,
+                    "schema_legado": "public",
                     "schema_moderno": "dbo",
                     "coluna_timestamp_controle": null,
                     "coluna_last_updated": "middleware_last_updated",
@@ -63,7 +63,7 @@
                 {
                     "tabela_legada": "tb_vendas_itens",
                     "tabela_moderna": "vendas_itens",
-                    "schema_legado": null,
+                    "schema_legado": "public",
                     "schema_moderno": "dbo",
                     "coluna_timestamp_controle": "dt_alteracao",
                     "coluna_last_updated": "middleware_last_updated",
