@@ -10,7 +10,7 @@
             "porta": "env:DB_ORIGEM_PORT"
         },
         "destino_query": {
-            "sgbd": "sqlserver",
+            "sgbd": "mysql",
             "host": "env:DB_DESTINO_HOST",
             "usuario": "env:DB_DESTINO_USER",
             "senha": "env:DB_DESTINO_PASS",

@@ -54,7 +54,8 @@ class DataSyncProcessor
         $tabelaDestino     = $configTabela['tabela_moderna'];
         $tabelaOrigem      = $configTabela['tabela_legada'];
         
-        $tabelaQualificada = "[{$nomeBancoDestino}].[{$schemaDestino}].[{$tabelaDestino}]";
+        // $tabelaQualificada = "[{$nomeBancoDestino}].[{$schemaDestino}].[{$tabelaDestino}]";
+        $tabelaQualificada = $this->syntaxModerno->obterNomeQualificado($nomeBancoDestino, $schemaDestino, $tabelaDestino);
         $mapeamento = $configTabela['camada_anticorrupcao']['mapeamento_colunas'] ?? [];
 
         if (empty($mapeamento)) {
