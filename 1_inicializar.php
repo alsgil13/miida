@@ -61,20 +61,25 @@ try {
 
         // 2. GARANTE A TABELA DE CONTROLE DE SINCRONIZAÇÃO NESTE BANCO (Evita Cross-Database)
         echo " -> Garantindo Tabela de Controle Interna... ";
-        $ddlTabelaControle = "
-            CREATE TABLE IF NOT EXISTS public.miida_controle_sincronizacao (
-                id SERIAL PRIMARY KEY,
-                banco_nome VARCHAR(150) NOT NULL,
-                tabela_nome VARCHAR(150) NOT NULL,
-                ultima_sincronizacao TIMESTAMP NULL,
-                status_execucao VARCHAR(50) NOT NULL,
-                registros_afetados INT DEFAULT 0,
-                criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-            CREATE INDEX IF NOT EXISTS idx_miida_controle_busca 
-            ON public.miida_controle_sincronizacao (banco_nome, tabela_nome, status_execucao);
-        ";
+        // $ddlTabelaControle = "
+        //     CREATE TABLE IF NOT EXISTS public.miida_controle_sincronizacao (
+        //         id SERIAL PRIMARY KEY,
+        //         banco_nome VARCHAR(150) NOT NULL,
+        //         tabela_nome VARCHAR(150) NOT NULL,
+        //         ultima_sincronizacao TIMESTAMP NULL,
+        //         status_execucao VARCHAR(50) NOT NULL,
+        //         registros_afetados INT DEFAULT 0,
+        //         criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        //     );
+        //     CREATE INDEX IF NOT EXISTS idx_miida_controle_busca 
+        //     ON public.miida_controle_sincronizacao (banco_nome, tabela_nome, status_execucao);
+        // ";
+
+        $ddlTabelaControle = $syntaxModerno->getDDLControle();
         $connModerno->exec($ddlTabelaControle);
+        if ($connModerno->inTransaction()) {
+            $connModerno->commit();
+        }
         echo "[OK]\n";
 
         // 3. Criação Dinâmica de Schemas e Tabelas mapeados para ESTE banco
@@ -82,61 +87,67 @@ try {
             $schema = $tabela['schema_moderno'] ?? 'public';
             $nomeTabela = $tabela['tabela_moderna'];
             
-            echo " -> Garantindo Schema [{$schema}] e Tabela [{$nomeTabela}]... ";
+            echo " -> Garantindo Tabela [{$nomeTabela}]... ";
 
-            // Garante o Schema físico no Postgres de forma isolada
-            if (!empty($schema) && strtolower($schema) !== 'public') {
-                $connModerno->exec("CREATE SCHEMA IF NOT EXISTS \"{$schema}\"");
+            // O provisionamento de schema/tabela é responsabilidade exclusiva da Strategy.
+            $sqlSchema = $syntaxModerno->obterDdlCriarSchema($schema);
+            if (!empty($sqlSchema)) {
+                $connModerno->exec($sqlSchema);
             }
 
             // MAPEAMENTO CORRETO: Acessa o nó interno exatamente como está na árvore do JSON
             $camposMapeados = $tabela['camada_anticorrupcao']['mapeamento_colunas'] ?? [];
 
-            // Montagem dinâmica das colunas conforme o mapeamento do JSON
+            // Montagem do mapa cru para a Strategy assumir toda a sintaxe final
             $colunasSql = [];
             $pks = []; // Array para acumular as colunas que fazem parte da chave primária
+            $colunasMapeadas = [];
             
             foreach ($camposMapeados as $colunaOriginal => $meta) {
                 $nomeDestino = $meta['nome_destino'];
                 $tipoDestino = $meta['tipo'];
                 $isPk = $meta['pk'] ?? false;
+                $chaveDestinoNormalizada = strtolower(trim((string)$nomeDestino));
 
                 // Tradução amigável para tipos (DATETIME vira TIMESTAMP no Postgres)
-                if (strtoupper($tipoDestino) === 'DATETIME') {
-                    $tipoDestino = 'TIMESTAMP';
-                }
-                // Tradução amigável (BIT vira BOOLEAN no Postgres)
-                if (strtoupper($tipoDestino) === 'BIT') {
-                    $tipoDestino = 'BOOLEAN'; 
-                }
+                // if (strtoupper($tipoDestino) === 'DATETIME') {
+                //     $tipoDestino = 'TIMESTAMP';
+                // }
+                // // Tradução amigável (BIT vira BOOLEAN no Postgres)
+                // if (strtoupper($tipoDestino) === 'BIT') {
+                //     $tipoDestino = 'BOOLEAN'; 
+                // }
 
-                $campoSql = "\"{$nomeDestino}\" {$tipoDestino}";
-                $colunasSql[] = $campoSql;
+                if (!isset($colunasMapeadas[$chaveDestinoNormalizada])) {
+                    $colunasSql[$nomeDestino] = $tipoDestino;
+                    $colunasMapeadas[$chaveDestinoNormalizada] = true;
+                }
 
                 if ($isPk) {
-                    $pks[] = "\"{$nomeDestino}\"";
+                    $pks[] = $nomeDestino;
                 }
             }
 
-            // Injeta a coluna de controle de tracking do middleware
+            // Injeta a coluna de controle de tracking do middleware apenas como fallback, se ainda não existir no mapeamento
             $colunaTracking = $tabela['coluna_last_updated'] ?? 'middleware_last_updated';
-            $colunasSql[] = "\"{$colunaTracking}\" TIMESTAMP DEFAULT CURRENT_TIMESTAMP";
-
-            // CORREÇÃO: Injeta de forma fixa a coluna de hash exigida pelo processador de sincronização
-            $colunasSql[] = "\"hash_versao\" VARCHAR(64) NULL";
-
-            // Se houver colunas PK, injeta a restrição de chave no formato composto correto do Postgres
-            if (!empty($pks)) {
-                $listaPks = implode(', ', $pks);
-                $colunasSql[] = "PRIMARY KEY ({$listaPks})";
+            $colunaTrackingNormalizada = strtolower(trim((string)$colunaTracking));
+            if (!isset($colunasMapeadas[$colunaTrackingNormalizada])) {
+                $colunasSql[$colunaTracking] = $syntaxModerno->obterTipoDataHora();
+                $colunasMapeadas[$colunaTrackingNormalizada] = true;
             }
 
-            $corpoTabela = implode(",\n    ", $colunasSql);
+            // CORREÇÃO: Injeta de forma fixa a coluna de hash exigida pelo processador de sincronização
+            if (!isset($colunasMapeadas['hash_versao'])) {
+                $colunasSql['hash_versao'] = 'VARCHAR(64)';
+            }
             
             // DDL purificada apontando explicitamente para o par Schema + Tabela correto da iteração
-            $ddlTabela = "CREATE TABLE IF NOT EXISTS \"{$schema}\".\"{$nomeTabela}\" (\n    {$corpoTabela}\n);";
-            
+            $ddlTabela = $syntaxModerno->obterDdlCriarTabela($schema, $nomeTabela, $colunasSql, $pks);
             $connModerno->exec($ddlTabela);
+            if ($connModerno->inTransaction()) {
+                $connModerno->commit();
+            }
+            
             echo "[OK]\n";
         }
         

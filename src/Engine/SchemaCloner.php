@@ -54,47 +54,44 @@ class SchemaCloner
                     }
                 }
 
-                // 3. Monta dinamicamente as colunas do DDL usando a Strategy de escape e tipos
-                $colunasDdl = [];
+                // 3. Monta o mapa bruto de colunas para a Strategy assumir 100% da sintaxe final
+                $colunas = [];
+                $pks = [];
                 foreach ($mapeamento as $colunaOrigem => $props) {
-                    $nomeColDestino = $props['nome_destino'];
-                    $tipoDestino    = strtoupper($props['tipo_destino'] ?? 'VARCHAR(255)');
-                    
-                    // Se o tipo original for TEXT, delega para a Strategy decidir a melhor representação física
+                    $nomeColDestino = $props['nome_destino'] ?? $colunaOrigem;
+                    $tipoDestino = strtoupper($props['tipo'] ?? $props['tipo_destino'] ?? 'VARCHAR(255)');
+
                     if ($tipoDestino === 'TEXT') {
                         $tipoDestino = $this->syntax->obterTipoTextoLongo();
                     }
 
-                    $restricao = !empty($props['pk']) ? ' NOT NULL' : '';
-                    
-                    // Escapa a coluna de forma agnóstica via Strategy
-                    $colunasDdl[] = $this->syntax->escaparColuna($nomeColDestino) . " {$tipoDestino}{$restricao}";
-                }
+                    $colunas[$nomeColDestino] = $tipoDestino;
 
-                // Injeta as colunas técnicas de auditoria e rastreabilidade sem fixar delimitadores brutos
-                $colunaLastUpdated = $tabelaConfig['coluna_last_updated'] ?? 'middleware_last_updated';
-                $tipoDataHoraTecnica = $this->syntax->obterTipoDataHora();
-
-                $colunasDdl[] = $this->syntax->escaparColuna($colunaLastUpdated) . " {$tipoDataHoraTecnica} NOT NULL";
-                $colunasDdl[] = $this->syntax->escaparColuna('hash_versao') . " VARCHAR(32) NOT NULL";
-
-                // 4. Mapeia chaves primárias utilizando as regras semânticas corretas
-                $pks = [];
-                foreach ($mapeamento as $colunaOrigem => $props) {
                     if (!empty($props['pk'])) {
-                        $pks[] = $this->syntax->escaparColuna($props['nome_destino']);
+                        $pks[] = $nomeColDestino;
                     }
                 }
-                
-                if (!empty($pks)) {
-                    $colunasDdl[] = "PRIMARY KEY (" . implode(', ', $pks) . ")";
+
+                // Injeta coluna técnica de tracking apenas como fallback quando o manifesto não a definiu.
+                $colunaLastUpdated = $tabelaConfig['coluna_last_updated'] ?? null;
+                if (!empty($colunaLastUpdated) && !array_key_exists($colunaLastUpdated, $colunas)) {
+                    $colunas[$colunaLastUpdated] = $this->syntax->obterTipoDataHora();
                 }
 
-                $corpoTabelaSql = implode(",\n        ", $colunasDdl);
+                if (empty($colunaLastUpdated) && !array_key_exists('middleware_last_updated', $colunas)) {
+                    $colunas['middleware_last_updated'] = $this->syntax->obterTipoDataHora();
+                }
 
-                // 5. Executa a criação física da tabela delegando totalmente para a Strategy ativa
-                // O método obterDdlCriarTabela passa a receber o schema real resolvido pela própria Strategy
-                $sqlCriarTabela = $this->syntax->obterDdlCriarTabela($schemaModerno, $tabelaModerna, $corpoTabelaSql);
+                if (!array_key_exists('hash_versao', $colunas)) {
+                    $colunas['hash_versao'] = 'VARCHAR(32)';
+                }
+
+                if (!empty($pks)) {
+                    $pks = array_values(array_unique($pks));
+                }
+
+                // 4. Executa a criação física da tabela delegando totalmente para a Strategy ativa
+                $sqlCriarTabela = $this->syntax->obterDdlCriarTabela($schemaModerno, $tabelaModerna, $colunas, $pks);
 
                 try {
                     $stmtTable = $this->destino->query($sqlCriarTabela);

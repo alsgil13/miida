@@ -1,2 +1,12 @@
-Problema: está criando middleware_last_updated mesmo quando ja existe coluna de controle na tabela 
+- Testes a serem feitos com BD DE Exemplo:
+     [ ] LEGADO: POSTGRESS     -> NOVO: POSTGRESS
+     [ ] LEGADO: POSTGRESS     -> NOVO: MySQL
+     [ ] LEGADO: POSTGRESS     -> NOVO: SQLServer
+     [ ] LEGADO: MySQL         -> NOVO: POSTGRESS
+     [✓] LEGADO: MySQL         -> NOVO: MySQL
+     [ ] LEGADO: MySQL         -> NOVO: SQLServer    
+     [ ] LEGADO: SQLServer     -> NOVO: POSTGRESS  Somente no Notebook (VM)
+     [ ] LEGADO: SQLServer     -> NOVO: MySQL      Somente no Notebook (VM)
+     [ ] LEGADO: SQLServer     -> NOVO: SQLServer  Somente no Notebook (VM)       
 
+- Criar script par trasnformar Create DDL em JSON Config

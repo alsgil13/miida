@@ -68,73 +68,98 @@ try {
         default:           $syntaxModerno = new SqlServerSyntax(); break;
     }
 
-    // Adaptação: Injeção das instâncias de Strategy na criação das conexões da Factory
-    echo "[*] Conectando ao Banco Legado de Origem...\n";
-    $connLegado = ConnectionFactory::getLegadoConnection($infra, $syntaxLegado);
-
-    echo "[*] Conectando ao Banco Moderno de Destino...\n";
-    $connModerno = ConnectionFactory::getModernoConnection($infra, $syntaxModerno);
-    echo "[OK] Inicializacao de conexoes e motores efetuada com sucesso.\n\n";
-
-    // 2. INJECAO DE DEPENDENCIAS DE INFRAESTRUTURA
-    $controlRepo = new ControlRepository($connModerno, $syntaxModerno);
-    $acl = new AntiCorruptionLayer();
-    $logger = new Logger($connModerno, $syntaxModerno);
-    
-    // Processadores configurados com suporte Multi-SGBD nativo
-    $sincronizador = new DataSyncProcessor($connLegado, $connModerno, $syntaxLegado, $syntaxModerno, $controlRepo);
-    $limpador = new LimpezaOrfaosProcessor($connLegado, $connModerno, $syntaxLegado, $syntaxModerno, $logger);
-
-    // 3. ESTRUTURAÇÃO DOS MARCADORES DE CRONOMETRO EM MEMORIA
+    // 2. ESTRUTURAÇÃO DOS MARCADORES DE CRONOMETRO EM MEMORIA
     $cronometroTabelas = [];
-    $intervaloLimpezaMinutos = (int)($config['configuracao_global']['intervalo_limpeza_orfaos_minutos'] ?? 60);
+    $intervaloLimpezaMinutos = (int)($infra['intervalo_limpeza_orfaos_minutos'] ?? 60);
     $proximaLimpezaOrfaos = time() + ($intervaloLimpezaMinutos * 60);
 
-    echo "Orquestrador rodando. Intervalo de limpeza de orfaos configurado para " . $intervaloLimpezaMinutos . " minutos.\n";
-    echo "Iniciando loop de captura incremental...\n\n";
+    echo "Orquestrador inicializado. Intervalo de limpeza de orfaos: " . $intervaloLimpezaMinutos . " minutos.\n";
+    echo "Iniciando loop de captura incremental multi-banco...\n\n";
 
     // LOOP INFINITO DE ORQUESTRAÇÃO DO INGESTION ENGINE
     while (true) {
         $agora = time();
 
-        // SUB-PIPELINE 1: CAPTURA INCREMENTAL DAS ALTERAÇÕES (DATA SYNC)
+        // PROCESSAMENTO ISOLADO POR BANCO GERENCIADO (GARANTE MULTI-DATABASE NO POSTGRES)
         foreach ($config['bancos_gerenciados'] as $banco) {
+            $nomeBancoLegado  = $banco['banco_legado'];
+            $nomeBancoModerno = $banco['banco_moderno'];
+            
+            $connLegado  = null;
+            $connModerno = null;
+            $necessitaConexao = false;
+
+            // Checagem prévia: Verifica se alguma tabela deste banco precisa de processamento neste ciclo
             foreach ($banco['tabelas'] as $tabela) {
-                
-                $chaveCronometro = $banco['banco_moderno'] . "." . $tabela['tabela_moderna'];
+                $chaveCronometro = $nomeBancoModerno . "." . $tabela['tabela_moderna'];
                 $intervaloTabelaSegundos = (int)($tabela['intervalo_sincronizacao_segundos'] ?? 10);
 
+                // CORREÇÃO: Inicializa a chave de tempo antes de realizar a soma comparativa
                 if (!isset($cronometroTabelas[$chaveCronometro])) {
                     $cronometroTabelas[$chaveCronometro] = 0;
                 }
 
                 if ($agora >= ($cronometroTabelas[$chaveCronometro] + $intervaloTabelaSegundos)) {
-                    
-                    // Executa a carga incremental isolada
-                    $sincronizador->sincronizarTabela($banco, $tabela);
-                    
-                    // Atualiza o marcador temporal da tabela para o proximo ciclo
-                    $cronometroTabelas[$chaveCronometro] = time();
+                    $necessitaConexao = true;
+                    break;
                 }
+            }
+
+            // Força a conexão também se for o momento do ciclo cronometrado de expurgos
+            if ($agora >= $proximaLimpezaOrfaos) {
+                $necessitaConexao = true;
+            }
+
+            // Estabelece as conexões injetando dinamicamente os nomes dos catálogos atuais
+            if ($necessitaConexao) {
+                $connLegado  = ConnectionFactory::getLegadoConnection($infra, $syntaxLegado, $nomeBancoLegado);
+                $connModerno = ConnectionFactory::getModernoConnection($infra, $syntaxModerno, $nomeBancoModerno);
+                
+                $controlRepo   = new ControlRepository($connModerno, $syntaxModerno);
+                $sincronizador = new DataSyncProcessor($connLegado, $connModerno, $syntaxLegado, $syntaxModerno, $controlRepo);
+                $logger        = new Logger($connModerno, $syntaxModerno);
+                $limpador      = new LimpezaOrfaosProcessor($connLegado, $connModerno, $syntaxLegado, $syntaxModerno, $logger);
+
+                // SUB-PIPELINE 1: CAPTURA INCREMENTAL (DATA SYNC)
+                foreach ($banco['tabelas'] as $tabela) {
+                    $chaveCronometro = $nomeBancoModerno . "." . $tabela['tabela_moderna'];
+                    $intervaloTabelaSegundos = (int)($tabela['intervalo_sincronizacao_segundos'] ?? 10);
+
+                    // Garante que a chave exista por redundância de segurança dentro do escopo
+                    if (!isset($cronometroTabelas[$chaveCronometro])) {
+                        $cronometroTabelas[$chaveCronometro] = 0;
+                    }
+
+                    if ($agora >= ($cronometroTabelas[$chaveCronometro] + $intervaloTabelaSegundos)) {
+                        // Executa a carga incremental isolada com segurança de contexto
+                        $sincronizador->sincronizarTabela($banco, $tabela);
+                        $cronometroTabelas[$chaveCronometro] = time();
+                    }
+                }
+
+                // SUB-PIPELINE 2: AUDITORIA CRONOMETRADA DE EXPURGO DE ORFAOS DESTE BANCO
+                if ($agora >= $proximaLimpezaOrfaos) {
+                    echo "\n [ALERTA] Disparando ciclo de limpeza de registros orfaos para: [{$nomeBancoModerno}]\n";
+                    $inicioLimpeza = microtime(true);
+
+                    foreach ($banco['tabelas'] as $tabela) {
+                        $limpador->executarLimpeza($banco, $tabela);
+                    }
+
+                    $tempoGastoLimpeza = round((microtime(true) - $inicioLimpeza) * 1000, 2);
+                    echo " [OK] Limpeza de [{$nomeBancoModerno}] finalizada em " . $tempoGastoLimpeza . " ms.\n";
+                }
+
+                // Desconecta explicitamente para liberar recursos do Pool do SGBD e do Docker Engine
+                $connLegado  = null;
+                $connModerno = null;
             }
         }
 
-        // SUB-PIPELINE 2: AUDITORIA CRONOMETRADA DE EXPURGO DE ORFAOS
+        // Atualiza o temporizador global da limpeza após varrer todos os escopos pendentes
         if ($agora >= $proximaLimpezaOrfaos) {
-            echo "\n\n [ALERTA] Disparando ciclo global de limpeza de registros orfaos...\n";
-            $inicioLimpeza = microtime(true);
-
-            foreach ($config['bancos_gerenciados'] as $banco) {
-                foreach ($banco['tabelas'] as $tabela) {
-                    $limpador->executarLimpeza($banco, $tabela);
-                }
-            }
-
-            $tempoGastoLimpeza = round((microtime(true) - $inicioLimpeza) * 1000, 2);
-            echo " [OK] Ciclo de limpeza finalizado em " . $tempoGastoLimpeza . " ms.\n\n";
-
-            // Reagenda a proxima execucao baseando-se no tempo definido no JSON
             $proximaLimpezaOrfaos = time() + ($intervaloLimpezaMinutos * 60);
+            echo "\n [SISTEMA] Proximo ciclo global de orfaos reagendado.\n\n";
         }
 
         // Descanso defensivo do processador para evitar consumo de 100% de CPU thread lock
@@ -142,9 +167,6 @@ try {
     }
 
 } catch (Exception $e) {
-    echo "ERRO NO ORQUESTRADOR: " . $e->getMessage() . "\n";
-    if (isset($logger)) {
-        $logger->error("DataSyncOrchestrator Daemon", "Falha fatal no loop do orquestrador", $e->getMessage());
-    }
+    echo "ERRO CRITICO NO ORQUESTRADOR: " . $e->getMessage() . "\n";
     exit(1);
 }

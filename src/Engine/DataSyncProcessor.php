@@ -43,7 +43,7 @@ class DataSyncProcessor
         $tabelaOrigem  = $tabelaConfig['tabela_legada'];
         $tabelaDestino = $tabelaConfig['tabela_moderna'];
         $schemaOrigem  = $tabelaConfig['schema_legado'] ?? null;
-        $schemaDestino = $tabelaConfig['schema_moderno'] ?? 'dbo';
+        $schemaDestino = $tabelaConfig['schema_moderno'] ?? null;
         $colunaControle = $tabelaConfig['coluna_timestamp_controle'] ?? null;
 
         $mapeamento = $tabelaConfig['camada_anticorrupcao']['mapeamento_colunas'] ?? [];
@@ -76,7 +76,13 @@ class DataSyncProcessor
         $stmtOrigem->execute();
         $linhasProcessadas = 0;
 
+        $transacaoIniciada = false;
         try {
+            if (!$this->connModerno->inTransaction()) {
+                $this->connModerno->beginTransaction();
+                $transacaoIniciada = true;
+            }
+
             while ($row = $stmtOrigem->fetch(\PDO::FETCH_ASSOC)) {
                 // 5. Envia o registro para a Camada de Anticorrupção (ACL) ser higienizado
                 $dadosHigienizados = AntiCorruptionLayer::higienizar($row, $tabelaConfig);
@@ -89,20 +95,83 @@ class DataSyncProcessor
                     }
                 }
 
-                // INJEÇÃO DAS COLUNAS AUXILIARES DO MIDDLEWARE EXIGIDAS NO BANCO MODERNO
-                $colunaTracking = $tabelaConfig['coluna_last_updated'] ?? 'middleware_last_updated';
-                $registroLimpo[$colunaTracking] = date('Y-m-d H:i:s');
-                
-                // Calcula de forma simples um MD5 dos dados brutos para preencher o hash_versao exigido
-                $registroLimpo['hash_versao'] = md5(json_encode($row));
+                // -----------------------------------------------------------------
+                // GERAÇÃO DO HASH_DE_VERSAO APENAS A PARTIR DAS COLUNAS DE NEGÓCIO
+                // -----------------------------------------------------------------
+                // 1) Monta um subconjunto estrito contendo somente as colunas mapeadas
+                $businessSubset = [];
+                foreach ($mapeamento as $colOrig => $props) {
+                    $nomeDestino = $props['nome_destino'] ?? $colOrig;
+                    if (array_key_exists($nomeDestino, $registroLimpo)) {
+                        $businessSubset[$nomeDestino] = $registroLimpo[$nomeDestino];
+                    } else {
+                        $businessSubset[$nomeDestino] = null;
+                    }
+                }
+
+                // 2) Normaliza a ordem das chaves para garantir hash determinístico
+                ksort($businessSubset);
+
+                // 3) Calcula o hash (UTF-8 safe)
+                $hashVersao = md5(json_encode($businessSubset, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+
+                // -----------------------------------------------------------------
+                // 4) Checa no destino se o hash já é o mesmo (evita UPSERT desnecessário)
+                // -----------------------------------------------------------------
+                $deveExecutarUpsert = true;
+                if (!empty($pks)) {
+                    $whereParts = [];
+                    $whereParams = [];
+                    foreach ($pks as $pk) {
+                        $token = 'pk_' . preg_replace('/[^A-Za-z0-9_]/', '_', $pk);
+                        $whereParts[] = $this->syntaxModerno->escaparColuna($pk) . " = :{$token}";
+                        $whereParams[":{$token}"] = $registroLimpo[$pk] ?? null;
+                    }
+
+                    if (!empty($whereParts)) {
+                        $sqlCheck = "SELECT " . $this->syntaxModerno->escaparColuna('hash_versao') . " FROM {$tabelaQualificada} WHERE " . implode(' AND ', $whereParts);
+                        $stmtCheck = $this->connModerno->prepare($sqlCheck);
+                        foreach ($whereParams as $tk => $tv) {
+                            $stmtCheck->bindValue($tk, $tv);
+                        }
+                        $stmtCheck->execute();
+                        $existing = $stmtCheck->fetch(\PDO::FETCH_ASSOC);
+                        $existingHash = $existing['hash_versao'] ?? null;
+                        if ($existingHash !== null && $existingHash === $hashVersao) {
+                            // Hash idêntico -> ignora este registro completamente
+                            $deveExecutarUpsert = false;
+                        }
+                    }
+                }
+
+                if (!$deveExecutarUpsert) {
+                    // Registro não modificado — não conta como afetado
+                    continue;
+                }
+
+                // 5) Injeta a coluna de tracking e o hash_versao somente quando realmente vamos persistir
+                $colunaTracking = $tabelaConfig['coluna_last_updated'] ?? null;
+                $nomeColTracking = $colunaTracking ?: 'middleware_last_updated';
+                if (!array_key_exists($nomeColTracking, $registroLimpo)) {
+                    $registroLimpo[$nomeColTracking] = date('Y-m-d H:i:s');
+                }
+
+                $registroLimpo['hash_versao'] = $hashVersao;
 
                 // 6. Delega a persistência idempotente de forma transparente à Strategy do banco moderno ativo
                 // CORREÇÃO: Passando $tabelaConfig como 5º parâmetro para viabilizar tratamento dinâmico de tipo
                 $this->syntaxModerno->executarUpsert($this->connModerno, $tabelaQualificada, $registroLimpo, $pks, $tabelaConfig);
                 $linhasProcessadas++;
-            }            
+            }
+
+            if ($transacaoIniciada && $this->connModerno->inTransaction()) {
+                $this->connModerno->commit();
+            }
 
         } catch (\Exception $e) {
+            if ($transacaoIniciada && $this->connModerno->inTransaction()) {
+                $this->connModerno->rollBack();
+            }
             $this->controlRepo->atualizarVersao($nomeBancoDestino, $tabelaDestino, 'FALHA', $linhasProcessadas);
             throw $e;
         }

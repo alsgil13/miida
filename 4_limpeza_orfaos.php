@@ -52,23 +52,36 @@ try {
         default:           $syntaxModerno = new SqlServerSyntax(); break;
     }
 
-    // Adaptação: Injeção das instâncias de Strategy na criação das conexões da Factory
-    $connLegado  = ConnectionFactory::getLegadoConnection($infra, $syntaxLegado);
-    $connModerno = ConnectionFactory::getModernoConnection($infra, $syntaxModerno);
-    $logger      = new Logger($connModerno, $syntaxModerno);
-
-    $limpador = new LimpezaOrfaosProcessor($connLegado, $connModerno, $syntaxLegado, $syntaxModerno, $logger);
-
     echo "=========================================================\n";
     echo "          MIIDA - AUDITORIA DE EXCLUSOES MANUAL          \n";
     echo "=========================================================\n";
     
     $inicioCiclo = microtime(true);
+
     foreach ($config['bancos_gerenciados'] as $banco) {
+        $nomeBancoLegado  = $banco['banco_legado'];
+        $nomeBancoModerno = $banco['banco_moderno'];
+
+        echo "[*] Conectando aos escopos: [{$nomeBancoLegado}] -> [{$nomeBancoModerno}]\n";
+
+        // CORREÇÃO: Conexões movidas para dentro do loop, passando os respectivos nomes dos bancos
+        $connLegado  = ConnectionFactory::getLegadoConnection($infra, $syntaxLegado, $nomeBancoLegado);
+        $connModerno = ConnectionFactory::getModernoConnection($infra, $syntaxModerno, $nomeBancoModerno);
+        
+        $logger = new Logger($connModerno, $syntaxModerno);
+        $limpador = new LimpezaOrfaosProcessor($connLegado, $connModerno, $syntaxLegado, $syntaxModerno, $logger);
+
         foreach ($banco['tabelas'] as $tabela) {
+            echo " -> Executando limpeza na tabela: {$tabela['tabela_moderna']}... ";
             $limpador->executarLimpeza($banco, $tabela);
+            echo "[OK]\n";
         }
+
+        // Fecha as conexões deste escopo para liberar os handles do PDO correntemente
+        $connLegado = null;
+        $connModerno = null;
     }
+
     $tempoCicloMili = round((microtime(true) - $inicioCiclo) * 1000, 2);
     
     echo "\n=========================================================\n";

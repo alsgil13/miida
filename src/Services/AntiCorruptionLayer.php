@@ -62,18 +62,10 @@ class AntiCorruptionLayer
             $dadosLimpos[$nomeDestino] = $valor;
         }
 
-        // -------------------------------------------------------------------------
-        // INJEÇÃO AUTOMÁTICA DA COLUNA DE TIMESTAMPS DE AUDITORIA (MIDDLEWARE)
-        // -------------------------------------------------------------------------
-        $colunaAudit = $configAcl['coluna_last_updated'] ?? null;
-        if (!empty($colunaAudit)) {
-            $dadosLimpos[$colunaAudit] = date('Y-m-d H:i:s');
-        }
-
-        // -------------------------------------------------------------------------
-        // INJEÇÃO DINÂMICA DO HASH DE VERSÃO DA ACL
-        // -------------------------------------------------------------------------
-        $dadosLimpos['hash_versao'] = md5(json_encode($dadosLimpos));
+        // Observação: Não injetamos aqui colunas técnicas ou hashes.
+        // A responsabilidade por gerar `hash_versao` e por injetar
+        // timestamps técnicos é do motor de sincronização (DataSyncProcessor),
+        // que possui visão completa do mapeamento e do destino.
 
         return $dadosLimpos;
     }
