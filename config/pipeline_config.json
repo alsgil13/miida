@@ -3,14 +3,14 @@
         "intervalo_verificacao_segundos": 1,
         "intervalo_limpeza_orfaos_minutos": 5,
         "origem_command": {
-            "sgbd": "mysql",
+            "sgbd": "env:DB_ORIGEM_SGBD",
             "host": "env:DB_ORIGEM_HOST",
             "usuario": "env:DB_ORIGEM_USER",
             "senha": "env:DB_ORIGEM_PASS",
             "porta": "env:DB_ORIGEM_PORT"
         },
         "destino_query": {
-            "sgbd": "postgres",
+            "sgbd": "env:DB_DESTINO_SGBD",
             "host": "env:DB_DESTINO_HOST",
             "usuario": "env:DB_DESTINO_USER",
             "senha": "env:DB_DESTINO_PASS",

@@ -90,8 +90,11 @@ class ConnectionFactory
 
             if (!empty($ddlConfig['checagem'])) {
                 $stmt = $conexaoAdmin->query($ddlConfig['checagem']);
-                if ($stmt->fetch()) {
+                if ($stmt !== false && $stmt->fetch()) {
                     $precisaCriar = false;
+                }
+                if ($stmt !== false) {
+                    $stmt->closeCursor();
                 }
             }
 

@@ -175,6 +175,8 @@ class PostgresSyntax implements SgbdSyntaxInterface
         }
 
         $stmt->execute();
+        $stmt->closeCursor();
+        $stmt = null;
     }
 
     public function getDDLControle(): string

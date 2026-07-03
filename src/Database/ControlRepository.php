@@ -27,6 +27,8 @@ class ControlRepository
         $stmtCheck->bindValue(':tabela', $tabela);
         $stmtCheck->execute();
         $existe = $stmtCheck->fetchColumn();
+        $stmtCheck->closeCursor();
+        $stmtCheck = null;
 
         if ($existe) {
             // 2. Se já existe, faz o UPDATE com os tokens exatos
@@ -53,5 +55,7 @@ class ControlRepository
         $stmt->bindValue(':afetados', $afetados, \PDO::PARAM_INT);
 
         $stmt->execute();
+        $stmt->closeCursor();
+        $stmt = null;
     }
 }

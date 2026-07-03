@@ -15,7 +15,7 @@ class SqlServerSyntax implements SgbdSyntaxInterface
     {
         $schemaLimpo = $this->normalizarIdentificador(empty($schema) ? 'dbo' : $schema);
 
-        return "IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = '{$schemaLimpo}') BEGIN EXEC('CREATE SCHEMA [{$schemaLimpo}]') END;";
+        return "SET NOCOUNT ON; IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = '{$schemaLimpo}') BEGIN EXEC('CREATE SCHEMA [{$schemaLimpo}]') END;";
     }
 
     public function obterDdlCriarTabela(?string $schema, string $tabela, array $colunas, array $pks): string
@@ -44,7 +44,7 @@ class SqlServerSyntax implements SgbdSyntaxInterface
         $corpo = implode(",\n        ", $linhas);
         $objectId = '[dbo].[' . $tabelaLimpa . ']';
 
-        return "IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('[{$schemaLimpo}].[{$tabelaLimpa}]') AND type = 'U') BEGIN CREATE TABLE [{$schemaLimpo}].[{$tabelaLimpa}] (\n        {$corpo}\n    ); END;";
+        return "SET NOCOUNT ON; IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('[{$schemaLimpo}].[{$tabelaLimpa}]') AND type = 'U') BEGIN CREATE TABLE [{$schemaLimpo}].[{$tabelaLimpa}] (\n        {$corpo}\n    ); END;";
     }
 
     public function obterSqlUpsert(string $tabelaQualificada, array $colunas, array $chavesPrimarias): string
@@ -74,12 +74,12 @@ class SqlServerSyntax implements SgbdSyntaxInterface
 
     public function obterTipoDataHora(): string
     {
-        return 'DATETIME';
+        return 'DATETIME2(6)';
     }
 
     public function obterDsn(string $host, int $port, string $banco): string
     {
-        return "dblib:host={$host}:{$port};dbname=master;charset=UTF-8";
+        return "dblib:host={$host}:{$port};dbname={$banco};charset=UTF-8";
     }
 
     public function obterBancoAdministrativo(): string
@@ -131,10 +131,19 @@ class SqlServerSyntax implements SgbdSyntaxInterface
         $sqlCheck = 'SELECT COUNT(*) FROM ' . $tabelaQualificada . ' WHERE ' . implode(' AND ', $whereConds);
         $stmtCheck = $destino->prepare($sqlCheck);
         foreach ($whereParams as $token => $valor) {
-            $stmtCheck->bindValue($token, $valor);
+            if ($valor === null) {
+                $stmtCheck->bindValue($token, null, \PDO::PARAM_NULL);
+            } elseif (is_bool($valor)) {
+                $stmtCheck->bindValue($token, $valor ? 1 : 0, \PDO::PARAM_INT);
+            } else {
+                
+                $stmtCheck->bindValue($token, $valor);
+            }
         }
         $stmtCheck->execute();
         $existe = (int) $stmtCheck->fetchColumn();
+        $stmtCheck->closeCursor();
+        $stmtCheck = null;
 
         if ($existe > 0) {
             $updateFields = [];
@@ -156,12 +165,27 @@ class SqlServerSyntax implements SgbdSyntaxInterface
                 $stmtUpdate = $destino->prepare($sqlUpdate);
 
                 foreach ($whereParams as $token => $valor) {
-                    $stmtUpdate->bindValue($token, $valor);
+                    if ($valor === null) {
+                        $stmtUpdate->bindValue($token, null, \PDO::PARAM_NULL);
+                    } elseif (is_bool($valor)) {
+                        $stmtUpdate->bindValue($token, $valor ? 1 : 0, \PDO::PARAM_INT);
+                    } else {
+                        $stmtUpdate->bindValue($token, $valor);
+                    }
                 }
                 foreach ($updateParams as $token => $valor) {
-                    $stmtUpdate->bindValue($token, $valor);
+                    if ($valor === null) {
+                        $stmtUpdate->bindValue($token, null, \PDO::PARAM_NULL);
+                    } elseif (is_bool($valor)) {
+                        $stmtUpdate->bindValue($token, $valor ? 1 : 0, \PDO::PARAM_INT);
+                    } else {
+                 
+                        $stmtUpdate->bindValue($token, $valor);
+                    }
                 }
                 $stmtUpdate->execute();
+                $stmtUpdate->closeCursor();
+                $stmtUpdate = null;
             }
         } else {
             $insertCols = [];
@@ -172,7 +196,11 @@ class SqlServerSyntax implements SgbdSyntaxInterface
                 if (is_numeric($colunaReg)) {
                     continue;
                 }
-
+                // Arruma problema de timestamps vindos do POSTGRES
+                if (is_string($valorReg) && preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6}$/', $valorReg)) {
+                    // Corta as 3 últimas casas decimais do milissegundo (de .691839 para .691)
+                    $valorReg = substr($valorReg, 0, -3);
+                }      
                 $colLimpo = $this->normalizarIdentificador((string) $colunaReg);
                 $token = 'ins_' . $this->placeholderSeguro($colLimpo);
                 $insertCols[] = '[' . $colLimpo . ']';
@@ -183,9 +211,17 @@ class SqlServerSyntax implements SgbdSyntaxInterface
             $sqlInsert = 'INSERT INTO ' . $tabelaQualificada . ' (' . implode(', ', $insertCols) . ') VALUES (' . implode(', ', $insertTokens) . ')';
             $stmtInsert = $destino->prepare($sqlInsert);
             foreach ($insertParams as $token => $valor) {
-                $stmtInsert->bindValue($token, $valor);
+                if ($valor === null) {
+                    $stmtInsert->bindValue($token, null, \PDO::PARAM_NULL);
+                } elseif (is_bool($valor)) {
+                    $stmtInsert->bindValue($token, $valor ? 1 : 0, \PDO::PARAM_INT);
+                } else {
+                    $stmtInsert->bindValue($token, $valor);
+                }
             }
             $stmtInsert->execute();
+            $stmtInsert->closeCursor();
+            $stmtInsert = null;
         }
     }
 
@@ -198,10 +234,10 @@ BEGIN
         [id] INT IDENTITY(1,1) NOT NULL,
         [banco_nome] VARCHAR(150) NOT NULL,
         [tabela_nome] VARCHAR(150) NOT NULL,
-        [ultima_sincronizacao] DATETIME NULL,
+        [ultima_sincronizacao] DATETIME2(6) NULL,
         [status_execucao] VARCHAR(50) NOT NULL,
         [registros_afetados] INT DEFAULT 0,
-        [criado_em] DATETIME DEFAULT GETDATE(),
+        [criado_em] DATETIME2(6) DEFAULT SYSDATETIME(),
         CONSTRAINT [PK_miida_controle_sincronizacao] PRIMARY KEY ([id])
     );
 END;
@@ -225,8 +261,8 @@ SQL;
         $mapa = [
             'BOOLEAN' => 'BIT',
             'BIT' => 'BIT',
-            'DATETIME' => 'DATETIME',
-            'TIMESTAMP' => 'DATETIME',
+            'DATETIME' => 'DATETIME2(6)',
+            'TIMESTAMP' => 'DATETIME2(6)',
             'TEXT' => 'VARCHAR(MAX)',
             'LONGTEXT' => 'VARCHAR(MAX)',
         ];

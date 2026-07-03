@@ -64,6 +64,8 @@ class MySqlSyntax implements SgbdSyntaxInterface
     public function escaparColuna(string $coluna): string
     {
         return '`' . $this->normalizarIdentificador($coluna) . '`';
+            $stmt->closeCursor();
+            $stmt = null;
     }
 
     public function obterComandoTrocaBanco(string $banco): string

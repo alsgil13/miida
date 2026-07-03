@@ -6,3 +6,24 @@
 [2026-07-02 12:42:04] [CRITICAL] [Logger]: Falha ao persistir log no SGBD de Destino: SQLSTATE[42P01]: Undefined table: 7 ERROR:  relation "dbo.miida_logs_sistema" does not exist
 LINE 1: INSERT INTO "dbo"."miida_logs_sistema" (data_log, nivel, com...
                     ^
+[2026-07-03 17:32:47] [WARNING] [LIMPEZAORFAOSPROCESSOR -> USUARIOS]: Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1 
+[2026-07-03 17:32:47] [CRITICAL] [Logger]: Falha ao persistir log no SGBD de Destino: SQLSTATE[42000]: Syntax error or access violation: 1049 Unknown database 'master'
+[2026-07-03 17:37:32] [WARNING] [LIMPEZAORFAOSPROCESSOR -> USUARIOS]: Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1 
+[2026-07-03 17:37:32] [CRITICAL] [Logger]: Falha ao persistir log no SGBD de Destino: SQLSTATE[HY000]: General error: 20018 Invalid object name 'master.dbo.miida_logs_sistema'. [20018] (severity 16) [INSERT INTO [master].[dbo].[miida_logs_sistema] (data_log, nivel, componente, mensagem, detalhes) 
+                        VALUES ('2026-07-03 17:37:32', 'WARNING', 'LimpezaOrfaosProcessor -> usuarios', 'Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1', NULL)]
+[2026-07-03 17:44:51] [WARNING] [LIMPEZAORFAOSPROCESSOR -> USUARIOS]: Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1 
+[2026-07-03 17:44:51] [CRITICAL] [Logger]: Falha ao persistir log no SGBD de Destino: SQLSTATE[42P01]: Undefined table: 7 ERROR:  relation "dbo.miida_logs_sistema" does not exist
+LINE 1: INSERT INTO "dbo"."miida_logs_sistema" (data_log, nivel, com...
+                    ^
+[2026-07-03 17:58:50] [WARNING] [LIMPEZAORFAOSPROCESSOR -> USUARIOS]: Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1 
+[2026-07-03 17:58:50] [CRITICAL] [Logger]: Falha ao persistir log no SGBD de Destino: SQLSTATE[42P01]: Undefined table: 7 ERROR:  relation "dbo.miida_logs_sistema" does not exist
+LINE 1: INSERT INTO "dbo"."miida_logs_sistema" (data_log, nivel, com...
+                    ^
+[2026-07-03 18:03:22] [WARNING] [LIMPEZAORFAOSPROCESSOR -> USUARIOS]: Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1 
+[2026-07-03 18:03:22] [CRITICAL] [Logger]: Falha ao persistir log no SGBD de Destino: SQLSTATE[42000]: Syntax error or access violation: 1049 Unknown database 'master'
+[2026-07-03 19:18:58] [WARNING] [LIMPEZAORFAOSPROCESSOR -> USUARIOS]: Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1 
+[2026-07-03 19:18:58] [CRITICAL] [Logger]: Falha ao persistir log no SGBD de Destino: SQLSTATE[HY000]: General error: 20018 Invalid object name 'master.dbo.miida_logs_sistema'. [20018] (severity 16) [INSERT INTO [master].[dbo].[miida_logs_sistema] (data_log, nivel, componente, mensagem, detalhes) 
+                        VALUES ('2026-07-03 19:18:58', 'WARNING', 'LimpezaOrfaosProcessor -> usuarios', 'Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1', NULL)]
+[2026-07-03 19:29:24] [WARNING] [LIMPEZAORFAOSPROCESSOR -> USUARIOS]: Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1 
+[2026-07-03 19:29:24] [CRITICAL] [Logger]: Falha ao persistir log no SGBD de Destino: SQLSTATE[HY000]: General error: 20018 Invalid object name 'master.dbo.miida_logs_sistema'. [20018] (severity 16) [INSERT INTO [master].[dbo].[miida_logs_sistema] (data_log, nivel, componente, mensagem, detalhes) 
+                        VALUES ('2026-07-03 19:29:24', 'WARNING', 'LimpezaOrfaosProcessor -> usuarios', 'Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1', NULL)]

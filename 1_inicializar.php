@@ -57,6 +57,10 @@ try {
 
         // 1. Garante o "CREATE DATABASE" e abre a conexão PDO focada ESTRITAMENTE DENTRO desse catálogo
         $connModerno = ConnectionFactory::getModernoConnection($config, $syntaxModerno, $bancoModernoAlvo);
+        if ($sgbdDestino === 'sqlserver') {
+            // $connModerno->exec('SET NOCOUNT ON;');
+            $connModerno->exec('USE [' . $bancoModernoAlvo . '];');
+        }
         echo "[OK] Banco de dados verificado/criado com sucesso.\n";
 
         // 2. GARANTE A TABELA DE CONTROLE DE SINCRONIZAÇÃO NESTE BANCO (Evita Cross-Database)
@@ -84,14 +88,17 @@ try {
 
         // 3. Criação Dinâmica de Schemas e Tabelas mapeados para ESTE banco
         foreach ($banco['tabelas'] as $tabela) {
-            $schema = $tabela['schema_moderno'] ?? 'public';
+            $schema = $tabela['schema_moderno'] ?? null;
             $nomeTabela = $tabela['tabela_moderna'];
             
             echo " -> Garantindo Tabela [{$nomeTabela}]... ";
 
             // O provisionamento de schema/tabela é responsabilidade exclusiva da Strategy.
-            $sqlSchema = $syntaxModerno->obterDdlCriarSchema($schema);
             if (!empty($sqlSchema)) {
+                $sqlSchema = $syntaxModerno->obterDdlCriarSchema($schema);
+                if ($sgbdDestino === 'sqlserver') {
+                    $connModerno->exec('USE [' . $bancoModernoAlvo . '];');
+                }
                 $connModerno->exec($sqlSchema);
             }
 
@@ -143,10 +150,23 @@ try {
             
             // DDL purificada apontando explicitamente para o par Schema + Tabela correto da iteração
             $ddlTabela = $syntaxModerno->obterDdlCriarTabela($schema, $nomeTabela, $colunasSql, $pks);
-            $connModerno->exec($ddlTabela);
-            if ($connModerno->inTransaction()) {
-                $connModerno->commit();
+            
+            $stmt = $connModerno->prepare($ddlTabela);
+            $stmt->execute();
+            if($sgbdDestino === 'sqlserver'){
+                do {
+                    if ($stmt->columnCount() > 0) {
+                        $stmt->fetchAll();
+                    }
+                } while ($stmt->nextRowset());
+                $stmt->closeCursor();
+                $stmt = null;
             }
+
+            // if ($connModerno->inTransaction()) {
+            //     $connModerno->commit();
+            // }
+
             
             echo "[OK]\n";
         }

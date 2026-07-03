@@ -4,6 +4,7 @@ namespace Miida\Engine;
 
 use Miida\Database\ControlRepository;
 use Miida\Database\Syntax\SgbdSyntaxInterface;
+use Miida\Database\Syntax\SqlServerSyntax;
 use Miida\Services\AntiCorruptionLayer;
 
 /**
@@ -76,9 +77,10 @@ class DataSyncProcessor
         $stmtOrigem->execute();
         $linhasProcessadas = 0;
 
+        $usaTransacao = !($this->syntaxModerno instanceof SqlServerSyntax);
         $transacaoIniciada = false;
         try {
-            if (!$this->connModerno->inTransaction()) {
+            if ($usaTransacao && !$this->connModerno->inTransaction()) {
                 $this->connModerno->beginTransaction();
                 $transacaoIniciada = true;
             }
@@ -137,6 +139,8 @@ class DataSyncProcessor
                         $stmtCheck->execute();
                         $existing = $stmtCheck->fetch(\PDO::FETCH_ASSOC);
                         $existingHash = $existing['hash_versao'] ?? null;
+                        $stmtCheck->closeCursor();
+                        $stmtCheck = null;
                         if ($existingHash !== null && $existingHash === $hashVersao) {
                             // Hash idêntico -> ignora este registro completamente
                             $deveExecutarUpsert = false;
@@ -167,6 +171,9 @@ class DataSyncProcessor
             if ($transacaoIniciada && $this->connModerno->inTransaction()) {
                 $this->connModerno->commit();
             }
+
+            $stmtOrigem->closeCursor();
+            $stmtOrigem = null;
 
         } catch (\Exception $e) {
             if ($transacaoIniciada && $this->connModerno->inTransaction()) {
@@ -201,9 +208,11 @@ class DataSyncProcessor
             $stmt->execute();
             
             $resultado = $stmt->fetch(\PDO::FETCH_ASSOC);
+            $stmt->closeCursor();
+            $stmt = null;
             return $resultado['ultima_sincronizacao'] ?? null;
         } catch (\Exception $e) {
-            return null; // Retorna nulo se a tabela de controle ainda não foi provisionada
+            throw $e;
         }
     }
 }
