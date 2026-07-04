@@ -8,6 +8,7 @@ require_once __DIR__ . '/autoload.php';
 
 use Miida\Database\ConnectionFactory;
 use Miida\Database\Syntax\SqlServerSyntax;
+use Miida\Database\Syntax\SqlServerLegacySyntax;
 use Miida\Database\Syntax\MySqlSyntax;
 use Miida\Database\Syntax\PostgresSyntax;
 
@@ -40,10 +41,11 @@ $config['configuracao_infraestrutura'] = $infra;
 $sgbdDestino = strtolower($infra['destino_query']['sgbd'] ?? 'sqlserver');
 switch ($sgbdDestino) {
     case 'postgres':
-    case 'postgresql': $syntaxModerno = new PostgresSyntax(); break;
-    case 'mysql':      $syntaxModerno = new MySqlSyntax(); break;
+    case 'postgresql':          $syntaxModerno = new PostgresSyntax(); break;
+    case 'mysql':               $syntaxModerno = new MySqlSyntax(); break;
+    case 'sqlserver_legacy':    $syntaxModerno = new SqlServerLegacySyntax(); break;
     case 'sqlserver':
-    default:           $syntaxModerno = new SqlServerSyntax(); break;
+    default:                    $syntaxModerno = new SqlServerSyntax(); break;
 }
 
 try {

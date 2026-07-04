@@ -9,6 +9,7 @@ require_once __DIR__ . '/autoload.php';
 
 use Miida\Database\ConnectionFactory;
 use Miida\Database\Syntax\SqlServerSyntax;
+use Miida\Database\Syntax\SqlServerLegacySyntax; 
 use Miida\Database\Syntax\MySqlSyntax;
 use Miida\Database\Syntax\PostgresSyntax;
 use Miida\Services\Logger;
@@ -37,19 +38,21 @@ try {
     $sgbdOrigem = strtolower($infra['origem_command']['sgbd'] ?? 'mysql');
     switch ($sgbdOrigem) {
         case 'postgres':
-        case 'postgresql': $syntaxLegado = new PostgresSyntax(); break;
-        case 'mysql':      $syntaxLegado = new MySqlSyntax(); break;
+        case 'postgresql':          $syntaxLegado = new PostgresSyntax(); break;
+        case 'mysql':               $syntaxLegado = new MySqlSyntax(); break;
+        case 'sqlserver_legacy':    $syntaxLegado = new SqlServerLegacySyntax(); break;
         case 'sqlserver':
-        default:           $syntaxLegado = new SqlServerSyntax(); break;
+        default:                    $syntaxLegado = new SqlServerSyntax(); break;
     }
 
     $sgbdDestino = strtolower($infra['destino_query']['sgbd'] ?? 'sqlserver');
     switch ($sgbdDestino) {
         case 'postgres':
-        case 'postgresql': $syntaxModerno = new PostgresSyntax(); break;
-        case 'mysql':      $syntaxModerno = new MySqlSyntax(); break;
+        case 'postgresql':          $syntaxModerno = new PostgresSyntax(); break;
+        case 'mysql':               $syntaxModerno = new MySqlSyntax(); break;
+        case 'sqlserver_legacy':    $syntaxModerno = new SqlServerLegacySyntax(); break;
         case 'sqlserver':
-        default:           $syntaxModerno = new SqlServerSyntax(); break;
+        default:                    $syntaxModerno = new SqlServerSyntax(); break;
     }
 
     echo "=========================================================\n";

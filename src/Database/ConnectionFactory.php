@@ -34,7 +34,7 @@ class ConnectionFactory
         }
 
         $chave = get_class($syntax) . ":{$host}:{$dbNome}";
-
+    
         if (!isset(self::$legadoInstances[$chave])) {
             $config = $nodeConfig;
             $config['banco_resolvido'] = $dbNome;

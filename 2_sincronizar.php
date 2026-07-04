@@ -8,6 +8,7 @@ require_once __DIR__ . '/autoload.php';
 
 use Miida\Database\ConnectionFactory;
 use Miida\Database\Syntax\SqlServerSyntax;
+use Miida\Database\Syntax\SqlServerLegacySyntax;
 use Miida\Database\Syntax\MySqlSyntax;
 use Miida\Database\Syntax\PostgresSyntax;
 use Miida\Database\ControlRepository;
@@ -42,10 +43,11 @@ $config['configuracao_infraestrutura'] = $infra;
 $sgbdOrigem = strtolower($infra['origem_command']['sgbd'] ?? 'mysql');
 switch ($sgbdOrigem) {
     case 'postgres':
-    case 'postgresql': $syntaxLegado = new PostgresSyntax(); break;
-    case 'mysql':      $syntaxLegado = new MySqlSyntax(); break;
+    case 'postgresql':          $syntaxLegado = new PostgresSyntax(); break;
+    case 'mysql':               $syntaxLegado = new MySqlSyntax(); break;
+    case 'sqlserver_legacy':    $syntaxLegado = new SqlServerLegacySyntax(); break;
     case 'sqlserver':
-    default:           $syntaxLegado = new SqlServerSyntax(); break;
+    default:                    $syntaxLegado = new SqlServerSyntax(); break;
 }
 
 // RESOLUÇÃO DA STRATEGY DO SGBD DESTINO
