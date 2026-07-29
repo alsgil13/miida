@@ -119,7 +119,6 @@ def extrair_bancos_e_tabelas_literal(caminho_sql):
                     "tabela_moderna": nome_tabela_atual,
                     "schema_legado": None,
                     "schema_moderno": None,
-                    "coluna_timestamp_controle": coluna_controle,
                     "coluna_last_updated": coluna_controle,
                     "intervalo_sincronizacao_segundos": 1,
                     "camada_anticorrupcao": {
