@@ -45,7 +45,7 @@ class DataSyncProcessor
         $tabelaDestino = $tabelaConfig['tabela_moderna'];
         $schemaOrigem  = $tabelaConfig['schema_legado'] ?? null;
         $schemaDestino = $tabelaConfig['schema_moderno'] ?? null;
-        $colunaControle = $tabelaConfig['coluna_timestamp_controle'] ?? null;
+        $colunaControle = $tabelaConfig['coluna_last_updated'] ?? null;
 
         $mapeamento = $tabelaConfig['camada_anticorrupcao']['mapeamento_colunas'] ?? [];
 

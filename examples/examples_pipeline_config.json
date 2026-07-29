@@ -1,23 +1,20 @@
 {
-    "configuracao_global": {
-        "nome_sistema": "MIIDA Integration Engine Environment",
-        "ambiente": "Desenvolvimento",
-        "intervalo_limpeza_orfaos_minutos": 5
-    },
     "configuracao_infraestrutura": {
+        "intervalo_verificacao_segundos": 1,
+        "intervalo_limpeza_orfaos_minutos": 5,
         "origem_command": {
-            "sgbd": "sqlserver",
+            "sgbd": "env:DB_ORIGEM_SGBD",
             "host": "env:DB_ORIGEM_HOST",
-            "porta": "1433",
             "usuario": "env:DB_ORIGEM_USER",
-            "senha": "env:DB_ORIGEM_PASSWORD"
+            "senha": "env:DB_ORIGEM_PASS",
+            "porta": "env:DB_ORIGEM_PORT"
         },
         "destino_query": {
-            "sgbd": "postgres",
+            "sgbd": "env:DB_DESTINO_SGBD",
             "host": "env:DB_DESTINO_HOST",
-            "porta": "5432",
             "usuario": "env:DB_DESTINO_USER",
-            "senha": "env:DB_DESTINO_PASSWORD"
+            "senha": "env:DB_DESTINO_PASS",
+            "porta": "env:DB_DESTINO_PORT"
         }
     },
     "bancos_gerenciados": [
@@ -28,10 +25,10 @@
                 {
                     "tabela_legada": "tb_usuarios",
                     "tabela_moderna": "usuarios",
-                    "schema_legado": "dbo",
-                    "schema_moderno": "public",
-                    "coluna_timestamp_controle": "dt_cadastro",
-                    "intervalo_sincronizacao_segundos": 5,
+                    "schema_legado": null,
+                    "schema_moderno": null,
+                    "coluna_last_updated": null,
+                    "intervalo_sincronizacao_segundos": 1,
                     "camada_anticorrupcao": {
                         "sanitizacao": {
                             "remover_espacos_excesso": true,
@@ -53,11 +50,11 @@
                             },
                             "flg_ativo": {
                                 "nome_destino": "ativo",
-                                "tipo": "BOOLEAN"
+                                "tipo": "BIT"
                             },
                             "dt_cadastro": {
                                 "nome_destino": "criado_em",
-                                "tipo": "TIMESTAMP"
+                                "tipo": "DATETIME"
                             }
                         }
                     }
@@ -65,10 +62,10 @@
                 {
                     "tabela_legada": "tb_vendas_itens",
                     "tabela_moderna": "vendas_itens",
-                    "schema_legado": "dbo",
-                    "schema_moderno": "public",
-                    "coluna_timestamp_controle": "dt_alteracao",
-                    "intervalo_sincronizacao_segundos": 10,
+                    "schema_legado": null,
+                    "schema_moderno": null,
+                    "coluna_last_updated": "dt_alteracao",
+                    "intervalo_sincronizacao_segundos": 1,
                     "camada_anticorrupcao": {
                         "sanitizacao": {
                             "remover_espacos_excesso": false,
@@ -99,7 +96,7 @@
                             },
                             "dt_alteracao": {
                                 "nome_destino": "atualizado_em",
-                                "tipo": "TIMESTAMP"
+                                "tipo": "DATETIME"
                             }
                         }
                     }

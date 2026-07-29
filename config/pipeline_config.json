@@ -27,7 +27,6 @@
                     "tabela_moderna": "usuarios",
                     "schema_legado": null,
                     "schema_moderno": null,
-                    "coluna_timestamp_controle": null,
                     "coluna_last_updated": null,
                     "intervalo_sincronizacao_segundos": 1,
                     "camada_anticorrupcao": {
@@ -65,8 +64,7 @@
                     "tabela_moderna": "vendas_itens",
                     "schema_legado": null,
                     "schema_moderno": null,
-                    "coluna_timestamp_controle": "dt_alteracao",
-                    "coluna_last_updated": "atualizado_em",
+                    "coluna_last_updated": "dt_alteracao",
                     "intervalo_sincronizacao_segundos": 1,
                     "camada_anticorrupcao": {
                         "sanitizacao": {
