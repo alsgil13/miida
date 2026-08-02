@@ -6,12 +6,13 @@ use Miida\Database\ControlRepository;
 use Miida\Database\Syntax\SgbdSyntaxInterface;
 use Miida\Database\Syntax\SqlServerSyntax;
 use Miida\Services\AntiCorruptionLayer;
+use Miida\Pipeline\FilterInterface;
 
 /**
  * MIIDA - DataSyncProcessor
  * Motor de Sincronizacao de Dados de Alta Performance Multi-SGBD
  */
-class DataSyncProcessor
+class DataSyncProcessor implements FilterInterface
 {
     private \PDO $connLegado;
     private \PDO $connModerno;
@@ -33,6 +34,49 @@ class DataSyncProcessor
         $this->controlRepo  = $controlRepo;
     }
 
+/**
+     * Ponto de entrada exigido pela FilterInterface para execução no Pipeline.
+     */
+    public function process(array $config): array
+    {
+        $relatorio = [
+            'engine'            => 'DataSyncProcessor',
+            'status'            => 'SUCESSO',
+            'total_processado' => 0,
+            'detalhes'          => []
+        ];
+
+        $bancos = $config['bancos_gerenciados'] ?? [];
+
+        foreach ($bancos as $bancoConfig) {
+            $tabelas = $bancoConfig['tabelas'] ?? [];
+
+            foreach ($tabelas as $tabelaConfig) {
+                $tabelaDestino = $tabelaConfig['tabela_moderna'] ?? 'desconhecida';
+
+                try {
+                    // Executa a lógica legada mantida no método sincronizarTabela
+                    $linhas = $this->sincronizarTabela($bancoConfig, $tabelaConfig);
+
+                    $relatorio['total_processado'] += $linhas;
+                    $relatorio['detalhes'][] = [
+                        'tabela' => $tabelaDestino,
+                        'status' => 'SUCESSO',
+                        'linhas' => $linhas
+                    ];
+                } catch (\Exception $e) {
+                    $relatorio['status'] = 'FALHA_PARCIAL';
+                    $relatorio['detalhes'][] = [
+                        'tabela' => $tabelaDestino,
+                        'status' => 'ERRO',
+                        'motivo' => $e->getMessage()
+                    ];
+                }
+            }
+        }
+
+        return $relatorio;
+    }
     /**
      * Sincroniza uma tabela individual baseando-se no Manifesto JSON
      */

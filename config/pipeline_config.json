@@ -26,7 +26,7 @@
                     "tabela_legada": "tb_usuarios",
                     "tabela_moderna": "usuarios",
                     "schema_legado": null,
-                    "schema_moderno": null,
+                    "schema_moderno": "public",
                     "coluna_last_updated": null,
                     "intervalo_sincronizacao_segundos": 1,
                     "camada_anticorrupcao": {
@@ -63,7 +63,7 @@
                     "tabela_legada": "tb_vendas_itens",
                     "tabela_moderna": "vendas_itens",
                     "schema_legado": null,
-                    "schema_moderno": null,
+                    "schema_moderno": "public",
                     "coluna_last_updated": "dt_alteracao",
                     "intervalo_sincronizacao_segundos": 1,
                     "camada_anticorrupcao": {

@@ -47,26 +47,26 @@ class Logger
         file_put_contents($this->logFile, $linhaLog, FILE_APPEND);
 
         // 2. PERSISTÊNCIA NO BANCO DE DADOS DE LEITURA/AUDITORIA
-        if ($this->connModerno !== null) {
-            try {
-                // Query com o nome de tabela dinâmico e parâmetros ANSI padrão funcionais em qualquer SGBD
-                $sql = "INSERT INTO {$this->tabelaLogs} (data_log, nivel, componente, mensagem, detalhes) 
-                        VALUES (:data, :nivel, :componente, :mensagem, :detalhes)";
+        // if ($this->connModerno !== null) {
+        //     try {
+        //         // Query com o nome de tabela dinâmico e parâmetros ANSI padrão funcionais em qualquer SGBD
+        //         $sql = "INSERT INTO {$this->tabelaLogs} (data_log, nivel, componente, mensagem, detalhes) 
+        //                 VALUES (:data, :nivel, :componente, :mensagem, :detalhes)";
                 
-                $stmt = $this->connModerno->prepare($sql);
-                $stmt->execute([
-                    ':data'       => $dataAtual,
-                    ':nivel'      => strtoupper($nivel),
-                    ':componente' => $componente,
-                    ':mensagem'   => $mensagem,
-                    ':detalhes'   => $detalhes
-                ]);
-            } catch (Exception $e) {
-                // Se falhar o insert no banco, grava o erro da falha no próprio arquivo de log físico
-                $linhaErroBanco = sprintf("[%s] [CRITICAL] [Logger]: Falha ao persistir log no SGBD de Destino: %s\n", $dataAtual, $e->getMessage());
-                file_put_contents($this->logFile, $linhaErroBanco, FILE_APPEND);
-            }
-        }
+        //         $stmt = $this->connModerno->prepare($sql);
+        //         $stmt->execute([
+        //             ':data'       => $dataAtual,
+        //             ':nivel'      => strtoupper($nivel),
+        //             ':componente' => $componente,
+        //             ':mensagem'   => $mensagem,
+        //             ':detalhes'   => $detalhes
+        //         ]);
+        //     } catch (Exception $e) {
+        //         // Se falhar o insert no banco, grava o erro da falha no próprio arquivo de log físico
+        //         $linhaErroBanco = sprintf("[%s] [CRITICAL] [Logger]: Falha ao persistir log no SGBD de Destino: %s\n", $dataAtual, $e->getMessage());
+        //         file_put_contents($this->logFile, $linhaErroBanco, FILE_APPEND);
+        //     }
+        // }
     }
 
     // Atalhos semânticos elegantes para o código ficar limpo

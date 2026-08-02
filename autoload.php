@@ -1,48 +1,74 @@
 <?php
 
-
-// --- CARREGAMENTO DO ARQUIVO .env NA INICIALIZAÇÃO ---
-$envPath = __DIR__ . '/.env'; // Ajuste o caminho se o .env estiver em outra pasta
+// --- 1. CARREGAMENTO DO ARQUIVO .env NA INICIALIZAÇÃO ---
+$envPath = __DIR__ . '/.env';
 if (file_exists($envPath)) {
     $linhas = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($linhas as $linha) {
-        // Ignora comentários no arquivo .env
-        if (strpos(trim($linha), '#') === 0) continue; 
+        $linha = trim($linha);
+        // Ignora linhas vazias ou comentários
+        if (empty($linha) || strpos($linha, '#') === 0) continue; 
         
         // Divide a linha apenas no primeiro sinal de '='
         if (strpos($linha, '=') !== false) {
             list($nome, $valor) = explode('=', $linha, 2);
-            putenv(trim($nome) . '=' . trim($valor));
+            $nome = trim($nome);
+            $valor = trim($valor, " \t\n\r\0\x0B\"'"); // Remove aspas extras se houver
+            putenv("{$nome}={$valor}");
+            $_ENV[$nome] = $valor;
+            $_SERVER[$nome] = $valor;
         }
     }
 }
 
+// --- 2. FUNÇÃO HELPER DE CONFIGURAÇÃO PIPELINE (RESOLVE AS VARIÁVEIS ENV) ---
+if (!function_exists('carregarConfiguracaoPipeline')) {
+    /**
+     * Carrega o JSON de pipeline e desmascara automaticamente as variáveis env:
+     */
+    function carregarConfiguracaoPipeline(?string $caminhoJson = null): array
+    {
+        $caminhoJson = $caminhoJson ?? __DIR__ . '/config/pipeline_config.json';
+        
+        if (!file_exists($caminhoJson)) {
+            throw new \RuntimeException("ERRO: Arquivo de configuração [{$caminhoJson}] não encontrado.");
+        }
 
-/**
- * MIIDA - Autoloader Nativo Padrão PSR-4
- * Mapeia o Namespace 'Miida\\' para a pasta 'src/' de forma dinâmica
- */
+        $config = json_decode(file_get_contents($caminhoJson), true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \RuntimeException("ERRO: O JSON de configuração é inválido - " . json_last_error_msg());
+        }
+
+        // Função recursiva para desmascarar qualquer 'env:NOME_VAR' dentro de qualquer nível do array
+        $desmascarar = function (&$item) use (&$desmascarar) {
+            if (is_array($item)) {
+                foreach ($item as &$valor) {
+                    $desmascarar($valor);
+                }
+            } elseif (is_string($item) && strpos($item, 'env:') === 0) {
+                $varNome = substr($item, 4);
+                $item = getenv($varNome) ?: ($_ENV[$varNome] ?? ($_SERVER[$varNome] ?? ''));
+            }
+        };
+
+        $desmascarar($config);
+        return $config;
+    }
+}
+
+// --- 3. AUTOLOADER NATIVO PADRÃO PSR-4 ---
 spl_autoload_register(function ($classe) {
-    // Prefixo do namespace do seu projeto
     $prefixo = 'Miida\\';
-    
-    // Diretório base onde as classes estão guardadas
     $diretorioBase = __DIR__ . '/src/';
 
-    // Verifica se a classe chamada usa o prefixo do nosso namespace
     $tamanhoPrefixo = strlen($prefixo);
     if (strncmp($prefixo, $classe, $tamanhoPrefixo) !== 0) {
-        // Se não for do MIIDA, passa para o próximo autoloader (se houver)
         return;
     }
 
-    // Pega o nome relativo da classe (ex: Engine\DataSyncProcessor)
     $classeRelativa = substr($classe, $tamanhoPrefixo);
-
-    // Substitui as barras invertidas (namespace) pelas barras do sistema de arquivos e adiciona .php
     $arquivo = $diretorioBase . str_replace('\\', '/', $classeRelativa) . '.php';
 
-    // Se o arquivo físico existir, inclui ele automaticamente
     if (file_exists($arquivo)) {
         require_once $arquivo;
     }

@@ -1,29 +1,13 @@
-[2026-06-28 21:27:00] [ERROR] [LIMPEZAORFAOSPROCESSOR -> USUARIOS]: Falha ao executar rotina de limpeza de orfaos | Detalhes: SQLSTATE[HY000]: General error: 20018 Invalid object name 'dw_moderno_db.public.usuarios'. [20018] (severity 16) [SELECT CAST([id] AS VARCHAR(64)) AS chave_composta FROM [dw_moderno_db].[public].[usuarios]]
-[2026-06-28 21:27:00] [ERROR] [LIMPEZAORFAOSPROCESSOR -> VENDAS_ITENS]: Falha ao executar rotina de limpeza de orfaos | Detalhes: SQLSTATE[HY000]: General error: 20018 Invalid object name 'dw_moderno_db.public.vendas_itens'. [20018] (severity 16) [SELECT CAST([venda_id] AS VARCHAR(64)) + '-' + CAST([sequencial] AS VARCHAR(64)) AS chave_composta FROM [dw_moderno_db].[public].[vendas_itens]]
-[2026-06-28 21:29:09] [WARNING] [LIMPEZAORFAOSPROCESSOR -> USUARIOS]: Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1 
-[2026-06-28 23:31:10] [ERROR] [DATASYNCORCHESTRATOR DAEMON]: Falha fatal no loop do orquestrador | Detalhes: SQLSTATE[70100]: <<Unknown error>>: 1317 Query execution was interrupted
-[2026-07-02 12:42:04] [WARNING] [LIMPEZAORFAOSPROCESSOR -> USUARIOS]: Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1 
-[2026-07-02 12:42:04] [CRITICAL] [Logger]: Falha ao persistir log no SGBD de Destino: SQLSTATE[42P01]: Undefined table: 7 ERROR:  relation "dbo.miida_logs_sistema" does not exist
-LINE 1: INSERT INTO "dbo"."miida_logs_sistema" (data_log, nivel, com...
-                    ^
-[2026-07-03 17:32:47] [WARNING] [LIMPEZAORFAOSPROCESSOR -> USUARIOS]: Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1 
-[2026-07-03 17:32:47] [CRITICAL] [Logger]: Falha ao persistir log no SGBD de Destino: SQLSTATE[42000]: Syntax error or access violation: 1049 Unknown database 'master'
-[2026-07-03 17:37:32] [WARNING] [LIMPEZAORFAOSPROCESSOR -> USUARIOS]: Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1 
-[2026-07-03 17:37:32] [CRITICAL] [Logger]: Falha ao persistir log no SGBD de Destino: SQLSTATE[HY000]: General error: 20018 Invalid object name 'master.dbo.miida_logs_sistema'. [20018] (severity 16) [INSERT INTO [master].[dbo].[miida_logs_sistema] (data_log, nivel, componente, mensagem, detalhes) 
-                        VALUES ('2026-07-03 17:37:32', 'WARNING', 'LimpezaOrfaosProcessor -> usuarios', 'Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1', NULL)]
-[2026-07-03 17:44:51] [WARNING] [LIMPEZAORFAOSPROCESSOR -> USUARIOS]: Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1 
-[2026-07-03 17:44:51] [CRITICAL] [Logger]: Falha ao persistir log no SGBD de Destino: SQLSTATE[42P01]: Undefined table: 7 ERROR:  relation "dbo.miida_logs_sistema" does not exist
-LINE 1: INSERT INTO "dbo"."miida_logs_sistema" (data_log, nivel, com...
-                    ^
-[2026-07-03 17:58:50] [WARNING] [LIMPEZAORFAOSPROCESSOR -> USUARIOS]: Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1 
-[2026-07-03 17:58:50] [CRITICAL] [Logger]: Falha ao persistir log no SGBD de Destino: SQLSTATE[42P01]: Undefined table: 7 ERROR:  relation "dbo.miida_logs_sistema" does not exist
-LINE 1: INSERT INTO "dbo"."miida_logs_sistema" (data_log, nivel, com...
-                    ^
-[2026-07-03 18:03:22] [WARNING] [LIMPEZAORFAOSPROCESSOR -> USUARIOS]: Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1 
-[2026-07-03 18:03:22] [CRITICAL] [Logger]: Falha ao persistir log no SGBD de Destino: SQLSTATE[42000]: Syntax error or access violation: 1049 Unknown database 'master'
-[2026-07-03 19:18:58] [WARNING] [LIMPEZAORFAOSPROCESSOR -> USUARIOS]: Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1 
-[2026-07-03 19:18:58] [CRITICAL] [Logger]: Falha ao persistir log no SGBD de Destino: SQLSTATE[HY000]: General error: 20018 Invalid object name 'master.dbo.miida_logs_sistema'. [20018] (severity 16) [INSERT INTO [master].[dbo].[miida_logs_sistema] (data_log, nivel, componente, mensagem, detalhes) 
-                        VALUES ('2026-07-03 19:18:58', 'WARNING', 'LimpezaOrfaosProcessor -> usuarios', 'Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1', NULL)]
-[2026-07-03 19:29:24] [WARNING] [LIMPEZAORFAOSPROCESSOR -> USUARIOS]: Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1 
-[2026-07-03 19:29:24] [CRITICAL] [Logger]: Falha ao persistir log no SGBD de Destino: SQLSTATE[HY000]: General error: 20018 Invalid object name 'master.dbo.miida_logs_sistema'. [20018] (severity 16) [INSERT INTO [master].[dbo].[miida_logs_sistema] (data_log, nivel, componente, mensagem, detalhes) 
-                        VALUES ('2026-07-03 19:29:24', 'WARNING', 'LimpezaOrfaosProcessor -> usuarios', 'Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1', NULL)]
+[2026-08-02 22:28:23] [SUCCESS] [DATASYNCPROCESSOR]: Carga efetuada com sucesso (MYSQL -> POSTGRES). Total de registros: 0. Tempo: 0.34s | Detalhes: {"tempo_segundos":0.34,"total_processado":0,"tabelas":[{"tabela":"usuarios","status":"SUCESSO","linhas":0},{"tabela":"vendas_itens","status":"SUCESSO","linhas":0}]}
+[2026-08-02 22:30:58] [SUCCESS] [SCHEMACLONER]: Provisionamento de infraestrutura concluído com sucesso (POSTGRES). Estruturas validadas/criadas: 2. Tempo: 0.26s | Detalhes: {"tempo_segundos":0.26,"total_processado":2,"detalhes":[{"banco":"dw_moderno_db","tabela":"public.usuarios","status":"SUCESSO"},{"banco":"dw_moderno_db","tabela":"public.vendas_itens","status":"SUCESSO"}]}
+[2026-08-02 22:34:39] [SUCCESS] [SCHEMACLONER]: Provisionamento de infraestrutura concluído com sucesso (POSTGRES). Estruturas validadas/criadas: 2. Tempo: 0.26s | Detalhes: {"tempo_segundos":0.26,"total_processado":2,"detalhes":[{"banco":"dw_moderno_db","tabela":"public.usuarios","status":"SUCESSO"},{"banco":"dw_moderno_db","tabela":"public.vendas_itens","status":"SUCESSO"}]}
+[2026-08-02 22:34:49] [SUCCESS] [DATASYNCPROCESSOR]: Carga efetuada com sucesso (MYSQL -> POSTGRES). Total de registros: 8. Tempo: 0.34s | Detalhes: {"tempo_segundos":0.34,"total_processado":8,"tabelas":[{"tabela":"usuarios","status":"SUCESSO","linhas":5},{"tabela":"vendas_itens","status":"SUCESSO","linhas":3}]}
+[2026-08-02 22:42:02] [SUCCESS] [LIMPEZAORFAOSPROCESSOR]: Expurgo de órfãos concluído com sucesso. Registros removidos: 0. Tempo: 0.25s | Detalhes: {"tempo_segundos":0.25,"total_removidos":0,"detalhes":[{"banco":"dw_moderno_db","tabela":"usuarios","status":"SUCESSO","linhas_removidas":0},{"banco":"dw_moderno_db","tabela":"vendas_itens","status":"SUCESSO","linhas_removidas":0}]}
+[2026-08-02 22:42:25] [WARNING] [LIMPEZAORFAOSPROCESSOR -> USUARIOS]: Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1 
+[2026-08-02 22:42:25] [SUCCESS] [LIMPEZAORFAOSPROCESSOR]: Expurgo de órfãos concluído com sucesso. Registros removidos: 1. Tempo: 0.35s | Detalhes: {"tempo_segundos":0.35,"total_removidos":1,"detalhes":[{"banco":"dw_moderno_db","tabela":"usuarios","status":"SUCESSO","linhas_removidas":1},{"banco":"dw_moderno_db","tabela":"vendas_itens","status":"SUCESSO","linhas_removidas":0}]}
+[2026-08-02 22:47:24] [INFO] [ORCHESTRATOR:LIMPEZAORFAOS]: Expurgo de órfãos concluído. Total removido: 0. Tempo: 0.19s 
+[2026-08-02 22:47:43] [SUCCESS] [ORCHESTRATOR:DATASYNC]: Sincronização concluída. Registros afetados: 1. Tempo: 0.06s | Detalhes: [{"tabela":"usuarios","status":"SUCESSO","linhas":1},{"tabela":"vendas_itens","status":"SUCESSO","linhas":0}]
+[2026-08-02 22:52:25] [WARNING] [LIMPEZAORFAOSPROCESSOR -> USUARIOS]: Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1 
+[2026-08-02 22:52:25] [INFO] [ORCHESTRATOR:LIMPEZAORFAOS]: Expurgo de órfãos concluído. Total removido: 1. Tempo: 0.14s 
+[2026-08-02 22:53:32] [INFO] [LIMPEZAORFAOSPROCESSOR -> USUARIOS]: Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: 1 
+[2026-08-02 22:53:32] [SUCCESS] [LIMPEZAORFAOSPROCESSOR]: Expurgo de órfãos concluído com sucesso. Registros removidos: 1. Tempo: 0.33s | Detalhes: {"tempo_segundos":0.33,"total_removidos":1,"detalhes":[{"banco":"dw_moderno_db","tabela":"usuarios","status":"SUCESSO","linhas_removidas":1},{"banco":"dw_moderno_db","tabela":"vendas_itens","status":"SUCESSO","linhas_removidas":0}]}
