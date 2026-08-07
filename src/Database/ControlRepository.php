@@ -16,9 +16,9 @@ class ControlRepository
     /**
      * Atualiza ou Insere o estado de sincronização de uma tabela
      */
-    public function atualizarVersao(string $banco, string $tabela, string $status, int $afetados): void
+    public function atualizarVersao(string $banco, string $tabela, string $schema, string $status, int $afetados): void
     {
-        $tabelaControle = $this->syntax->obterNomeQualificadoTabelaControle();
+        $tabelaControle = $this->syntax->obterNomeQualificadoTabelaControle($schema);
 
         // 1. Verifica se o registro de controle já existe para esta tabela específica
         $sqlCheck = "SELECT 1 FROM {$tabelaControle} WHERE banco_nome = :banco AND tabela_nome = :tabela";

@@ -95,158 +95,252 @@ class SqlServerSyntax implements SgbdSyntaxInterface
         ];
     }
 
-    public function obterNomeQualificadoTabelaControle(): string
+    // public function obterNomeQualificadoTabelaControle(string $schema): string
+    // {
+    //         $schemaLimpo = $this->normalizarIdentificador($schema);
+    //         return "`{$schemaLimpo}`.`miida_controle_sincronizacao`";
+    // }
+
+    // public function obterSqlSelecaoIncremental(string $banco, ?string $schema, string $tabela, string $colunaControle): string
+    // {
+    //     return 'SELECT * FROM [' . $this->normalizarIdentificador($banco) . '].[dbo].[' . $this->normalizarIdentificador($tabela) . ']' .
+    //         ' WHERE [' . $this->normalizarIdentificador($colunaControle) . '] > :ultima_data';
+    // }
+    // public function obterSqlSelecaoIncremental(string $banco, ?string $schema, string $tabela, string $colunaControle): string
+    // {
+    //     $schemaReal = empty($schema) ? 'public' : $schema;
+
+    //     return 'SELECT * FROM `'
+    //         . $this->normalizarIdentificador($banco) . '`.`'
+    //         . $this->normalizarIdentificador($schemaReal) . '`.`'
+    //         . $this->normalizarIdentificador($tabela) . '`'
+    //         . ' WHERE `'
+    //         . $this->normalizarIdentificador($colunaControle) . '` > :ultima_data'
+    //         . ' ORDER BY `'
+    //         . $this->normalizarIdentificador($colunaControle) . '` ASC';
+    // }
+    public function obterNomeQualificadoTabelaControle(string $schema): string
     {
-        return '[dbo].[miida_controle_sincronizacao]';
+        $schemaLimpo = $this->normalizarIdentificador(empty($schema) || strtolower($schema) === 'public' ? 'dbo' : $schema);
+        return "[{$schemaLimpo}].[miida_controle_sincronizacao]";
     }
 
-    public function obterSqlSelecaoIncremental(string $banco, string $tabela, string $colunaControle): string
+    public function obterSqlSelecaoIncremental(string $banco, ?string $schema, string $tabela, string $colunaControle): string
     {
-        return 'SELECT * FROM [' . $this->normalizarIdentificador($banco) . '].[dbo].[' . $this->normalizarIdentificador($tabela) . ']' .
-            ' WHERE [' . $this->normalizarIdentificador($colunaControle) . '] > :ultima_data';
+        $schemaReal = empty($schema) || strtolower($schema) === 'public' ? 'dbo' : $schema;
+
+        return 'SELECT * FROM ['
+            . $this->normalizarIdentificador($banco) . '].['
+            . $this->normalizarIdentificador($schemaReal) . '].['
+            . $this->normalizarIdentificador($tabela) . ']'
+            . ' WHERE ['
+            . $this->normalizarIdentificador($colunaControle) . '] > :ultima_data';
     }
 
-    public function executarUpsert(\PDO $destino, string $tabelaQualificada, array $registro, array $pks, array $tabelaConfig): void
-    {
-        if (empty($pks)) {
-            throw new \Exception('Erro de Sintaxe: Nao e possivel realizar UPSERT sem chaves primarias.');
-        }
+    // public function executarUpsert(\PDO $destino, string $tabelaQualificada, array $registro, array $pks, array $tabelaConfig): void
+    // {
+    //     if (empty($pks)) {
+    //         throw new \Exception('Erro de Sintaxe: Nao e possivel realizar UPSERT sem chaves primarias.');
+    //     }
 
-        $colunas = [];
-        foreach ($registro as $coluna => $valor) {
-            if (!is_numeric($coluna)) {
-                $colunas[] = (string) $coluna;
-            }
-        }
+    //     $colunas = [];
+    //     foreach ($registro as $coluna => $valor) {
+    //         if (!is_numeric($coluna)) {
+    //             $colunas[] = (string) $coluna;
+    //         }
+    //     }
 
-        $whereConds = [];
-        $whereParams = [];
-        foreach ($pks as $pk) {
-            $pkLimpo = $this->normalizarIdentificador((string) $pk);
-            $token = 'whr_' . $this->placeholderSeguro($pkLimpo);
-            $whereConds[] = '[' . $pkLimpo . '] = :' . $token;
-            $whereParams[':' . $token] = $registro[$pkLimpo] ?? null;
-        }
+    //     $whereConds = [];
+    //     $whereParams = [];
+    //     foreach ($pks as $pk) {
+    //         $pkLimpo = $this->normalizarIdentificador((string) $pk);
+    //         $token = 'whr_' . $this->placeholderSeguro($pkLimpo);
+    //         $whereConds[] = '[' . $pkLimpo . '] = :' . $token;
+    //         $whereParams[':' . $token] = $registro[$pkLimpo] ?? null;
+    //     }
 
-        $sqlCheck = 'SELECT COUNT(*) FROM ' . $tabelaQualificada . ' WHERE ' . implode(' AND ', $whereConds);
-        $stmtCheck = $destino->prepare($sqlCheck);
-        foreach ($whereParams as $token => $valor) {
-            if ($valor === null) {
-                $stmtCheck->bindValue($token, null, \PDO::PARAM_NULL);
-            } elseif (is_bool($valor)) {
-                $stmtCheck->bindValue($token, $valor ? 1 : 0, \PDO::PARAM_INT);
-            } else {
+    //     $sqlCheck = 'SELECT COUNT(*) FROM ' . $tabelaQualificada . ' WHERE ' . implode(' AND ', $whereConds);
+    //     $stmtCheck = $destino->prepare($sqlCheck);
+    //     foreach ($whereParams as $token => $valor) {
+    //         if ($valor === null) {
+    //             $stmtCheck->bindValue($token, null, \PDO::PARAM_NULL);
+    //         } elseif (is_bool($valor)) {
+    //             $stmtCheck->bindValue($token, $valor ? 1 : 0, \PDO::PARAM_INT);
+    //         } else {
                 
-                $stmtCheck->bindValue($token, $valor);
-            }
-        }
-        $stmtCheck->execute();
-        $existe = (int) $stmtCheck->fetchColumn();
-        $stmtCheck->closeCursor();
-        $stmtCheck = null;
+    //             $stmtCheck->bindValue($token, $valor);
+    //         }
+    //     }
+    //     $stmtCheck->execute();
+    //     $existe = (int) $stmtCheck->fetchColumn();
+    //     $stmtCheck->closeCursor();
+    //     $stmtCheck = null;
 
-        if ($existe > 0) {
-            $updateFields = [];
-            $updateParams = [];
+    //     if ($existe > 0) {
+    //         $updateFields = [];
+    //         $updateParams = [];
 
-            foreach ($registro as $colunaReg => $valorReg) {
-                if (is_numeric($colunaReg) || $this->ehPk((string) $colunaReg, $pks)) {
-                    continue;
-                }
+    //         foreach ($registro as $colunaReg => $valorReg) {
+    //             if (is_numeric($colunaReg) || $this->ehPk((string) $colunaReg, $pks)) {
+    //                 continue;
+    //             }
 
-                $colLimpo = $this->normalizarIdentificador((string) $colunaReg);
-                $token = 'up_' . $this->placeholderSeguro($colLimpo);
-                $updateFields[] = '[' . $colLimpo . '] = :' . $token;
-                $updateParams[':' . $token] = $valorReg;
-            }
+    //             $colLimpo = $this->normalizarIdentificador((string) $colunaReg);
+    //             $token = 'up_' . $this->placeholderSeguro($colLimpo);
+    //             $updateFields[] = '[' . $colLimpo . '] = :' . $token;
+    //             $updateParams[':' . $token] = $valorReg;
+    //         }
 
-            if (!empty($updateFields)) {
-                $sqlUpdate = 'UPDATE ' . $tabelaQualificada . ' SET ' . implode(', ', $updateFields) . ' WHERE ' . implode(' AND ', $whereConds);
-                $stmtUpdate = $destino->prepare($sqlUpdate);
+    //         if (!empty($updateFields)) {
+    //             $sqlUpdate = 'UPDATE ' . $tabelaQualificada . ' SET ' . implode(', ', $updateFields) . ' WHERE ' . implode(' AND ', $whereConds);
+    //             $stmtUpdate = $destino->prepare($sqlUpdate);
 
-                foreach ($whereParams as $token => $valor) {
-                    if ($valor === null) {
-                        $stmtUpdate->bindValue($token, null, \PDO::PARAM_NULL);
-                    } elseif (is_bool($valor)) {
-                        $stmtUpdate->bindValue($token, $valor ? 1 : 0, \PDO::PARAM_INT);
-                    } else {
-                        $stmtUpdate->bindValue($token, $valor);
-                    }
-                }
-                foreach ($updateParams as $token => $valor) {
-                    if ($valor === null) {
-                        $stmtUpdate->bindValue($token, null, \PDO::PARAM_NULL);
-                    } elseif (is_bool($valor)) {
-                        $stmtUpdate->bindValue($token, $valor ? 1 : 0, \PDO::PARAM_INT);
-                    } else {
+    //             foreach ($whereParams as $token => $valor) {
+    //                 if ($valor === null) {
+    //                     $stmtUpdate->bindValue($token, null, \PDO::PARAM_NULL);
+    //                 } elseif (is_bool($valor)) {
+    //                     $stmtUpdate->bindValue($token, $valor ? 1 : 0, \PDO::PARAM_INT);
+    //                 } else {
+    //                     $stmtUpdate->bindValue($token, $valor);
+    //                 }
+    //             }
+    //             foreach ($updateParams as $token => $valor) {
+    //                 if ($valor === null) {
+    //                     $stmtUpdate->bindValue($token, null, \PDO::PARAM_NULL);
+    //                 } elseif (is_bool($valor)) {
+    //                     $stmtUpdate->bindValue($token, $valor ? 1 : 0, \PDO::PARAM_INT);
+    //                 } else {
                  
-                        $stmtUpdate->bindValue($token, $valor);
-                    }
-                }
-                $stmtUpdate->execute();
-                $stmtUpdate->closeCursor();
-                $stmtUpdate = null;
-            }
-        } else {
-            $insertCols = [];
-            $insertTokens = [];
-            $insertParams = [];
+    //                     $stmtUpdate->bindValue($token, $valor);
+    //                 }
+    //             }
+    //             $stmtUpdate->execute();
+    //             $stmtUpdate->closeCursor();
+    //             $stmtUpdate = null;
+    //         }
+    //     } else {
+    //         $insertCols = [];
+    //         $insertTokens = [];
+    //         $insertParams = [];
 
-            foreach ($registro as $colunaReg => $valorReg) {
-                if (is_numeric($colunaReg)) {
-                    continue;
-                }
-                // Arruma problema de timestamps vindos do POSTGRES
-                if (is_string($valorReg) && preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6}$/', $valorReg)) {
-                    // Corta as 3 últimas casas decimais do milissegundo (de .691839 para .691)
-                    $valorReg = substr($valorReg, 0, -3);
-                }      
-                $colLimpo = $this->normalizarIdentificador((string) $colunaReg);
-                $token = 'ins_' . $this->placeholderSeguro($colLimpo);
-                $insertCols[] = '[' . $colLimpo . ']';
-                $insertTokens[] = ':' . $token;
-                $insertParams[':' . $token] = $valorReg;
-            }
+    //         foreach ($registro as $colunaReg => $valorReg) {
+    //             if (is_numeric($colunaReg)) {
+    //                 continue;
+    //             }
+    //             // Arruma problema de timestamps vindos do POSTGRES
+    //             if (is_string($valorReg) && preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6}$/', $valorReg)) {
+    //                 // Corta as 3 últimas casas decimais do milissegundo (de .691839 para .691)
+    //                 $valorReg = substr($valorReg, 0, -3);
+    //             }      
+    //             $colLimpo = $this->normalizarIdentificador((string) $colunaReg);
+    //             $token = 'ins_' . $this->placeholderSeguro($colLimpo);
+    //             $insertCols[] = '[' . $colLimpo . ']';
+    //             $insertTokens[] = ':' . $token;
+    //             $insertParams[':' . $token] = $valorReg;
+    //         }
 
-            $sqlInsert = 'INSERT INTO ' . $tabelaQualificada . ' (' . implode(', ', $insertCols) . ') VALUES (' . implode(', ', $insertTokens) . ')';
-            $stmtInsert = $destino->prepare($sqlInsert);
-            foreach ($insertParams as $token => $valor) {
-                if ($valor === null) {
-                    $stmtInsert->bindValue($token, null, \PDO::PARAM_NULL);
-                } elseif (is_bool($valor)) {
-                    $stmtInsert->bindValue($token, $valor ? 1 : 0, \PDO::PARAM_INT);
-                } else {
-                    $stmtInsert->bindValue($token, $valor);
-                }
-            }
-            $stmtInsert->execute();
-            $stmtInsert->closeCursor();
-            $stmtInsert = null;
+    //         $sqlInsert = 'INSERT INTO ' . $tabelaQualificada . ' (' . implode(', ', $insertCols) . ') VALUES (' . implode(', ', $insertTokens) . ')';
+    //         $stmtInsert = $destino->prepare($sqlInsert);
+    //         foreach ($insertParams as $token => $valor) {
+    //             if ($valor === null) {
+    //                 $stmtInsert->bindValue($token, null, \PDO::PARAM_NULL);
+    //             } elseif (is_bool($valor)) {
+    //                 $stmtInsert->bindValue($token, $valor ? 1 : 0, \PDO::PARAM_INT);
+    //             } else {
+    //                 $stmtInsert->bindValue($token, $valor);
+    //             }
+    //         }
+    //         $stmtInsert->execute();
+    //         $stmtInsert->closeCursor();
+    //         $stmtInsert = null;
+    //     }
+    // }
+public function executarUpsert(\PDO $destino, string $tabelaQualificada, array $registro, array $pks, array $tabelaConfig): void
+{
+    if (empty($pks)) {
+        throw new \Exception('Erro de Sintaxe: Nao e possivel realizar UPSERT sem chaves primarias.');
+    }
+
+    $colunas = array_filter(array_keys($registro), fn($c) => !is_numeric($c));
+
+    // Monta condição do WHERE pelas PKs
+    $whereConds = [];
+    foreach ($pks as $pk) {
+        $pkLimpo = $this->normalizarIdentificador((string) $pk);
+        $whereConds[] = '[' . $pkLimpo . '] = :' . $this->placeholderSeguro($pkLimpo);
+    }
+    $strWhere = implode(' AND ', $whereConds);
+
+    // Monta campos de UPDATE
+    $updateFields = [];
+    foreach ($colunas as $col) {
+        if (!$this->ehPk($col, $pks)) {
+            $colLimpo = $this->normalizarIdentificador($col);
+            $updateFields[] = '[' . $colLimpo . '] = :' . $this->placeholderSeguro($colLimpo);
         }
     }
 
-    public function getDDLControle(): string
+    // Monta campos de INSERT
+    $insertCols = array_map(fn($c) => '[' . $this->normalizarIdentificador($c) . ']', $colunas);
+    $insertTokens = array_map(fn($c) => ':' . $this->placeholderSeguro($c), $colunas);
+
+    // SQL único com IF EXISTS nativo do T-SQL
+    $sql = "IF EXISTS (SELECT 1 FROM {$tabelaQualificada} WHERE {$strWhere})
+                UPDATE {$tabelaQualificada} SET " . implode(', ', $updateFields) . " WHERE {$strWhere};
+            ELSE
+                INSERT INTO {$tabelaQualificada} (" . implode(', ', $insertCols) . ") VALUES (" . implode(', ', $insertTokens) . ");";
+
+    $stmt = $destino->prepare($sql);
+
+    foreach ($colunas as $colunaReg) {
+        $valorReg = $registro[$colunaReg];
+
+        // Trata precisão de datas vindas do Postgres
+        if (is_string($valorReg) && preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{6}$/', $valorReg)) {
+            $valorReg = substr($valorReg, 0, -3);
+        }
+
+        $token = ':' . $this->placeholderSeguro($colunaReg);
+        if ($valorReg === null) {
+            $stmt->bindValue($token, null, \PDO::PARAM_NULL);
+        } elseif (is_bool($valorReg)) {
+            $stmt->bindValue($token, $valorReg ? 1 : 0, \PDO::PARAM_INT);
+        } else {
+            $stmt->bindValue($token, $valorReg);
+        }
+    }
+
+    $stmt->execute();
+    $stmt->closeCursor();
+    $stmt = null;
+}
+    public function getDDLControle(string $schema): string
     {
+        $schemaLimpo = $this->normalizarIdentificador(empty($schema) ? 'dbo' : $schema);
         return <<<SQL
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('[dbo].[miida_controle_sincronizacao]') AND type = 'U')
-BEGIN
-    CREATE TABLE [dbo].[miida_controle_sincronizacao] (
-        [id] INT IDENTITY(1,1) NOT NULL,
-        [banco_nome] VARCHAR(150) NOT NULL,
-        [tabela_nome] VARCHAR(150) NOT NULL,
-        [ultima_sincronizacao] DATETIME2(6) NULL,
-        [status_execucao] VARCHAR(50) NOT NULL,
-        [registros_afetados] INT DEFAULT 0,
-        [criado_em] DATETIME2(6) DEFAULT SYSDATETIME(),
-        CONSTRAINT [PK_miida_controle_sincronizacao] PRIMARY KEY ([id])
-    );
-END;
-IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'idx_miida_controle_busca' AND object_id = OBJECT_ID('[dbo].[miida_controle_sincronizacao]'))
-BEGIN
-    CREATE INDEX idx_miida_controle_busca
-    ON [dbo].[miida_controle_sincronizacao] (banco_nome, tabela_nome, status_execucao);
-END;
-SQL;
+                    IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = '$schemaLimpo')
+                    BEGIN
+                        EXEC('CREATE SCHEMA $schemaLimpo');
+                    END
+                    IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID('[{$schemaLimpo}].[miida_controle_sincronizacao]') AND type = 'U')
+                    BEGIN
+                        CREATE TABLE [dbo].[miida_controle_sincronizacao] (
+                            [id] INT IDENTITY(1,1) NOT NULL,
+                            [banco_nome] VARCHAR(150) NOT NULL,
+                            [tabela_nome] VARCHAR(150) NOT NULL,
+                            [ultima_sincronizacao] DATETIME2(6) NULL,
+                            [status_execucao] VARCHAR(50) NOT NULL,
+                            [registros_afetados] INT DEFAULT 0,
+                            [criado_em] DATETIME2(6) DEFAULT SYSDATETIME(),
+                            CONSTRAINT [PK_miida_controle_sincronizacao] PRIMARY KEY ([id])
+                        );
+                    END;
+                    IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'idx_miida_controle_busca' AND object_id = OBJECT_ID('[dbo].[miida_controle_sincronizacao]'))
+                    BEGIN
+                        CREATE INDEX idx_miida_controle_busca
+                        ON [dbo].[miida_controle_sincronizacao] (banco_nome, tabela_nome, status_execucao);
+                    END;
+                    SQL;
     }
 
     private function normalizarIdentificador(string $valor): string

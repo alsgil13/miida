@@ -45,10 +45,10 @@ interface SgbdSyntaxInterface
     public function obterDdlGarantirBanco(string $bancoAlvo): array;
 
     // Retorna o nome qualificado específico para a tabela interna de controle de sincronização do middleware.
-    public function obterNomeQualificadoTabelaControle(): string;
+    public function obterNomeQualificadoTabelaControle(string $schema): string;
 
     // Monta o SQL agnóstico de extração incremental para o banco de origem.
-    public function obterSqlSelecaoIncremental(string $banco, string $tabela, string $colunaControle): string;
+    public function obterSqlSelecaoIncremental(string $banco, ?string $schema, string $tabela, string $colunaControle): string;
 
     /**
      * Gera e executa o comando atômico ou instrução estruturada de UPSERT (Merge/Insert or Update)
@@ -60,5 +60,5 @@ interface SgbdSyntaxInterface
      * Gera o DDL para a tabela de controle
      * @return string
      */
-    public function getDDLControle(): string;
+    public function getDDLControle(string $schema): string;
 }

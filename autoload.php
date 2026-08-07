@@ -1,5 +1,8 @@
 <?php
 
+
+date_default_timezone_set('America/Sao_Paulo');
+
 // --- 1. CARREGAMENTO DO ARQUIVO .env NA INICIALIZAÇÃO ---
 $envPath = __DIR__ . '/.env';
 if (file_exists($envPath)) {

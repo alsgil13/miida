@@ -3,9 +3,12 @@
 namespace Miida\Engine;
 
 use Miida\Database\ControlRepository;
+use Miida\Database\Syntax\MySqlSyntax;
+use Miida\Database\Syntax\PostgresSyntax;
 use Miida\Database\Syntax\SgbdSyntaxInterface;
 use Miida\Database\Syntax\SqlServerSyntax;
 use Miida\Services\AntiCorruptionLayer;
+use Miida\Services\Logger;
 use Miida\Pipeline\FilterInterface;
 
 /**
@@ -55,8 +58,29 @@ class DataSyncProcessor implements FilterInterface
                 $tabelaDestino = $tabelaConfig['tabela_moderna'] ?? 'desconhecida';
 
                 try {
+
+                    $connModerno = null;
+                    $syntaxModerno = null;
+                    $logger = new Logger($connModerno, $syntaxModerno);
                     // Executa a lógica legada mantida no método sincronizarTabela
+                    // $linhas = $this->sincronizarTabela($bancoConfig, $tabelaConfig);
+                    $inicioTabela = microtime(true);
+                    $contadorAntes = $relatorio['total_processado'];
+
+                    $logger->info(
+                        'DataSyncProcessor',
+                        "Iniciando sincronização de {$tabelaDestino}. Processados até agora: {$contadorAntes}"
+                    );
+
                     $linhas = $this->sincronizarTabela($bancoConfig, $tabelaConfig);
+
+                    $contadorDepois = $relatorio['total_processado'] + $linhas;
+                    $tempoTabela = round(microtime(true) - $inicioTabela, 2);
+
+                    $logger->success(
+                        'DataSyncProcessor',
+                        "Sincronização concluída para {$tabelaDestino}. Linhas: {$linhas}. Total antes: {$contadorAntes}. Total depois: {$contadorDepois}. Tempo: {$tempoTabela}s"
+                    );
 
                     $relatorio['total_processado'] += $linhas;
                     $relatorio['detalhes'][] = [
@@ -105,11 +129,26 @@ class DataSyncProcessor implements FilterInterface
         $tabelaQualificada = $this->syntaxModerno->obterNomeQualificado($nomeBancoDestino, $schemaDestino, $tabelaDestino);
 
         // 3. Busca o ponteiro da última sincronização para a estratégia incremental
-        $ultimaData = $this->obterDataUltimaSincronizacao($nomeBancoDestino, $tabelaDestino);
+        // $ultimaData = $this->obterDataUltimaSincronizacao($nomeBancoDestino, $tabelaDestino,$schemaDestino);
+        //$sqlOrigem = $this->syntaxLegado->obterSqlSelecaoIncremental($nomeBancoOrigem, $schemaOrigem, $tabelaOrigem, $colunaControle);
 
         // 4. Monta e executa a query de extração respeitando o dialeto de origem
+        // if (!empty($colunaControle) && !empty($ultimaData)) {
+        //     $sqlOrigem = $this->syntaxLegado->obterSqlSelecaoIncremental($nomeBancoOrigem, $schemaOrigem, $tabelaOrigem, $colunaControle);
+        //     $stmtOrigem = $this->connLegado->prepare($sqlOrigem);
+        //     $stmtOrigem->bindValue(':ultima_data', $ultimaData);
+        // } else {
+        //     $tabelaOrigemQualificada = $this->syntaxLegado->obterNomeQualificado($nomeBancoOrigem, $schemaOrigem, $tabelaOrigem);
+        //     $sqlOrigem = "SELECT * FROM {$tabelaOrigemQualificada}";
+        //     $stmtOrigem = $this->connLegado->prepare($sqlOrigem);
+        // }
         if (!empty($colunaControle) && !empty($ultimaData)) {
-            $sqlOrigem = $this->syntaxLegado->obterSqlSelecaoIncremental($nomeBancoOrigem, $tabelaOrigem, $colunaControle);
+            $sqlOrigem = $this->syntaxLegado->obterSqlSelecaoIncremental(
+                $nomeBancoOrigem,
+                $schemaOrigem,
+                $tabelaOrigem,
+                $colunaControle
+            );
             $stmtOrigem = $this->connLegado->prepare($sqlOrigem);
             $stmtOrigem->bindValue(':ultima_data', $ultimaData);
         } else {
@@ -121,7 +160,8 @@ class DataSyncProcessor implements FilterInterface
         $stmtOrigem->execute();
         $linhasProcessadas = 0;
 
-        $usaTransacao = !($this->syntaxModerno instanceof SqlServerSyntax);
+        // $usaTransacao = !($this->syntaxModerno instanceof SqlServerSyntax);
+        $usaTransacao = true;
         $transacaoIniciada = false;
         try {
             if ($usaTransacao && !$this->connModerno->inTransaction()) {
@@ -132,12 +172,28 @@ class DataSyncProcessor implements FilterInterface
             while ($row = $stmtOrigem->fetch(\PDO::FETCH_ASSOC)) {
                 // 5. Envia o registro para a Camada de Anticorrupção (ACL) ser higienizado
                 $dadosHigienizados = AntiCorruptionLayer::higienizar($row, $tabelaConfig);
-
+                // if(array_key_exists('last_updated',$dadosHigienizados)){
+                // if($this->syntaxModerno instanceof MySqlSyntax){
+                //     echo "è MySQL";
+                // }
+                //     var_dump($dadosHigienizados);
+                // }
                 // CORREÇÃO: Mantém as chaves limpas para que as Strategies gerenciem os tokens do PDO perfeitamente
                 $registroLimpo = [];
                 foreach ($dadosHigienizados as $col => $val) {
                     if (!is_numeric($col)) {
                         $registroLimpo[$col] = $val;
+                    }
+                    // var_dump($mapeamento[$col]['tipo']); echo "\n";
+                    // echo $col . "\n";
+
+                    if($this->syntaxLegado instanceof PostgresSyntax){
+                        // echo "ahhoy";
+                        // $tipo = $mapeamento[$col]['tipo'];
+                        // // echo $tipo;
+                        // if(trim($tipo) == "DATETIME"){
+                        //     echo $col . "\n";
+                        // }
                     }
                 }
 
@@ -208,6 +264,7 @@ class DataSyncProcessor implements FilterInterface
 
                 // 6. Delega a persistência idempotente de forma transparente à Strategy do banco moderno ativo
                 // CORREÇÃO: Passando $tabelaConfig como 5º parâmetro para viabilizar tratamento dinâmico de tipo
+                //var_dump($registroLimpo);
                 $this->syntaxModerno->executarUpsert($this->connModerno, $tabelaQualificada, $registroLimpo, $pks, $tabelaConfig);
                 $linhasProcessadas++;
             }
@@ -223,11 +280,11 @@ class DataSyncProcessor implements FilterInterface
             if ($transacaoIniciada && $this->connModerno->inTransaction()) {
                 $this->connModerno->rollBack();
             }
-            $this->controlRepo->atualizarVersao($nomeBancoDestino, $tabelaDestino, 'FALHA', $linhasProcessadas);
+            $this->controlRepo->atualizarVersao($nomeBancoDestino, $tabelaDestino, $schemaDestino, 'FALHA', $linhasProcessadas);
             throw $e;
         }
 
-        $this->controlRepo->atualizarVersao($nomeBancoDestino, $tabelaDestino, 'SUCESSO', $linhasProcessadas);
+        $this->controlRepo->atualizarVersao($nomeBancoDestino, $tabelaDestino, $schemaDestino, 'SUCESSO', $linhasProcessadas);
 
         return $linhasProcessadas;
     }
@@ -235,9 +292,10 @@ class DataSyncProcessor implements FilterInterface
     /**
      * Busca o timestamp da última execução bem-sucedida
      */
-    private function obterDataUltimaSincronizacao(string $banco, string $tabela): ?string
+    private function obterDataUltimaSincronizacao(string $banco, string $tabela, string $schema): ?string
     {
-        $tabelaControle = $this->syntaxModerno->obterNomeQualificadoTabelaControle();
+        //echo $banco;
+        $tabelaControle = $this->syntaxModerno->obterNomeQualificadoTabelaControle($schema);
 
         $sql = "SELECT ultima_sincronizacao 
                 FROM {$tabelaControle} 

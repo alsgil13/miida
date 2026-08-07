@@ -26,7 +26,7 @@
                     "tabela_legada": "tb_clientes_sem_update_1",
                     "tabela_moderna": "tb_clientes_sem_update_1",
                     "schema_legado": null,
-                    "schema_moderno": "dbo",
+                    "schema_moderno": null,
                     "coluna_last_updated": null,
                     "intervalo_sincronizacao_segundos": 60,
                     "camada_anticorrupcao": {
@@ -67,7 +67,7 @@
                     "tabela_legada": "tb_clientes_com_update_1",
                     "tabela_moderna": "tb_clientes_com_update_1",
                     "schema_legado": null,
-                    "schema_moderno": "dbo",
+                    "schema_moderno": null,
                     "coluna_last_updated": "last_updated",
                     "intervalo_sincronizacao_segundos": 60,
                     "camada_anticorrupcao": {
@@ -112,7 +112,7 @@
                     "tabela_legada": "tb_clientes_sem_update_2",
                     "tabela_moderna": "tb_clientes_sem_update_2",
                     "schema_legado": null,
-                    "schema_moderno": "dbo",
+                    "schema_moderno": null,
                     "coluna_last_updated": null,
                     "intervalo_sincronizacao_segundos": 60,
                     "camada_anticorrupcao": {
@@ -153,7 +153,7 @@
                     "tabela_legada": "tb_clientes_com_update_2",
                     "tabela_moderna": "tb_clientes_com_update_2",
                     "schema_legado": null,
-                    "schema_moderno": "dbo",
+                    "schema_moderno": null,
                     "coluna_last_updated": "last_updated",
                     "intervalo_sincronizacao_segundos": 60,
                     "camada_anticorrupcao": {
@@ -198,7 +198,7 @@
                     "tabela_legada": "tb_clientes_sem_update_3",
                     "tabela_moderna": "tb_clientes_sem_update_3",
                     "schema_legado": null,
-                    "schema_moderno": "dbo",
+                    "schema_moderno": null,
                     "coluna_last_updated": null,
                     "intervalo_sincronizacao_segundos": 60,
                     "camada_anticorrupcao": {
@@ -239,7 +239,7 @@
                     "tabela_legada": "tb_clientes_com_update_3",
                     "tabela_moderna": "tb_clientes_com_update_3",
                     "schema_legado": null,
-                    "schema_moderno": "dbo",
+                    "schema_moderno": null,
                     "coluna_last_updated": "last_updated",
                     "intervalo_sincronizacao_segundos": 60,
                     "camada_anticorrupcao": {

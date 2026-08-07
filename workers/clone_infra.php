@@ -46,7 +46,9 @@ try {
 
     // 4. GARANTE A TABELA DE CONTROLE DE SINCRONIZAÇÃO
     echo "[*] Garantindo Tabela de Controle Interna... ";
-    $ddlTabelaControle = $syntaxModerno->getDDLControle();
+    $schemaModernoControle = $config['bancos_gerenciados'][0]['tabelas'][0]['schema_moderno'];
+    //var_dump($schemaModernoControle);
+    $ddlTabelaControle = $syntaxModerno->getDDLControle($schemaModernoControle);
     $connModerno->exec($ddlTabelaControle);
     if ($connModerno->inTransaction()) {
         $connModerno->commit();

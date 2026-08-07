@@ -115,14 +115,22 @@ class PostgresSyntax implements SgbdSyntaxInterface
         ];
     }
 
-    public function obterNomeQualificadoTabelaControle(): string
+    public function obterNomeQualificadoTabelaControle(string $schema): string
     {
-        return 'public.miida_controle_sincronizacao';
+        $schemaReal = empty($schema) ? 'public' : $schema;
+        return $schemaReal.'.miida_controle_sincronizacao';
     }
 
-    public function obterSqlSelecaoIncremental(string $banco, string $tabela, string $colunaControle): string
+    // public function obterSqlSelecaoIncremental(string $banco, string $tabela, string $colunaControle): string
+    // {
+    //     return 'SELECT * FROM "' . $this->normalizarIdentificador('public') . '"."' . $this->normalizarIdentificador($tabela) . '"'
+    //         . ' WHERE "' . $this->normalizarIdentificador($colunaControle) . '" > :ultima_data';
+    // }
+    public function obterSqlSelecaoIncremental(string $banco, ?string $schema, string $tabela, string $colunaControle): string
     {
-        return 'SELECT * FROM "' . $this->normalizarIdentificador('public') . '"."' . $this->normalizarIdentificador($tabela) . '"'
+        $schemaReal = empty($schema) ? 'public' : $schema;
+
+        return 'SELECT * FROM "' . $this->normalizarIdentificador($schemaReal) . '"."' . $this->normalizarIdentificador($tabela) . '"'
             . ' WHERE "' . $this->normalizarIdentificador($colunaControle) . '" > :ultima_data';
     }
 
@@ -179,21 +187,25 @@ class PostgresSyntax implements SgbdSyntaxInterface
         $stmt = null;
     }
 
-    public function getDDLControle(): string
+    public function getDDLControle(string $schema): string
     {
+        $schemaReal = empty($schema) ? 'public' : $schema;
+        echo $schemaReal;
+
         return <<<SQL
-CREATE TABLE IF NOT EXISTS public.miida_controle_sincronizacao (
-    id SERIAL PRIMARY KEY,
-    banco_nome VARCHAR(150) NOT NULL,
-    tabela_nome VARCHAR(150) NOT NULL,
-    ultima_sincronizacao TIMESTAMP NULL,
-    status_execucao VARCHAR(50) NOT NULL,
-    registros_afetados INT DEFAULT 0,
-    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-CREATE INDEX IF NOT EXISTS idx_miida_controle_busca
-ON public.miida_controle_sincronizacao (banco_nome, tabela_nome, status_execucao);
-SQL;
+                CREATE SCHEMA IF NOT EXISTS $schemaReal;
+                CREATE TABLE IF NOT EXISTS $schemaReal.miida_controle_sincronizacao (
+                        id SERIAL PRIMARY KEY,
+                        banco_nome VARCHAR(150) NOT NULL,
+                        tabela_nome VARCHAR(150) NOT NULL,
+                        ultima_sincronizacao TIMESTAMP NULL,
+                        status_execucao VARCHAR(50) NOT NULL,
+                        registros_afetados INT DEFAULT 0,
+                        criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+                CREATE INDEX IF NOT EXISTS idx_miida_controle_busca
+                ON $schemaReal.miida_controle_sincronizacao (banco_nome, tabela_nome, status_execucao);
+                SQL;
     }
 
     private function normalizarIdentificador(string $valor): string

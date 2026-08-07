@@ -103,14 +103,15 @@ class MySqlSyntax implements SgbdSyntaxInterface
         ];
     }
 
-    public function obterNomeQualificadoTabelaControle(): string
+    public function obterNomeQualificadoTabelaControle(string $schema): string
     {
-        return '`miida_controle_sincronizacao`';
+        $schemaLimpo = $this->normalizarIdentificador($schema);
+        return "{$schemaLimpo}.miida_controle_sincronizacao";
     }
 
-    public function obterSqlSelecaoIncremental(string $banco, string $tabela, string $colunaControle): string
+    public function obterSqlSelecaoIncremental(string $banco, ?string $schema, string $tabela, string $colunaControle): string
     {
-        return 'SELECT * FROM `' . $this->normalizarIdentificador($banco) . '`.'
+        return 'SELECT * FROM `$schema`.`' . $this->normalizarIdentificador($banco) . '`.'
             . '`' . $this->normalizarIdentificador($tabela) . '`'
             . ' WHERE `' . $this->normalizarIdentificador($colunaControle) . '` > :ultima_data'
             . ' ORDER BY `' . $this->normalizarIdentificador($colunaControle) . '` ASC';
@@ -118,6 +119,7 @@ class MySqlSyntax implements SgbdSyntaxInterface
 
     public function executarUpsert(\PDO $destino, string $tabelaQualificada, array $registro, array $pks, array $tabelaConfig): void
     {
+
         $colunas = [];
         foreach ($registro as $coluna => $valor) {
             if (!is_numeric($coluna)) {
@@ -125,6 +127,7 @@ class MySqlSyntax implements SgbdSyntaxInterface
             }
         }
 
+        // var_dump($registro);
         $colunasEscapadas = array_map(fn($c) => '`' . $this->normalizarIdentificador($c) . '`', $colunas);
         $placeholders = array_map(fn($c) => ':' . $this->placeholderSeguro($c), $colunas);
 
@@ -149,16 +152,19 @@ class MySqlSyntax implements SgbdSyntaxInterface
         }
 
         $stmt = $destino->prepare($sql);
+        //echo $sql;
         foreach ($colunas as $coluna) {
             $stmt->bindValue(':' . $this->placeholderSeguro($coluna), $registro[$coluna]);
         }
         $stmt->execute();
     }
 
-    public function getDDLControle(): string
+    public function getDDLControle(string $schema): string
     {
+        $schemaLimpo = $this->normalizarIdentificador($schema);
         return <<<SQL
-CREATE TABLE IF NOT EXISTS `miida_controle_sincronizacao` (
+CREATE SCHEMA IF NOT EXISTS $schemaLimpo;
+CREATE TABLE IF NOT EXISTS `$schemaLimpo`.`miida_controle_sincronizacao` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `banco_nome` VARCHAR(150) NOT NULL,
     `tabela_nome` VARCHAR(150) NOT NULL,

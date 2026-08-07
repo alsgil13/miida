@@ -4,8 +4,8 @@ import re
 # ==============================================================================
 # CONFIGURAÇÕES DE ENTRADA, SAÍDA E SANITIZAÇÃO
 # ==============================================================================
-ARQUIVO_SQL_ENTRADA = "est_lemaf.sql"  # Altere o nome do arquivo aqui
-ARQUIVO_JSON_SAIDA = "pipeline_config_lemaf.json"
+ARQUIVO_SQL_ENTRADA = "ddl_teste.sql"  # Altere o nome do arquivo aqui
+ARQUIVO_JSON_SAIDA = "pipeline_config.json"
 
 # Flags de sanitização pedidas
 REMOVER_ESPACOS_PADRAO = True
