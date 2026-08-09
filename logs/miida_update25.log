@@ -1,0 +1,159 @@
+
+---------- SQLSERVER_LEGACY -> POSTGRES --------------
+[2026-08-09 07:57:11] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_1. Processados até agora: 0 
+[2026-08-09 07:57:12] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_1. Linhas: 250. Total antes: 0. Total depois: 250. Tempo: 1.05s 
+[2026-08-09 07:57:12] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_1. Processados até agora: 250 
+[2026-08-09 07:57:13] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_1. Linhas: 250. Total antes: 250. Total depois: 500. Tempo: 0.82s 
+[2026-08-09 07:57:13] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_2. Processados até agora: 500 
+[2026-08-09 07:57:16] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_2. Linhas: 1250. Total antes: 500. Total depois: 1750. Tempo: 3.46s 
+[2026-08-09 07:57:16] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_2. Processados até agora: 1750 
+[2026-08-09 07:57:20] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_2. Linhas: 1250. Total antes: 1750. Total depois: 3000. Tempo: 3.15s 
+[2026-08-09 07:57:20] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_3. Processados até agora: 3000 
+[2026-08-09 07:57:27] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_3. Linhas: 2500. Total antes: 3000. Total depois: 5500. Tempo: 7.22s 
+[2026-08-09 07:57:27] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_3. Processados até agora: 5500 
+[2026-08-09 07:57:34] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_3. Linhas: 2500. Total antes: 5500. Total depois: 8000. Tempo: 7.53s 
+[2026-08-09 07:57:34] [SUCCESS] [DATASYNCPROCESSOR]: Carga efetuada com sucesso (SQLSERVER_LEGACY -> POSTGRES). Total de registros: 8000. Tempo: 23.91s | Detalhes: {"tempo_segundos":23.91,"total_processado":8000,"tabelas":[{"tabela":"tb_clientes_sem_update_1","status":"SUCESSO","linhas":250},{"tabela":"tb_clientes_com_update_1","status":"SUCESSO","linhas":250},{"tabela":"tb_clientes_sem_update_2","status":"SUCESSO","linhas":1250},{"tabela":"tb_clientes_com_update_2","status":"SUCESSO","linhas":1250},{"tabela":"tb_clientes_sem_update_3","status":"SUCESSO","linhas":2500},{"tabela":"tb_clientes_com_update_3","status":"SUCESSO","linhas":2500}]}
+
+---------- SQLSERVER_LEGACY -> MYSQL --------------
+
+[2026-08-09 08:16:18] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_1. Processados até agora: 0 
+[2026-08-09 08:16:19] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_1. Linhas: 250. Total antes: 0. Total depois: 250. Tempo: 1.11s 
+[2026-08-09 08:16:19] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_1. Processados até agora: 250 
+[2026-08-09 08:16:20] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_1. Linhas: 250. Total antes: 250. Total depois: 500. Tempo: 0.94s 
+[2026-08-09 08:16:20] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_2. Processados até agora: 500 
+[2026-08-09 08:16:23] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_2. Linhas: 1250. Total antes: 500. Total depois: 1750. Tempo: 2.96s 
+[2026-08-09 08:16:23] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_2. Processados até agora: 1750 
+[2026-08-09 08:16:26] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_2. Linhas: 1250. Total antes: 1750. Total depois: 3000. Tempo: 3.37s 
+[2026-08-09 08:16:26] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_3. Processados até agora: 3000 
+[2026-08-09 08:16:32] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_3. Linhas: 2500. Total antes: 3000. Total depois: 5500. Tempo: 5.98s 
+[2026-08-09 08:16:32] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_3. Processados até agora: 5500 
+[2026-08-09 08:16:39] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_3. Linhas: 2500. Total antes: 5500. Total depois: 8000. Tempo: 6.13s 
+[2026-08-09 08:16:39] [SUCCESS] [DATASYNCPROCESSOR]: Carga efetuada com sucesso (SQLSERVER_LEGACY -> MYSQL). Total de registros: 8000. Tempo: 20.96s | Detalhes: {"tempo_segundos":20.96,"total_processado":8000,"tabelas":[{"tabela":"tb_clientes_sem_update_1","status":"SUCESSO","linhas":250},{"tabela":"tb_clientes_com_update_1","status":"SUCESSO","linhas":250},{"tabela":"tb_clientes_sem_update_2","status":"SUCESSO","linhas":1250},{"tabela":"tb_clientes_com_update_2","status":"SUCESSO","linhas":1250},{"tabela":"tb_clientes_sem_update_3","status":"SUCESSO","linhas":2500},{"tabela":"tb_clientes_com_update_3","status":"SUCESSO","linhas":2500}]}
+
+
+---------- SQLSERVER_LEGACY -> SQLSERVER --------------
+
+[2026-08-09 08:21:03] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_1. Processados até agora: 0 
+[2026-08-09 08:21:05] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_1. Linhas: 250. Total antes: 0. Total depois: 250. Tempo: 1.83s 
+[2026-08-09 08:21:05] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_1. Processados até agora: 250 
+[2026-08-09 08:21:07] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_1. Linhas: 250. Total antes: 250. Total depois: 500. Tempo: 2.04s 
+[2026-08-09 08:21:07] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_2. Processados até agora: 500 
+[2026-08-09 08:21:14] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_2. Linhas: 1250. Total antes: 500. Total depois: 1750. Tempo: 7.06s 
+[2026-08-09 08:21:14] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_2. Processados até agora: 1750 
+[2026-08-09 08:21:21] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_2. Linhas: 1250. Total antes: 1750. Total depois: 3000. Tempo: 6.85s 
+[2026-08-09 08:21:21] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_3. Processados até agora: 3000 
+[2026-08-09 08:21:37] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_3. Linhas: 2500. Total antes: 3000. Total depois: 5500. Tempo: 16.56s 
+[2026-08-09 08:21:37] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_3. Processados até agora: 5500 
+[2026-08-09 08:21:54] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_3. Linhas: 2500. Total antes: 5500. Total depois: 8000. Tempo: 16.21s 
+[2026-08-09 08:21:54] [SUCCESS] [DATASYNCPROCESSOR]: Carga efetuada com sucesso (SQLSERVER_LEGACY -> SQLSERVER). Total de registros: 8000. Tempo: 50.96s | Detalhes: {"tempo_segundos":50.96,"total_processado":8000,"tabelas":[{"tabela":"tb_clientes_sem_update_1","status":"SUCESSO","linhas":250},{"tabela":"tb_clientes_com_update_1","status":"SUCESSO","linhas":250},{"tabela":"tb_clientes_sem_update_2","status":"SUCESSO","linhas":1250},{"tabela":"tb_clientes_com_update_2","status":"SUCESSO","linhas":1250},{"tabela":"tb_clientes_sem_update_3","status":"SUCESSO","linhas":2500},{"tabela":"tb_clientes_com_update_3","status":"SUCESSO","linhas":2500}]}
+
+---------- MYSQL -> SQLSERVER --------------
+
+[2026-08-09 08:27:58] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_1. Processados até agora: 0 
+[2026-08-09 08:28:00] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_1. Linhas: 250. Total antes: 0. Total depois: 250. Tempo: 1.74s 
+[2026-08-09 08:28:00] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_1. Processados até agora: 250 
+[2026-08-09 08:28:02] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_1. Linhas: 250. Total antes: 250. Total depois: 500. Tempo: 1.78s 
+[2026-08-09 08:28:02] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_2. Processados até agora: 500 
+[2026-08-09 08:28:10] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_2. Linhas: 1250. Total antes: 500. Total depois: 1750. Tempo: 7.75s 
+[2026-08-09 08:28:10] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_2. Processados até agora: 1750 
+[2026-08-09 08:28:17] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_2. Linhas: 1250. Total antes: 1750. Total depois: 3000. Tempo: 7.69s 
+[2026-08-09 08:28:17] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_3. Processados até agora: 3000 
+[2026-08-09 08:28:32] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_3. Linhas: 2500. Total antes: 3000. Total depois: 5500. Tempo: 14.78s 
+[2026-08-09 08:28:32] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_3. Processados até agora: 5500 
+[2026-08-09 08:28:48] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_3. Linhas: 2500. Total antes: 5500. Total depois: 8000. Tempo: 15.64s 
+[2026-08-09 08:28:48] [SUCCESS] [DATASYNCPROCESSOR]: Carga efetuada com sucesso (MYSQL -> SQLSERVER). Total de registros: 8000. Tempo: 49.65s | Detalhes: {"tempo_segundos":49.65,"total_processado":8000,"tabelas":[{"tabela":"tb_clientes_sem_update_1","status":"SUCESSO","linhas":250},{"tabela":"tb_clientes_com_update_1","status":"SUCESSO","linhas":250},{"tabela":"tb_clientes_sem_update_2","status":"SUCESSO","linhas":1250},{"tabela":"tb_clientes_com_update_2","status":"SUCESSO","linhas":1250},{"tabela":"tb_clientes_sem_update_3","status":"SUCESSO","linhas":2500},{"tabela":"tb_clientes_com_update_3","status":"SUCESSO","linhas":2500}]}
+
+---------- MYSQL -> MYSQL --------------
+
+[2026-08-09 08:30:46] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_1. Processados até agora: 0 
+[2026-08-09 08:30:48] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_1. Linhas: 1000. Total antes: 0. Total depois: 1000. Tempo: 1.54s 
+[2026-08-09 08:30:48] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_1. Processados até agora: 1000 
+[2026-08-09 08:30:49] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_1. Linhas: 1000. Total antes: 1000. Total depois: 2000. Tempo: 1.26s 
+[2026-08-09 08:30:49] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_2. Processados até agora: 2000 
+[2026-08-09 08:30:53] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_2. Linhas: 5000. Total antes: 2000. Total depois: 7000. Tempo: 4.42s 
+[2026-08-09 08:30:53] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_2. Processados até agora: 7000 
+[2026-08-09 08:30:58] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_2. Linhas: 5000. Total antes: 7000. Total depois: 12000. Tempo: 4.78s 
+[2026-08-09 08:30:58] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_3. Processados até agora: 12000 
+[2026-08-09 08:31:07] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_3. Linhas: 10000. Total antes: 12000. Total depois: 22000. Tempo: 8.84s 
+[2026-08-09 08:31:07] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_3. Processados até agora: 22000 
+[2026-08-09 08:31:17] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_3. Linhas: 10000. Total antes: 22000. Total depois: 32000. Tempo: 9.4s 
+[2026-08-09 08:31:17] [SUCCESS] [DATASYNCPROCESSOR]: Carga efetuada com sucesso (MYSQL -> MYSQL). Total de registros: 32000. Tempo: 30.56s | Detalhes: {"tempo_segundos":30.56,"total_processado":32000,"tabelas":[{"tabela":"tb_clientes_sem_update_1","status":"SUCESSO","linhas":1000},{"tabela":"tb_clientes_com_update_1","status":"SUCESSO","linhas":1000},{"tabela":"tb_clientes_sem_update_2","status":"SUCESSO","linhas":5000},{"tabela":"tb_clientes_com_update_2","status":"SUCESSO","linhas":5000},{"tabela":"tb_clientes_sem_update_3","status":"SUCESSO","linhas":10000},{"tabela":"tb_clientes_com_update_3","status":"SUCESSO","linhas":10000}]}
+
+[2026-08-09 08:31:47] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_1. Processados até agora: 0 
+[2026-08-09 08:31:48] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_1. Linhas: 250. Total antes: 0. Total depois: 250. Tempo: 0.96s 
+[2026-08-09 08:31:48] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_1. Processados até agora: 250 
+[2026-08-09 08:31:49] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_1. Linhas: 250. Total antes: 250. Total depois: 500. Tempo: 0.85s 
+[2026-08-09 08:31:49] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_2. Processados até agora: 500 
+[2026-08-09 08:31:52] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_2. Linhas: 1250. Total antes: 500. Total depois: 1750. Tempo: 2.81s 
+[2026-08-09 08:31:52] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_2. Processados até agora: 1750 
+[2026-08-09 08:31:55] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_2. Linhas: 1250. Total antes: 1750. Total depois: 3000. Tempo: 2.87s 
+[2026-08-09 08:31:55] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_3. Processados até agora: 3000 
+[2026-08-09 08:32:00] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_3. Linhas: 2500. Total antes: 3000. Total depois: 5500. Tempo: 5.22s 
+[2026-08-09 08:32:00] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_3. Processados até agora: 5500 
+[2026-08-09 08:32:05] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_3. Linhas: 2500. Total antes: 5500. Total depois: 8000. Tempo: 5.14s 
+[2026-08-09 08:32:05] [SUCCESS] [DATASYNCPROCESSOR]: Carga efetuada com sucesso (MYSQL -> MYSQL). Total de registros: 8000. Tempo: 18.12s | Detalhes: {"tempo_segundos":18.12,"total_processado":8000,"tabelas":[{"tabela":"tb_clientes_sem_update_1","status":"SUCESSO","linhas":250},{"tabela":"tb_clientes_com_update_1","status":"SUCESSO","linhas":250},{"tabela":"tb_clientes_sem_update_2","status":"SUCESSO","linhas":1250},{"tabela":"tb_clientes_com_update_2","status":"SUCESSO","linhas":1250},{"tabela":"tb_clientes_sem_update_3","status":"SUCESSO","linhas":2500},{"tabela":"tb_clientes_com_update_3","status":"SUCESSO","linhas":2500}]}
+
+--------------- MYSQL -> POSTGRES -------------------
+
+[2026-08-09 08:35:02] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_1. Processados até agora: 0 
+[2026-08-09 08:35:03] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_1. Linhas: 250. Total antes: 0. Total depois: 250. Tempo: 0.87s 
+[2026-08-09 08:35:03] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_1. Processados até agora: 250 
+[2026-08-09 08:35:04] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_1. Linhas: 250. Total antes: 250. Total depois: 500. Tempo: 1.06s 
+[2026-08-09 08:35:04] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_2. Processados até agora: 500 
+[2026-08-09 08:35:08] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_2. Linhas: 1250. Total antes: 500. Total depois: 1750. Tempo: 3.8s 
+[2026-08-09 08:35:08] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_2. Processados até agora: 1750 
+[2026-08-09 08:35:11] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_2. Linhas: 1250. Total antes: 1750. Total depois: 3000. Tempo: 3.62s 
+[2026-08-09 08:35:11] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_3. Processados até agora: 3000 
+[2026-08-09 08:35:17] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_3. Linhas: 2500. Total antes: 3000. Total depois: 5500. Tempo: 5.78s 
+[2026-08-09 08:35:17] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_3. Processados até agora: 5500 
+[2026-08-09 08:35:22] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_3. Linhas: 2500. Total antes: 5500. Total depois: 8000. Tempo: 5.21s 
+[2026-08-09 08:35:22] [SUCCESS] [DATASYNCPROCESSOR]: Carga efetuada com sucesso (MYSQL -> POSTGRES). Total de registros: 8000. Tempo: 20.69s | Detalhes: {"tempo_segundos":20.69,"total_processado":8000,"tabelas":[{"tabela":"tb_clientes_sem_update_1","status":"SUCESSO","linhas":250},{"tabela":"tb_clientes_com_update_1","status":"SUCESSO","linhas":250},{"tabela":"tb_clientes_sem_update_2","status":"SUCESSO","linhas":1250},{"tabela":"tb_clientes_com_update_2","status":"SUCESSO","linhas":1250},{"tabela":"tb_clientes_sem_update_3","status":"SUCESSO","linhas":2500},{"tabela":"tb_clientes_com_update_3","status":"SUCESSO","linhas":2500}]}
+
+--------------- POSTGRES -> POSTGRES -------------------
+[2026-08-09 08:40:46] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_1. Processados até agora: 0 
+[2026-08-09 08:40:48] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_1. Linhas: 250. Total antes: 0. Total depois: 250. Tempo: 1.27s 
+[2026-08-09 08:40:48] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_1. Processados até agora: 250 
+[2026-08-09 08:40:49] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_1. Linhas: 250. Total antes: 250. Total depois: 500. Tempo: 1.29s 
+[2026-08-09 08:40:49] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_2. Processados até agora: 500 
+[2026-08-09 08:40:52] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_2. Linhas: 1250. Total antes: 500. Total depois: 1750. Tempo: 3.22s 
+[2026-08-09 08:40:52] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_2. Processados até agora: 1750 
+[2026-08-09 08:40:56] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_2. Linhas: 1250. Total antes: 1750. Total depois: 3000. Tempo: 3.45s 
+[2026-08-09 08:40:56] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_3. Processados até agora: 3000 
+[2026-08-09 08:41:01] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_3. Linhas: 2500. Total antes: 3000. Total depois: 5500. Tempo: 5.36s 
+[2026-08-09 08:41:01] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_3. Processados até agora: 5500 
+[2026-08-09 08:41:07] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_3. Linhas: 2500. Total antes: 5500. Total depois: 8000. Tempo: 5.72s 
+[2026-08-09 08:41:07] [SUCCESS] [DATASYNCPROCESSOR]: Carga efetuada com sucesso (POSTGRES -> POSTGRES). Total de registros: 8000. Tempo: 20.63s | Detalhes: {"tempo_segundos":20.63,"total_processado":8000,"tabelas":[{"tabela":"tb_clientes_sem_update_1","status":"SUCESSO","linhas":250},{"tabela":"tb_clientes_com_update_1","status":"SUCESSO","linhas":250},{"tabela":"tb_clientes_sem_update_2","status":"SUCESSO","linhas":1250},{"tabela":"tb_clientes_com_update_2","status":"SUCESSO","linhas":1250},{"tabela":"tb_clientes_sem_update_3","status":"SUCESSO","linhas":2500},{"tabela":"tb_clientes_com_update_3","status":"SUCESSO","linhas":2500}]}
+
+
+---------------  POSTGRES -> SQLSERVER  ----------------
+[2026-08-09 08:45:14] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_1. Processados até agora: 0 
+[2026-08-09 08:45:15] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_1. Linhas: 250. Total antes: 0. Total depois: 250. Tempo: 1.85s 
+[2026-08-09 08:45:15] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_1. Processados até agora: 250 
+[2026-08-09 08:45:17] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_1. Linhas: 250. Total antes: 250. Total depois: 500. Tempo: 1.46s 
+[2026-08-09 08:45:17] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_2. Processados até agora: 500 
+[2026-08-09 08:45:24] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_2. Linhas: 1250. Total antes: 500. Total depois: 1750. Tempo: 7.35s 
+[2026-08-09 08:45:24] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_2. Processados até agora: 1750 
+[2026-08-09 08:45:32] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_2. Linhas: 1250. Total antes: 1750. Total depois: 3000. Tempo: 7.32s 
+[2026-08-09 08:45:32] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_3. Processados até agora: 3000 
+[2026-08-09 08:45:46] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_3. Linhas: 2500. Total antes: 3000. Total depois: 5500. Tempo: 14.23s 
+[2026-08-09 08:45:46] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_3. Processados até agora: 5500 
+[2026-08-09 08:45:58] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_3. Linhas: 2500. Total antes: 5500. Total depois: 8000. Tempo: 12.27s 
+[2026-08-09 08:45:58] [SUCCESS] [DATASYNCPROCESSOR]: Carga efetuada com sucesso (POSTGRES -> SQLSERVER). Total de registros: 8000. Tempo: 44.77s | Detalhes: {"tempo_segundos":44.77,"total_processado":8000,"tabelas":[{"tabela":"tb_clientes_sem_update_1","status":"SUCESSO","linhas":250},{"tabela":"tb_clientes_com_update_1","status":"SUCESSO","linhas":250},{"tabela":"tb_clientes_sem_update_2","status":"SUCESSO","linhas":1250},{"tabela":"tb_clientes_com_update_2","status":"SUCESSO","linhas":1250},{"tabela":"tb_clientes_sem_update_3","status":"SUCESSO","linhas":2500},{"tabela":"tb_clientes_com_update_3","status":"SUCESSO","linhas":2500}]}
+
+---------------  POSTGRES -> MYSQL  ----------------
+[2026-08-09 08:47:58] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_1. Processados até agora: 0 
+[2026-08-09 08:47:58] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_1. Linhas: 250. Total antes: 0. Total depois: 250. Tempo: 0.76s 
+[2026-08-09 08:47:58] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_1. Processados até agora: 250 
+[2026-08-09 08:47:59] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_1. Linhas: 250. Total antes: 250. Total depois: 500. Tempo: 0.59s 
+[2026-08-09 08:47:59] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_2. Processados até agora: 500 
+[2026-08-09 08:48:03] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_2. Linhas: 1250. Total antes: 500. Total depois: 1750. Tempo: 3.54s 
+[2026-08-09 08:48:03] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_2. Processados até agora: 1750 
+[2026-08-09 08:48:05] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_2. Linhas: 1250. Total antes: 1750. Total depois: 3000. Tempo: 2.56s 
+[2026-08-09 08:48:05] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_sem_update_3. Processados até agora: 3000 
+[2026-08-09 08:48:10] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_sem_update_3. Linhas: 2500. Total antes: 3000. Total depois: 5500. Tempo: 5.06s 
+[2026-08-09 08:48:10] [INFO] [DATASYNCPROCESSOR]: Iniciando sincronização de tb_clientes_com_update_3. Processados até agora: 5500 
+[2026-08-09 08:48:15] [SUCCESS] [DATASYNCPROCESSOR]: Sincronização concluída para tb_clientes_com_update_3. Linhas: 2500. Total antes: 5500. Total depois: 8000. Tempo: 5.1s 
+[2026-08-09 08:48:15] [SUCCESS] [DATASYNCPROCESSOR]: Carga efetuada com sucesso (POSTGRES -> MYSQL). Total de registros: 8000. Tempo: 17.88s | Detalhes: {"tempo_segundos":17.88,"total_processado":8000,"tabelas":[{"tabela":"tb_clientes_sem_update_1","status":"SUCESSO","linhas":250},{"tabela":"tb_clientes_com_update_1","status":"SUCESSO","linhas":250},{"tabela":"tb_clientes_sem_update_2","status":"SUCESSO","linhas":1250},{"tabela":"tb_clientes_com_update_2","status":"SUCESSO","linhas":1250},{"tabela":"tb_clientes_sem_update_3","status":"SUCESSO","linhas":2500},{"tabela":"tb_clientes_com_update_3","status":"SUCESSO","linhas":2500}]}
+
+
+

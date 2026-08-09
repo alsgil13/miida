@@ -1,0 +1,43 @@
+Clone-Carga
+    [X] MySQL -> PostGres
+    [X] MySQL -> SQLServer
+    [X] MySQL -> MySQL
+    [X] Postgres -> PostGres
+    [X] Postgres -> SQLServer
+    [X] Postgres -> MySQL
+    [X] SQLServer -> PostGres
+    [X] SQLServer -> SQLServer
+    [X] SQLServer -> MySQL
+
+Updates de 25%
+    [X] MySQL -> PostGres
+    [X] MySQL -> SQLServer
+    [X] MySQL -> MySQL
+    [X] Postgres -> PostGres
+    [X] Postgres -> SQLServer
+    [X] Postgres -> MySQL
+    [X] SQLServer -> PostGres
+    [X] SQLServer -> SQLServer
+    [X] SQLServer -> MySQL
+
+Updates de 50%
+    [X] MySQL -> PostGres 
+    [X] MySQL -> SQLServer
+    [X] MySQL -> MySQL
+    [X] Postgres -> PostGres
+    [X] Postgres -> SQLServer
+    [X] Postgres -> MySQL
+    [X] SQLServer -> PostGres
+    [X] SQLServer -> SQLServer
+    [X] SQLServer -> MySQL
+
+Delete de 25%
+    [ ] MySQL -> PostGres
+    [ ] MySQL -> SQLServer
+    [ ] MySQL -> MySQL
+    [ ] Postgres -> PostGres
+    [ ] Postgres -> SQLServer
+    [ ] Postgres -> MySQL
+    [ ] SQLServer -> PostGres
+    [ ] SQLServer -> SQLServer
+    [ ] SQLServer -> MySQL
