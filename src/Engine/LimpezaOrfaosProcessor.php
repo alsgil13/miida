@@ -45,23 +45,58 @@ class LimpezaOrfaosProcessor implements FilterInterface
             $tabelas = $banco['tabelas'] ?? [];
             
             foreach ($tabelas as $tabela) {
+                $tabelaModerna = $tabela['tabela_moderna'] ?? 'desconhecida';
+                $inicioTabela = microtime(true);
+                $contadorAntes = $totalDeletadoGeral;
+
+                // Log de Início da Tabela
+                if ($this->logger !== null) {
+                    $this->logger->info(
+                        'LimpezaOrfaosProcessor',
+                        "Iniciando verificação de expurgo de órfãos na tabela {$tabelaModerna}. Removidos até agora: {$contadorAntes}"
+                    );
+                }
+
                 try {
                     $deletadosTabela = $this->executarLimpeza($banco, $tabela);
                     $totalDeletadoGeral += $deletadosTabela;
 
+                    $contadorDepois = $totalDeletadoGeral;
+                    $tempoTabela = round(microtime(true) - $inicioTabela, 2);
+
+                    // Log de Sucesso da Tabela
+                    if ($this->logger !== null) {
+                        $this->logger->success(
+                            'LimpezaOrfaosProcessor',
+                            "Expurgo de órfãos concluído para {$tabelaModerna}. Linhas removidas: {$deletadosTabela}. Total antes: {$contadorAntes}. Total depois: {$contadorDepois}. Tempo: {$tempoTabela}s"
+                        );
+                    }
+
                     $detalhes[] = [
                         'banco'            => $banco['banco_moderno'],
-                        'tabela'           => $tabela['tabela_moderna'],
+                        'tabela'           => $tabelaModerna,
                         'status'           => 'SUCESSO',
-                        'linhas_removidas' => $deletadosTabela
+                        'linhas_removidas' => $deletadosTabela,
+                        'tempo_segundos'   => $tempoTabela
                     ];
                 } catch (Exception $e) {
                     $temErro = true;
+                    $tempoTabela = round(microtime(true) - $inicioTabela, 2);
+
+                    // Log de Erro na Tabela
+                    if ($this->logger !== null) {
+                        $this->logger->error(
+                            'LimpezaOrfaosProcessor',
+                            "Erro na limpeza de órfãos da tabela {$tabelaModerna}: " . $e->getMessage()
+                        );
+                    }
+
                     $detalhes[] = [
-                        'banco'  => $banco['banco_moderno'],
-                        'tabela' => $tabela['tabela_moderna'],
-                        'status' => 'ERRO',
-                        'motivo' => $e->getMessage()
+                        'banco'          => $banco['banco_moderno'],
+                        'tabela'         => $tabelaModerna,
+                        'status'         => 'ERRO',
+                        'motivo'         => $e->getMessage(),
+                        'tempo_segundos' => $tempoTabela
                     ];
                 }
             }
@@ -89,8 +124,6 @@ class LimpezaOrfaosProcessor implements FilterInterface
 
         $tabelaFqLegado  = $this->syntaxLegado->obterNomeQualificado($bancoLegado, $schemaLegado, $tabelaLegada);
         $tabelaFqModerno = $this->syntaxModerno->obterNomeQualificado($bancoModerno, $schemaModerno, $tabelaModerna);
-
-        $componenteNome = "LimpezaOrfaosProcessor -> " . $tabelaModerna;
 
         $chavesPrimarias = [];
         $mapeamento = $tabela['camada_anticorrupcao']['mapeamento_colunas'] ?? [];
@@ -163,13 +196,6 @@ class LimpezaOrfaosProcessor implements FilterInterface
             $stmtDelete->execute($params);
             
             $totalDeletado += $stmtDelete->rowCount();
-        }
-
-        if ($totalDeletado > 0 && $this->logger !== null) {
-            $this->logger->info(
-                $componenteNome, 
-                "Registros orfaos expurgados do ambiente moderno. Total de linhas removidas: " . $totalDeletado
-            );
         }
 
         return $totalDeletado;
