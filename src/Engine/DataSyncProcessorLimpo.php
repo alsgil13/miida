@@ -117,7 +117,7 @@ class DataSyncProcessor implements FilterInterface
 
         $mapeamento = $tabelaConfig['camada_anticorrupcao']['mapeamento_colunas'] ?? [];
 
-        // 1. Identifica as PKs usando o nome_destino do JSON
+        // Identifica as PKs usando o nome_destino do JSON
         $pks = [];
         foreach ($mapeamento as $colOriginal => $props) {
             if (!empty($props['pk'])) {
@@ -125,24 +125,9 @@ class DataSyncProcessor implements FilterInterface
             }
         }
 
-        // 2. Resolve o nome totalmente qualificado da tabela destino conforme o SGBD ativo
         $tabelaQualificada = $this->syntaxModerno->obterNomeQualificado($nomeBancoDestino, $schemaDestino, $tabelaDestino);
 
-        // 3. Busca o ponteiro da última sincronização para a estratégia incremental
-        // $ultimaData = $this->obterDataUltimaSincronizacao($nomeBancoDestino, $tabelaDestino,$schemaDestino);
-        //$sqlOrigem = $this->syntaxLegado->obterSqlSelecaoIncremental($nomeBancoOrigem, $schemaOrigem, $tabelaOrigem, $colunaControle);
-
-        // 4. Monta e executa a query de extração respeitando o dialeto de origem
-        // if (!empty($colunaControle) && !empty($ultimaData)) {
-        //     $sqlOrigem = $this->syntaxLegado->obterSqlSelecaoIncremental($nomeBancoOrigem, $schemaOrigem, $tabelaOrigem, $colunaControle);
-        //     $stmtOrigem = $this->connLegado->prepare($sqlOrigem);
-        //     $stmtOrigem->bindValue(':ultima_data', $ultimaData);
-        // } else {
-        //     $tabelaOrigemQualificada = $this->syntaxLegado->obterNomeQualificado($nomeBancoOrigem, $schemaOrigem, $tabelaOrigem);
-        //     $sqlOrigem = "SELECT * FROM {$tabelaOrigemQualificada}";
-        //     $stmtOrigem = $this->connLegado->prepare($sqlOrigem);
-        // }
-        if (!empty($colunaControle) && !empty($ultimaData)) {
+        if (!empty($colunaControle)) {
             $sqlOrigem = $this->syntaxLegado->obterSqlSelecaoIncremental(
                 $nomeBancoOrigem,
                 $schemaOrigem,
@@ -160,7 +145,6 @@ class DataSyncProcessor implements FilterInterface
         $stmtOrigem->execute();
         $linhasProcessadas = 0;
 
-        // $usaTransacao = !($this->syntaxModerno instanceof SqlServerSyntax);
         $usaTransacao = true;
         $transacaoIniciada = false;
         try {
@@ -172,29 +156,12 @@ class DataSyncProcessor implements FilterInterface
             while ($row = $stmtOrigem->fetch(\PDO::FETCH_ASSOC)) {
                 // 5. Envia o registro para a Camada de Anticorrupção (ACL) ser higienizado
                 $dadosHigienizados = AntiCorruptionLayer::higienizar($row, $tabelaConfig);
-                // if(array_key_exists('last_updated',$dadosHigienizados)){
-                // if($this->syntaxModerno instanceof MySqlSyntax){
-                //     echo "è MySQL";
-                // }
-                //     var_dump($dadosHigienizados);
-                // }
                 // CORREÇÃO: Mantém as chaves limpas para que as Strategies gerenciem os tokens do PDO perfeitamente
                 $registroLimpo = [];
                 foreach ($dadosHigienizados as $col => $val) {
                     if (!is_numeric($col)) {
                         $registroLimpo[$col] = $val;
                     }
-                    // var_dump($mapeamento[$col]['tipo']); echo "\n";
-                    // echo $col . "\n";
-
-                    // if($this->syntaxLegado instanceof PostgresSyntax){
-                        // echo "ahhoy";
-                        // $tipo = $mapeamento[$col]['tipo'];
-                        // // echo $tipo;
-                        // if(trim($tipo) == "DATETIME"){
-                        //     echo $col . "\n";
-                        // }
-                    // }
                 }
 
                 // -----------------------------------------------------------------
