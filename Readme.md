@@ -16,7 +16,7 @@ O MIIDA e um middleware desenvolvido em PHP CLI para atuar como motor de consist
 ---
 
 ## Estrutura de Pastas do Projeto
-
+```
 miida/
 - .env.example (Variaveis de ambiente para credenciais de acesso)
 - autoload.php (Autoloader nativo padrao PSR-4 e injetor de .env)
@@ -46,7 +46,7 @@ miida/
     - examples/ (SQL [DDL] utilizados para criar o banco de origem)
     - sql2config.py (Script de conversao de DDL para JSON no formato adequado ao manifesto pipeline_config.json)
   - workers/ (pipelines de manipulação dos filtros [engines])
-
+```
 ---
 
 ## Como o MIIDA Funciona
@@ -59,7 +59,7 @@ O ciclo de sincronizacao do MIIDA baseia-se em tres etapas automaticas parametri
 
 ---
 
-## Guia Passo a Passo para reprodução dos experimentos
+## Guia para reprodução dos experimentos
 
 Siga as instrucoes abaixo para configurar um ambiente local de testes do MIIDA simulando uma migracao entre dois bancos de dados distintos.
 
