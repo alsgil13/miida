@@ -59,7 +59,7 @@ O ciclo de sincronizacao do MIIDA baseia-se em tres etapas automaticas parametri
 
 ---
 
-## Guia Passo a Passo para Testes
+## Guia Passo a Passo para reprodução dos experimentos
 
 Siga as instrucoes abaixo para configurar um ambiente local de testes do MIIDA simulando uma migracao entre dois bancos de dados distintos.
 
@@ -71,7 +71,7 @@ Siga as instrucoes abaixo para configurar um ambiente local de testes do MIIDA s
 ### Passo 1: Preparar os arquivos de configuracao
 1. Crie um arquivo chamado .env na raiz do projeto com as credenciais de acesso aos seus servidores de banco de dados, seguindo o modelo abaixo disponível em .env.example.
 2. Copie o arquivo manifesto de exemplo que esta em utils/examples/pipeline_config.json para a pasta /config da raiz do projeto, renomeando-o para pipeline_config.json.
-3. Abra o /config/pipeline_config.json e edite os bancos_gerenciados:
+3. Abra o /config/pipeline_config.json e edite os bancos_gerenciados, caso seja reprodução do experiemtno do trabalho, utilize o arquivo utils/data_hadlers/pipeline_config.json, caso seja para aplicação real, você pode utilizar o script utils/sql2config.py para gerar o manifesto a partir de um DDL de origem. O manifesto deve conter a lista de bancos, tabelas e colunas que serao sincronizadas, alem das configuracoes da Camada Anticorrupcao (ACL) para higienização de dados e mapeamento de colunas:
 ```JSON
  "bancos_gerenciados": [
         {
@@ -114,33 +114,41 @@ Siga as instrucoes abaixo para configurar um ambiente local de testes do MIIDA s
                     ...
                 },
 ```
+ 
+
+### Passo 2: Popular o Banco de Dados de Origem (reprodução de experimento)
+1. Abra a ferramenta de gerenciamento de banco de dados de sua preferencia (DBeaver, pgAdmin, SSMS) conecte ao SGBD de origem.
+2. Va ate a pasta utils/ do projeto e execute o script SQL DDLteste.sql.
+3. Este script criara o database teste e 6 tabelas sendo 3 de cada estrutura (com e sem coluna lat_updated).
+4. Em seguida, execute os scripts SQL de carga de dados (carga_tb...sql) localizados em utils/data_handlers/ para popular as tabelas com registros de teste.
 
 
-### Passo 2: Popular o Banco de Dados de Origem (caso de experimento)
-1. Abra a ferramenta de gerenciamento de banco de dados de sua preferencia (DBeaver, pgAdmin, SSMS).
-2. Va ate a pasta utils/examples/ do projeto e execute o script SQL correspondente ao banco que voce definiu como Origem (por exemplo, execute o exemplo_origem_mysql.sql se a sua origem for MySQL).
-3. Este script criara a database erp_legado_db, criara as tabelas tb_usuarios e tb_vendas_itens (com chave composta) e inserira registros de teste contendo strings com espacos propositais em excesso.
+### Passo 3: Executar os workers para clone e carga inicial
+No diretório workers/ foram criados os pipelines que implementam os filtros de cada etapa do processo de sincronizacao. Para executar o worker desejado, utilize o comando:
+```php
+php workers/<nome_do_worker>.php
+```
+Para reprodução dos testes execute os workers clone_infra.php, sync_data.php para a carga inicial.
 
-### Passo 3: Executar a Inicializacao do Ecossistema
-No terminal, execute o seguinte comando a partir da raiz do projeto:
-php 1_inicializar.php
+### Passo 4: Alterar os dados do Banco de origem
+Após feita a carga inicial é necessário alterar alguns registros no banco de origem para testar a sincronização incremental. Execute os scripts SQL de alteração localizados em utils/data_handlers/ (utilize o update_25.sql para alterar 25% dos dados).
 
-O MIIDA ira ler o manifesto JSON, conectar-se ao banco moderno de destino e criar de forma automatica as tabelas de controle de sincronizacao, a tabela de logs do sistema e as tabelas de negocio (usuarios e vendas_itens) com os novos nomes de colunas e padroes de tipos ja convertidos.
+### Passo 5: Executar o worker de sincronizacao incremental novamente
+Após a alteração na base legada, rode o worker/sync_data.php novamente para que o sistema detecte as alterações e sincronize os dados atualizados para o banco moderno de destino.
 
-### Passo 4: Executar a Sincronizacao Inicial (One-shot)
-No terminal, execute o comando de sincronizacao pontual:
-php 2_sincronizar.php
+#### Repita os passos 4 e 5
+Dessa vez utilize o update_50.sql para alterar metade da base de dados e sincronize novamente.
 
-O sistema extraira os dados do banco legado, passara os registros pela Camada Anticorrupcao (higienizando os espacos extras das strings e convertendo os tipos), gerara os hashes MD5 e salvara os dados no destino. Se voce consultar o seu banco moderno de destino, os dados ja estarao la totalmente normalizados.
+### Passo 6: Testar a exclusão de registros e limpeza de órfãos
+Utilize o script delete_25.sql para deletar 25% dos registros no banco de origem. Em seguida, execute o worker de limpeza de órfãos (purge_orphans.php) para que o sistema detecte os registros deletados e remova-os do banco moderno de destino.
 
-### Passo 5: Testar o Modo Continuo (Daemon) e Limpeza de Orfaos
-Para ver o middleware funcionando em tempo real como um servico de segundo plano:
-php 3_orquestrador.php
+**Todos os tempos de cada operação em cada tabela serão registrados no logs/miida.log para auditoria e analise de performance.**
 
-O processo ficara em execucao continua no terminal monitorando novas alteracoes. 
-1. Va ate o seu banco de origem e insira um novo registro ou atualize um campo na tabela tb_usuarios. Em ate 5 segundos o terminal do orquestrador exibira o processamento da alteracao detectada.
-2. Delete um registro qualquer na tabela tb_vendas_itens no banco de origem. No proximo ciclo programado de limpeza ou ao rodar manualmente o comando php 4_limpeza_orfaos.php em outro terminal, o middleware detectara que a chave composta nao existe mais na origem e realizara o expurgo do registro correspondente no banco moderno.
+## Outros Workers Criados
+Tabém foram criados os workers orchestrator.php que executa os filtros de clonagem e sincronização em sequência e depois entra em um loop executando os filtros de sincronização e deleção dos dados órfãos. O worker seed_dev.php foi desenvolvido para criar um ambiente de desenvolvimento ja com dados carregados e pronto para testes de desenvolvimento de novas features.
 
-### Execucao Unificada
-Apos compreender o fluxo de cada script, voce pode iniciar todo o ecossistema sequencialmente em um unico comando utilizando o inicializador unificado:
-php run.php
+
+
+
+
+
