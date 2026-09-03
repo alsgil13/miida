@@ -125,7 +125,7 @@ Siga as instrucoes abaixo para configurar um ambiente local de testes do MIIDA s
 
 ### Passo 3: Executar os workers para clone e carga inicial
 No diretório workers/ foram criados os pipelines que implementam os filtros de cada etapa do processo de sincronizacao. Para executar o worker desejado, utilize o comando:
-```php
+```bash
 php workers/<nome_do_worker>.php
 ```
 Para reprodução dos testes execute os workers clone_infra.php, sync_data.php para a carga inicial.
