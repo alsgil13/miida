@@ -1,16 +1,16 @@
 # MIIDA - Middleware de Ingestao, Integracao e Desacoplamento de Arquiteturas
 
-O MIIDA e um middleware de alto desempenho desenvolvido em PHP CLI para atuar como motor de consistencia eventual e sincronizacao diferencial incremental de dados. O sistema foi projetado especificamente para solucionar os desafios de transicao arquitetural e a adocao do padrao CQRS (Command Query Responsibility Segregation), desacoplando um no de escrita legado de um no moderno de leitura de alta performance de forma totalmente agnostica a banco de dados.
+O MIIDA e um middleware desenvolvido em PHP CLI para atuar como motor de consistencia eventual e sincronizacao diferencial incremental de dados. O sistema foi projetado especificamente para solucionar os desafios de transicao arquitetural e a adocao do padrao CQRS (Command Query Responsibility Segregation), desacoplando um no de escrita e leitura legado de um no moderno de leitura de forma totalmente agnostica a banco de dados.
 
 ---
 
 ## Arquitetura e Diferenciais Tecnicos
 
 * Abordagem Nao-Intrusiva: O ecossistema opera sem instalar gatilhos (triggers), criar tabelas de log temporarias ou alterar qualquer estrutura no banco de dados de producao de origem.
-* Padrao Strategy para Multi-SGBD: Toda a geracao de DDL (Data Definition Language) e DML (Data Manipulation Language) foi isolada por meio de contratos de interface. Isso permite que o middleware opere nativamente cruzando dados entre SQL Server, MySQL e PostgreSQL de forma simultanea e transparente.
-* Camada Anticorrupcao (ACL) Declarativa: Mapeia, traduz nomes de colunas e efetua a coerco estrita de tipos (Type Casting) baseando-se em metadados JSON, blindando o novo banco de dados contra codificacoes antigas ou corrompidas, padronizando os dados em UTF-8.
+* Padrao Strategy para Multi-SGBD: Toda a geracao de DDL (Data Definition Language) e DML (Data Manipulation Language) foi isolada por meio de contratos de interface. Isso permite que o middleware opere nativamente cruzando dados entre SQL Server, MySQL e PostgreSQL de forma simultanea e transparente, além de abrir a possibilidade de implementacao de novos dialetos de SGBD no futuro.
+* Camada Anticorrupcao (ACL) Declarativa: Mapeia, traduz nomes de colunas e efetua a correção estrita de tipos (Type Casting) baseando-se em metadados JSON, blindando o novo banco de dados contra codificacoes antigas ou corrompidas, padronizando os dados em UTF-8.
 * Idempotencia Baseada em Hash de Versao: Cada registro processado possui uma assinatura digital MD5 calculada em tempo de execucao. Se os dados de origem nao mudaram, o motor ignora a escrita, reduzindo o consumo de banda de rede e processamento de I/O de disco.
-* Suporte Nativo a Chaves Primarias Compostas: O motor e o provisionador tratam relacionamentos complexos e chaves multiplas de forma dinamica, viabilizando inclusive a deteccao e exclusao automatica de registros orfaos.
+* Suporte Nativo a Chaves Primarias Compostas: O motor e o provisionador tratam relacionamentos complexos e chaves multiplas de forma dinamica, viabilizando inclusive a deteccao e exclusao de registros apagados na origem.
 * Consistencia e Auditoria: O estado temporal de sincronizacao de cada tabela e armazenado de forma centralizada no destino pelo ControlRepository, suportando quedas de conectividade e reinicializacoes de ambientes sem duplicar ou perder registros.
 
 ---
@@ -18,22 +18,11 @@ O MIIDA e um middleware de alto desempenho desenvolvido em PHP CLI para atuar co
 ## Estrutura de Pastas do Projeto
 
 miida/
-- .env (Variaveis de ambiente para credenciais de acesso)
+- .env.example (Variaveis de ambiente para credenciais de acesso)
 - autoload.php (Autoloader nativo padrao PSR-4 e injetor de .env)
-- run.php (Launcher unificado do ecossistema completo)
-- 1_inicializar.php (Script CLI de provisionamento e carga estrutural inicial)
-- 2_sincronizar.php (Script CLI para execucao unica do pipeline)
-- 3_orquestrador.php (Daemon principal em loop continuo)
-- 4_limpeza_orfaos.php (Script CLI auxiliar para auditoria e expurgo manual)
 - config/
   - pipeline_config.json (Centralizacao declarativa da infra e mapeamento de tabelas)
-- examples/
-  - exemplo_origem_mysql.sql (Script de teste para simular legado em MySQL)
-  - exemplo_origem_postgres.sql (Script de teste para simular legado em PostgreSQL)
-  - exemplo_origem_sqlserver.sql (Script de teste para simular legado em SQL Server)
-  - pipeline_config.json (Manifesto de exemplo estruturado para testes)
-- logs/
-  - miida.log (Arquivo fisico de telemetria e logs de infraestrutura)
+- logs/ 
 - src/
   - Database/
     - ConnectionFactory.php (Fabrica de conexoes PDO agnosticas)
@@ -44,12 +33,19 @@ miida/
       - PostgresSyntax.php (Implementacao de sintaxe do motor PostgreSQL)
       - SqlServerSyntax.php (Implementacao de sintaxe do motor SQL Server)
   - Engine/
-    - DataSyncProcessor.php (Core Engine: Orquestrador de Extracao, ACL e Upsert)
+    - DataSyncProcessor.php (Responsável pela carga dos dados e sincronizacao incremental)
     - LimpezaOrfaosProcessor.php (Engine de processamento e expurgo de dados deletados)
-    - SchemaCloner.php (Provisionador idempotente de bancos e tabelas)
+    - SchemaCloner.php (Provisionador de bancos e tabelas)
+  - Pipeline/
+    - FilterInterface.php (interface aplicada aos filtros [engine])
   - Services/
-    - AntiCorruptionLayer.php (Higienizador de strings, tipos e gerador de hashes)
-    - Logger.php (Subsistema hibrido de log)
+    - AntiCorruptionLayer.php (Higienizador de dados)
+    - Logger.php (Subsistema de log)
+  - utils/
+    - data_handlers/ (SQL[DML] utilizados para carga e alteração dos dados no SGBD de origem durante os testes)
+    - examples/ (SQL [DDL] utilizados para criar o banco de origem)
+    - sql2config.py (Script de conversao de DDL para JSON no formato adequado ao manifesto pipeline_config.json)
+  - workers/ (pipelines de manipulação dos filtros [engines])
 
 ---
 
@@ -73,20 +69,56 @@ Siga as instrucoes abaixo para configurar um ambiente local de testes do MIIDA s
 * Acesso a dois bancos de dados locais ou em containers (um para simular o legado de Origem e outro para o destino Moderno).
 
 ### Passo 1: Preparar os arquivos de configuracao
-1. Crie um arquivo chamado .env na raiz do projeto com as credenciais de acesso aos seus servidores de banco de dados, seguindo o modelo abaixo:
-DB_ORIGEM_HOST=127.0.0.1
-DB_ORIGEM_USER=root
-DB_ORIGEM_PASSWORD=suasenha
-DB_DESTINO_HOST=127.0.0.1
-DB_DESTINO_USER=postgres
-DB_DESTINO_PASSWORD=suasenha
+1. Crie um arquivo chamado .env na raiz do projeto com as credenciais de acesso aos seus servidores de banco de dados, seguindo o modelo abaixo disponível em .env.example.
+2. Copie o arquivo manifesto de exemplo que esta em utils/examples/pipeline_config.json para a pasta /config da raiz do projeto, renomeando-o para pipeline_config.json.
+3. Abra o /config/pipeline_config.json e edite os bancos_gerenciados:
+```JSON
+ "bancos_gerenciados": [
+        {
+            "banco_legado": "teste", // Nome do banco de dados de origem (legado)
+            "banco_moderno": "teste", // Nome do banco de dados de destino (moderno)
+            "tabelas": [
+                {
+                    "tabela_legada": "tb_clientes_sem_update_1", // Nome da tabela de origem (legado)
+                    "tabela_moderna": "tb_clientes_sem_update_1", // Nome da tabela de destino (moderno)
+                    "schema_legado": null, // Nome do schema de origem (legado) - null para bancos que nao possuem schema
+                    "schema_moderno": "dbo", // Nome do schema de destino (moderno) - null para bancos que nao possuem schema
+                    "coluna_last_updated": null, // Nome da coluna de timestamp de ultima atualizacao (legado) - null para tabelas que nao possuem
+                    "intervalo_sincronizacao_segundos": 60, // Intervalo em segundos para verificacao de alteracoes na tabela (legado)
+                    "camada_anticorrupcao": { // Configuracoes da Camada Anticorrupcao (ACL) para higienizacao e mapeamento de colunas
+                        "sanitizacao": {
+                            "remover_espacos_excesso": true,
+                            "forcar_utf8": true
+                        },
+                        "mapeamento_colunas": {
+                            "id": { // Nome da coluna de origem (legado)
+                                "nome_destino": "id", // Nome da coluna de destino (moderno)
+                                "tipo": "INT", // Tipo de dado da coluna de destino (moderno)
+                                "pk": true // Indica se a coluna e chave primaria (true/false)
+                            },
+                            "cpf_cnpj": {
+                                "nome_destino": "cpf_cnpj",
+                                "tipo": "VARCHAR(18)",
+                                "not_null": true // Indica se a coluna nao pode ser nula (true/false)
+                            }
+                        }
+                    }
+                },
+                {
+                    "tabela_legada": "tb_clientes_com_update_1",
+                    "tabela_moderna": "tb_clientes_com_update_1",
+                    "schema_legado": null,
+                    "schema_moderno": "dbo",
+                    "coluna_last_updated": "last_updated",
+                    "intervalo_sincronizacao_segundos": 60,
+                    ...
+                },
+```
 
-2. Copie o arquivo manifesto de exemplo que esta em examples/pipeline_config.json para a pasta /config da raiz do projeto, renomeando-o para pipeline_config.json.
-3. Abra o /config/pipeline_config.json e certifique-se de que os campos sgbd dentro de origem_command e destino_query correspondam exatamente aos motores de banco que voce utilizara nos testes (valores aceitos: sqlserver, mysql ou postgres).
 
-### Passo 2: Popular o Banco de Dados de Origem
+### Passo 2: Popular o Banco de Dados de Origem (caso de experimento)
 1. Abra a ferramenta de gerenciamento de banco de dados de sua preferencia (DBeaver, pgAdmin, SSMS).
-2. Va ate a pasta examples/ do projeto e execute o script SQL correspondente ao banco que voce definiu como Origem (por exemplo, execute o exemplo_origem_mysql.sql se a sua origem for MySQL).
+2. Va ate a pasta utils/examples/ do projeto e execute o script SQL correspondente ao banco que voce definiu como Origem (por exemplo, execute o exemplo_origem_mysql.sql se a sua origem for MySQL).
 3. Este script criara a database erp_legado_db, criara as tabelas tb_usuarios e tb_vendas_itens (com chave composta) e inserira registros de teste contendo strings com espacos propositais em excesso.
 
 ### Passo 3: Executar a Inicializacao do Ecossistema
